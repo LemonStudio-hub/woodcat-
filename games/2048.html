@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048 - 木头猫</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: #faf8ef;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 10px;
+            color: #776e65;
+            overflow-x: hidden;
+        }
+        
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #bbada0;
+            border-radius: 12px;
+            padding: 15px;
+            width: 100%;
+            max-width: 350px;
+            margin: 10px 0;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            animation: containerPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        h1 {
+            color: #776e65;
+            margin: 8px 0 10px;
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 10px;
+            animation: slideIn 0.5s ease-out 0.1s both;
+        }
+        
+        .score-box {
+            background: #bbada0;
+            color: #eee4da;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 90px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .score-box h3 {
+            margin: 0;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #eee4da;
+            text-transform: uppercase;
+        }
+        
+        .score-box p {
+            margin: 3px 0 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #fff;
+        }
+        
+        .game-intro {
+            color: #776e65;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            animation: slideIn 0.5s ease-out 0.2s both;
+        }
+        
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: #bbada0;
+            border-radius: 8px;
+            padding: 6px;
+            margin-bottom: 12px;
+            position: relative;
+            touch-action: none; /* 禁用默认触摸行为 */
+            overflow: hidden;
+        }
+        
+        .cell {
+            background: rgba(238, 228, 218, 0.35);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            transition: all 0.15s ease;
+        }
+        
+        .tile {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            border-radius: 6px;
+            transition: all 0.15s ease;
+            width: calc(25% - 6px);
+            height: calc(25% - 6px);
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .tile.new {
+            animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .tile.merged {
+            animation: merge 0.2s ease-out;
+        }
+        
+        .tile.moving {
+            transition: top 0.15s ease, left 0.15s ease;
+        }
+        
+        .tile-2 { background: #eee4da; color: #776e65; font-size: 18px; }
+        .tile-4 { background: #ede0c8; color: #776e65; font-size: 18px; }
+        .tile-8 { background: #f2b179; color: #f9f6f2; font-size: 18px; }
+        .tile-16 { background: #f59563; color: #f9f6f2; font-size: 16px; }
+        .tile-32 { background: #f67c5f; color: #f9f6f2; font-size: 16px; }
+        .tile-64 { background: #f65e3b; color: #f9f6f2; font-size: 16px; }
+        .tile-128 { background: #edcf72; color: #f9f6f2; font-size: 16px; }
+        .tile-256 { background: #edcc61; color: #f9f6f2; font-size: 16px; }
+        .tile-512 { background: #edc850; color: #f9f6f2; font-size: 16px; }
+        .tile-1024 { background: #edc53f; color: #f9f6f2; font-size: 14px; }
+        .tile-2048 { background: #edc22e; color: #f9f6f2; font-size: 14px; }
+        
+        .tile-4096 { background: #ff0000; color: #f9f6f2; font-size: 14px; }
+        .tile-8192 { background: #ff00ff; color: #f9f6f2; font-size: 14px; }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            animation: slideIn 0.5s ease-out 0.3s both;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            background: #8f7a66;
+            color: #f9f6f2;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            background: #7c6b5a;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        
+        .back-home {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: #9e8c7c;
+            color: #f9f6f2;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            transition: all 0.2s ease;
+        }
+        
+        .back-home:hover {
+            background: #8f7a66;
+            transform: scale(1.1);
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 8px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #776e65;
+            width: 100%;
+            animation: slideIn 0.5s ease-out 0.4s both;
+        }
+        
+        /* 动画定义 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes containerPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            70% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes merge {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 0.5s ease;
+        }
+        
+        /* 移动端优化 */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            
+            .game-container {
+                padding: 12px;
+                width: 100%;
+                max-width: 100%;
+                margin: 5px 0;
+                border-radius: 10px;
+            }
+            
+            h1 {
+                font-size: 1.7rem;
+                margin: 6px 0 8px;
+            }
+            
+            .stats {
+                margin-bottom: 8px;
+            }
+            
+            .score-box {
+                min-width: 80px;
+                padding: 6px 10px;
+                border-radius: 6px;
+            }
+            
+            .score-box h3 {
+                font-size: 0.65rem;
+            }
+            
+            .score-box p {
+                font-size: 1rem;
+            }
+            
+            .game-board {
+                padding: 5px;
+                margin-bottom: 10px;
+                border-radius: 6px;
+            }
+            
+            .cell, .tile {
+                font-size: 16px;
+                border-radius: 4px;
+            }
+            
+            .tile-128, .tile-256, .tile-512 {
+                font-size: 14px;
+            }
+            
+            .tile-1024, .tile-2048 {
+                font-size: 12px;
+            }
+            
+            button {
+                padding: 9px 14px;
+                font-size: 0.85rem;
+                border-radius: 6px;
+            }
+            
+            .game-intro, .instructions {
+                font-size: 0.7rem;
+            }
+            
+            .back-home {
+                top: 6px;
+                left: 6px;
+                width: 26px;
+                height: 26px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a class="back-home" href="../index.html">←</a>
+    <div class="game-container">
+        <h1>2048</h1>
+        <div class="stats">
+            <div class="score-box">
+                <h3>分数</h3>
+                <p id="score">0</p>
+            </div>
+            <div class="score-box">
+                <h3>最高分</h3>
+                <p id="high-score">0</p>
+            </div>
+        </div>
+        <div class="game-intro">
+            <p>滑动或使用方向键合并相同数字的方块</p>
+        </div>
+        <div class="game-board" id="board"></div>
+        <div class="controls">
+            <div class="buttons">
+                <button id="new-game">新游戏</button>
+            </div>
+        </div>
+        <div class="instructions">
+            <p>向上滑动↑ 向下滑动↓ 向左滑动← 向右滑动→</p>
+        </div>
+    </div>
+
+    <script src="../js/gesture-controller.js"></script>
+    <script>
+        // 2048核心游戏逻辑
+        document.addEventListener('DOMContentLoaded', () => {
+            const GRID_SIZE = 4;
+            let grid = [];
+            let score = 0;
+            let highScore = localStorage.getItem('2048-high-score') || 0;
+            let gameOver = false;
+            let gameWon = false;
+            
+            // 创建音频上下文
+            let audioContext;
+            function initAudio() {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+            
+            // 移动音效
+            function playMoveSound() {
+                if (!audioContext) return;
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.value = 220;
+                gainNode.gain.value = 0.1;
+                
+                oscillator.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.3);
+                
+                setTimeout(() => {
+                    oscillator.stop();
+                }, 300);
+            }
+            
+            // 合并音效
+            function playMergeSound() {
+                if (!audioContext) return;
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.value = 330;
+                gainNode.gain.value = 0.15;
+                
+                oscillator.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.3);
+                
+                setTimeout(() => {
+                    oscillator.stop();
+                }, 300);
+            }
+            
+            // 游戏结束音效
+            function playGameOverSound() {
+                if (!audioContext) return;
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.type = 'sine';
+                
+                // 播放下降的音调
+                oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.8);
+                
+                gainNode.gain.value = 0.15;
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.8);
+                
+                oscillator.start();
+                
+                setTimeout(() => {
+                    oscillator.stop();
+                }, 800);
+            }
+            
+            // 获胜音效
+            function playWinSound() {
+                if (!audioContext) return;
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.type = 'sine';
+                
+                // 播放上升的音调
+                oscillator.frequency.setValueAtTime(261.63, audioContext.currentTime); // C
+                oscillator.frequency.exponentialRampToValueAtTime(329.63, audioContext.currentTime + 0.2); // E
+                oscillator.frequency.exponentialRampToValueAtTime(392.00, audioContext.currentTime + 0.4); // G
+                oscillator.frequency.exponentialRampToValueAtTime(523.25, audioContext.currentTime + 0.6); // C
+                
+                gainNode.gain.value = 0.15;
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.8);
+                
+                oscillator.start();
+                
+                setTimeout(() => {
+                    oscillator.stop();
+                }, 800);
+            }
+            
+            // 新方块出现音效
+            function playNewTileSound() {
+                if (!audioContext) return;
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.value = 523.25; // C5
+                gainNode.gain.value = 0.1;
+                
+                oscillator.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.2);
+                
+                setTimeout(() => {
+                    oscillator.stop();
+                }, 200);
+            }
+            
+            // 初始化游戏
+            function initGame() {
+                grid = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(0));
+                score = 0;
+                gameOver = false;
+                gameWon = false;
+                
+                updateScore();
+                document.getElementById('high-score').textContent = highScore;
+                
+                addRandomTile();
+                addRandomTile();
+                drawBoard();
+            }
+            
+            // 添加随机方块
+            function addRandomTile() {
+                const emptyCells = [];
+                
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    for (let x = 0; x < GRID_SIZE; x++) {
+                        if (grid[y][x] === 0) {
+                            emptyCells.push({x, y});
+                        }
+                    }
+                }
+                
+                if (emptyCells.length > 0) {
+                    const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                    grid[randomCell.y][randomCell.x] = Math.random() < 0.9 ? 2 : 4;
+                    playNewTileSound(); // 播放新方块音效
+                }
+            }
+            
+            // 绘制游戏板
+            function drawBoard() {
+                const boardElement = document.getElementById('board');
+                boardElement.innerHTML = '';
+                
+                // 创建背景格子
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    for (let x = 0; x < GRID_SIZE; x++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        boardElement.appendChild(cell);
+                    }
+                }
+                
+                // 创建方块
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    for (let x = 0; x < GRID_SIZE; x++) {
+                        if (grid[y][x] !== 0) {
+                            const tile = document.createElement('div');
+                            tile.className = `tile tile-${grid[y][x]} new`;
+                            tile.textContent = grid[y][x];
+                            // 设置位置
+                            tile.style.top = `${y * (100/GRID_SIZE)}%`;
+                            tile.style.left = `${x * (100/GRID_SIZE)}%`;
+                            tile.style.width = `calc(${100/GRID_SIZE}% - 6px)`;
+                            tile.style.height = `calc(${100/GRID_SIZE}% - 6px)`;
+                            boardElement.appendChild(tile);
+                            
+                            // 动画结束后移除 new 类
+                            setTimeout(() => {
+                                tile.classList.remove('new');
+                            }, 200);
+                        }
+                    }
+                }
+            }
+            
+            // 移动方块
+            function move(direction) {
+                if (gameOver) return false;
+                
+                let moved = false;
+                const oldGrid = JSON.parse(JSON.stringify(grid));
+                
+                // 根据方向移动
+                switch(direction) {
+                    case 'up':
+                        for (let x = 0; x < GRID_SIZE; x++) {
+                            for (let y = 1; y < GRID_SIZE; y++) {
+                                if (grid[y][x] !== 0) {
+                                    moved = moveTile(x, y, 0, -1) || moved;
+                                }
+                            }
+                        }
+                        break;
+                    case 'down':
+                        for (let x = 0; x < GRID_SIZE; x++) {
+                            for (let y = GRID_SIZE - 2; y >= 0; y--) {
+                                if (grid[y][x] !== 0) {
+                                    moved = moveTile(x, y, 0, 1) || moved;
+                                }
+                            }
+                        }
+                        break;
+                    case 'left':
+                        for (let y = 0; y < GRID_SIZE; y++) {
+                            for (let x = 1; x < GRID_SIZE; x++) {
+                                if (grid[y][x] !== 0) {
+                                    moved = moveTile(x, y, -1, 0) || moved;
+                                }
+                            }
+                        }
+                        break;
+                    case 'right':
+                        for (let y = 0; y < GRID_SIZE; y++) {
+                            for (let x = GRID_SIZE - 2; x >= 0; x--) {
+                                if (grid[y][x] !== 0) {
+                                    moved = moveTile(x, y, 1, 0) || moved;
+                                }
+                            }
+                        }
+                        break;
+                }
+                
+                if (moved) {
+                    playMoveSound(); // 播放移动音效
+                    addRandomTile();
+                    drawBoard();
+                    updateScore();
+                    
+                    if (!hasMoves()) {
+                        gameOver = true;
+                        playGameOverSound(); // 播放游戏结束音效
+                        setTimeout(() => {
+                            alert('游戏结束!');
+                        }, 100);
+                    }
+                }
+                
+                return JSON.stringify(grid) !== JSON.stringify(oldGrid);
+            }
+            
+            // 移动单个方块
+            function moveTile(x, y, dx, dy) {
+                let moved = false;
+                let newX = x;
+                let newY = y;
+                
+                while (true) {
+                    const nextX = newX + dx;
+                    const nextY = newY + dy;
+                    
+                    // 检查边界
+                    if (nextX < 0 || nextX >= GRID_SIZE || nextY < 0 || nextY >= GRID_SIZE) {
+                        break;
+                    }
+                    
+                    // 如果下一个位置为空，移动方块
+                    if (grid[nextY][nextX] === 0) {
+                        grid[nextY][nextX] = grid[newY][newX];
+                        grid[newY][newX] = 0;
+                        newX = nextX;
+                        newY = nextY;
+                        moved = true;
+                    } 
+                    // 如果下一个位置有相同数字，合并方块
+                    else if (grid[nextY][nextX] === grid[newY][newX]) {
+                        grid[nextY][nextX] *= 2;
+                        score += grid[nextY][nextX];
+                        grid[newY][newX] = 0;
+                        moved = true;
+                        playMergeSound(); // 播放合并音效
+                        
+                        // 检查是否达到2048
+                        if (grid[nextY][nextX] === 2048 && !gameWon) {
+                            gameWon = true;
+                            playWinSound(); // 播放获胜音效
+                            setTimeout(() => {
+                                alert('恭喜！你达到了2048!');
+                            }, 100);
+                        }
+                        
+                        break;
+                    } 
+                    else {
+                        break;
+                    }
+                }
+                
+                return moved;
+            }
+            
+            // 检查是否还有移动
+            function hasMoves() {
+                // 检查是否有空格子
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    for (let x = 0; x < GRID_SIZE; x++) {
+                        if (grid[y][x] === 0) return true;
+                    }
+                }
+                
+                // 检查是否有相邻的相同数字
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    for (let x = 0; x < GRID_SIZE; x++) {
+                        const current = grid[y][x];
+                        if (
+                            (x < GRID_SIZE - 1 && grid[y][x + 1] === current) ||
+                            (y < GRID_SIZE - 1 && grid[y + 1][x] === current)
+                        ) {
+                            return true;
+                        }
+                    }
+                }
+                
+                return false;
+            }
+            
+            // 更新分数
+            function updateScore() {
+                document.getElementById('score').textContent = score;
+                
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem('2048-high-score', highScore);
+                    document.getElementById('high-score').textContent = highScore;
+                }
+            }
+            
+            // 初始化手势控制器
+            const gameBoardElement = document.getElementById('board');
+            
+            // 手势控制器
+            const gestureController = new GestureController(gameBoardElement, {
+                minSwipeDistance: 25,  // 调整最小滑动距离以提高灵敏度
+                minSwipeSpeed: 0.15,   // 调整最小滑动速度
+                preventDefault: true,
+                onSwipeLeft: (e, data) => {
+                    if (!gameOver) {
+                        move('left');
+                    }
+                    e.preventDefault();
+                },
+                onSwipeRight: (e, data) => {
+                    if (!gameOver) {
+                        move('right');
+                    }
+                    e.preventDefault();
+                },
+                onSwipeUp: (e, data) => {
+                    if (!gameOver) {
+                        move('up');
+                    }
+                    e.preventDefault();
+                },
+                onSwipeDown: (e, data) => {
+                    if (!gameOver) {
+                        move('down');
+                    }
+                    e.preventDefault();
+                }
+            });
+            
+            // 键盘事件
+            document.addEventListener('keydown', (e) => {
+                if (gameOver) return;
+                
+                switch(e.key) {
+                    case 'ArrowUp':
+                    case 'w':
+                    case 'W':
+                        e.preventDefault();
+                        move('up');
+                        break;
+                    case 'ArrowDown':
+                    case 's':
+                    case 'S':
+                        e.preventDefault();
+                        move('down');
+                        break;
+                    case 'ArrowLeft':
+                    case 'a':
+                    case 'A':
+                        e.preventDefault();
+                        move('left');
+                        break;
+                    case 'ArrowRight':
+                    case 'd':
+                    case 'D':
+                        e.preventDefault();
+                        move('right');
+                        break;
+                }
+            });
+            
+            // 按钮事件
+            document.getElementById('new-game').addEventListener('click', () => {
+                initGame();
+                initAudio(); // 重新初始化音频，确保可以播放
+            });
+            
+            // 初始化游戏和音频
+            initGame();
+            initAudio();
+        });
+    </script>
+</body>
+</html>

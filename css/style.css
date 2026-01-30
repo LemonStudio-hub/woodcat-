@@ -1,0 +1,511 @@
+/* 木头猫游戏合集 - 样式表 */
+/* 移动端优先的响应式设计 */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+/* 头部样式 - 移动端优先 */
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+.logo {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.logo h1 {
+    color: #2c3e50;
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+.logo .slogan {
+    color: #7f8c8d;
+    font-size: 0.85rem;
+}
+
+.nav {
+    width: 100%;
+}
+
+.nav ul {
+    display: none; /* 默认隐藏导航，通过按钮控制显示 */
+    list-style: none;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 0;
+}
+
+.nav a {
+    display: block;
+    text-decoration: none;
+    color: #34495e;
+    font-weight: 500;
+    padding: 10px;
+    border-radius: 4px;
+    background: #f8f9fa;
+    text-align: center;
+}
+
+.nav a:hover,
+.nav a.active {
+    background: #3498db;
+    color: white;
+}
+
+/* 移动端菜单按钮 */
+.mobile-menu-btn {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    padding: 5px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+    align-items: center;
+}
+
+.mobile-menu-btn span {
+    width: 25px;
+    height: 3px;
+    background: #333;
+    margin: 3px 0;
+    transition: 0.3s;
+    border-radius: 2px;
+}
+
+/* 英雄区域 - 移动端优先 */
+.hero {
+    text-align: center;
+    padding: 30px 15px;
+    margin-bottom: 30px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.hero h2 {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.hero p {
+    color: #7f8c8d;
+    margin: 0 0 20px;
+    font-size: 1rem;
+}
+
+/* 按钮样式 - 移动端优先 */
+.btn-primary,
+.btn-secondary {
+    display: block;
+    width: 100%;
+    max-width: 250px;
+    margin: 10px auto;
+    padding: 12px 20px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.btn-primary {
+    background: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: #ecf0f1;
+    color: #2c3e50;
+}
+
+.btn-secondary:hover {
+    background: #d5dbdb;
+    transform: translateY(-2px);
+}
+
+/* 游戏区域 - 移动端优先 */
+.games-section {
+    margin-bottom: 30px;
+}
+
+.games-section h3 {
+    font-size: 1.4rem;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.games-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.game-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.game-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-color: #3498db;
+}
+
+.game-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.game-card h4 {
+    color: #2c3e50;
+    margin-bottom: 5px;
+    font-size: 1.1rem;
+}
+
+.game-card p {
+    color: #7f8c8d;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.game-meta {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.difficulty, .players {
+    padding: 3px 6px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.difficulty {
+    color: white;
+}
+
+.easy { background: #2ecc71; }
+.medium { background: #f39c12; }
+.hard { background: #e74c3c; }
+
+.players {
+    background: #3498db;
+    color: white;
+}
+
+/* 特色区域 - 移动端优先 */
+.features {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.feature-card {
+    background: #fff;
+    padding: 20px 15px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+}
+
+.feature-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.feature-card h3 {
+    color: #2c3e50;
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+}
+
+.feature-card p {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+/* 页脚 - 移动端优先 */
+.footer {
+    background: #2c3e50;
+    color: #ecf0f1;
+    padding: 30px 0 15px;
+    margin-top: 30px;
+}
+
+.footer-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.footer h4 {
+    color: #fff;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.footer ul {
+    list-style: none;
+}
+
+.footer ul li {
+    margin-bottom: 5px;
+}
+
+.footer a {
+    color: #bdc3c7;
+    text-decoration: none;
+    transition: color 0.3s;
+    font-size: 0.9rem;
+}
+
+.footer a:hover {
+    color: #ecf0f1;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 15px;
+    border-top: 1px solid #34495e;
+    color: #95a5a6;
+    font-size: 0.85rem;
+}
+
+/* 平板设备 (最小768px) */
+@media (min-width: 768px) {
+    .container {
+        max-width: 1200px;
+        padding: 0 20px;
+    }
+    
+    .header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        margin-bottom: 30px;
+    }
+    
+    .logo {
+        margin-bottom: 0;
+    }
+    
+    .logo h1 {
+        font-size: 1.8rem;
+    }
+    
+    .logo .slogan {
+        font-size: 0.9rem;
+    }
+    
+    .mobile-menu-btn {
+        display: none;
+    }
+    
+    .nav {
+        display: block;
+    }
+    
+    .nav ul {
+        display: flex;
+        flex-direction: row;
+        gap: 25px;
+        padding: 0;
+    }
+    
+    .nav a {
+        display: inline-block;
+        padding: 5px 10px;
+        background: transparent;
+        text-align: initial;
+    }
+    
+    .hero {
+        padding: 40px;
+        margin-bottom: 40px;
+    }
+    
+    .hero h2 {
+        font-size: 2rem;
+        margin-bottom: 15px;
+    }
+    
+    .hero p {
+        max-width: 600px;
+        margin: 0 auto 25px;
+        font-size: 1.1rem;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        display: inline-block;
+        width: auto;
+        margin: 0 10px;
+        max-width: none;
+    }
+    
+    .games-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+    }
+    
+    .game-card {
+        padding: 25px;
+        min-height: auto;
+    }
+    
+    .game-icon {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+    }
+    
+    .game-card h4 {
+        font-size: 1.2rem;
+        margin-bottom: 8px;
+    }
+    
+    .game-card p {
+        font-size: 0.95rem;
+        margin-bottom: 15px;
+    }
+    
+    .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+    }
+    
+    .feature-card h3 {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+    
+    .feature-card p {
+        font-size: 0.95rem;
+    }
+    
+    .footer {
+        padding: 40px 0 20px;
+        margin-top: 50px;
+    }
+    
+    .footer-content {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .footer h4 {
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+    }
+    
+    .footer a {
+        font-size: 0.95rem;
+    }
+    
+    .footer-bottom {
+        font-size: 0.9rem;
+        padding-top: 20px;
+    }
+}
+
+/* 桌面设备 (最小1024px) */
+@media (min-width: 1024px) {
+    .games-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+    
+    .hero h2 {
+        font-size: 2.2rem;
+    }
+    
+    .hero p {
+        font-size: 1.2rem;
+    }
+    
+    .game-card {
+        padding: 30px;
+    }
+    
+    .game-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+    }
+    
+    .game-card h4 {
+        font-size: 1.3rem;
+    }
+    
+    .features {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+    
+    .feature-icon {
+        font-size: 3rem;
+    }
+    
+    .feature-card {
+        padding: 25px;
+    }
+}

@@ -1,0 +1,274 @@
+/* 木头猫游戏合集 - 响应式设计优化 */
+/* 在这里补充一些媒体查询以增强响应式效果 */
+
+@media (max-width: 1024px) {
+    .games-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+    }
+    
+    .hero h2 {
+        font-size: 2.2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        flex-wrap: wrap;
+    }
+    
+    .logo {
+        order: 1;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+    
+    .nav {
+        order: 3;
+        width: 100%;
+        margin-top: 15px;
+        display: none; /* 默认隐藏，通过JS控制显示 */
+    }
+    
+    .nav ul {
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .mobile-menu-btn {
+        order: 2;
+    }
+    
+    .hero {
+        margin-bottom: 30px;
+    }
+    
+    .hero h2 {
+        font-size: 2rem;
+    }
+    
+    .hero p {
+        font-size: 1.1rem;
+    }
+    
+    .games-section h3 {
+        font-size: 1.7rem;
+    }
+    
+    .games-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 10px;
+    }
+    
+    .header {
+        padding: 15px 0;
+    }
+    
+    .logo h1 {
+        font-size: 22px;
+    }
+    
+    .hero h2 {
+        font-size: 1.7rem;
+    }
+    
+    .hero p {
+        font-size: 1rem;
+    }
+    
+    .games-section h3 {
+        font-size: 1.5rem;
+    }
+    
+    .games-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .game-card {
+        padding: 20px 15px;
+    }
+    
+    .game-icon {
+        font-size: 2.2rem;
+    }
+    
+    .game-card h4 {
+        font-size: 1.1rem;
+    }
+    
+    .game-card p {
+        font-size: 0.9rem;
+    }
+    
+    .footer {
+        padding: 20px 0;
+    }
+}
+
+@media (max-width: 360px) {
+    .hero h2 {
+        font-size: 1.5rem;
+    }
+    
+    .game-icon {
+        font-size: 2rem;
+    }
+    
+    .game-card {
+        padding: 18px 12px;
+    }
+}
+
+/* 针对平板设备的优化 */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .games-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .nav ul {
+        gap: 15px;
+    }
+}
+
+/* 横屏手机优化 */
+@media (max-height: 500px) and (orientation: landscape) {
+    .hero h2 {
+        font-size: 1.8rem;
+    }
+    
+    .hero {
+        margin-bottom: 20px;
+    }
+}
+
+/* 高分辨率屏幕优化 */
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1400px;
+    }
+    
+    .hero h2 {
+        font-size: 3rem;
+    }
+    
+    .games-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* 模态框在小屏幕上的优化 */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        height: 80vh;
+        margin: 10vh auto;
+    }
+    
+    .close {
+        top: 10px;
+        right: 10px;
+        width: 30px;
+        height: 30px;
+        font-size: 24px;
+    }
+    
+    #gameContainer {
+        padding: 15px;
+    }
+}
+
+/* 为游戏内容区域添加样式 */
+.game-content h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.8rem;
+}
+
+.game-content p {
+    color: #7f8c8d;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+
+.game-placeholder {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 25px;
+    text-align: center;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-controls {
+    text-align: left;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.game-controls ul {
+    margin-top: 10px;
+    text-align: left;
+}
+
+.game-controls li {
+    margin: 8px 0;
+    padding-left: 20px;
+    position: relative;
+    color: #555;
+}
+
+.game-controls li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #3498db;
+}
+
+/* 暗色模式支持 */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: #e0e6ed;
+    }
+    
+    .game-card {
+        background: #2c3e50;
+        border-color: #34495e;
+        color: #e0e6ed;
+    }
+    
+    .game-card:hover {
+        border-color: #3498db;
+    }
+    
+    .modal-content {
+        background: #2c3e50;
+        color: #e0e6ed;
+    }
+    
+    .game-placeholder {
+        background: #34495e;
+        color: #e0e6ed;
+    }
+    
+    .header {
+        border-bottom-color: #34495e;
+    }
+    
+    .footer {
+        border-top-color: #34495e;
+    }
+}
