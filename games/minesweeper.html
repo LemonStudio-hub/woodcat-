@@ -187,24 +187,31 @@
             position: absolute;
             top: 10px;
             left: 10px;
-            background: #95a5a6;
+            background: #34495e;
             color: white;
             border: none;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             font-size: 16px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
-            z-index: 10;
+            transition: all 0.3s ease;
+            z-index: 20;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
         }
         
         .back-home:hover {
-            background: #7f8c8d;
-            transform: scale(1.1);
+            background: #2c3e50;
+            transform: scale(1.15) rotate(-10deg);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .back-home:active {
+            transform: scale(1.05);
         }
         
         /* 动画定义 */

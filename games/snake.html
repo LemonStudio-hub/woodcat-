@@ -168,24 +168,31 @@
             position: absolute;
             top: 10px;
             left: 10px;
-            background: #95a5a6;
+            background: #34495e;
             color: white;
             border: none;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             font-size: 16px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
-            z-index: 10;
+            transition: all 0.3s ease;
+            z-index: 20;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
         }
         
         .back-home:hover {
-            background: #7f8c8d;
-            transform: scale(1.1);
+            background: #2c3e50;
+            transform: scale(1.15) rotate(-10deg);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .back-home:active {
+            transform: scale(1.05);
         }
         
         /* 动画定义 */
@@ -366,14 +373,36 @@
                 }
             }
             
-            // 创建音频上下文
-            let audioContext;
+            // 创建音频上下文 - 移动端需要用户交互后才能播放音频
+            let audioContext = null;
+            let audioInitialized = false;
+            
             function initAudio() {
+                if (audioInitialized) return;
+                
                 try {
+                    // 创建音频上下文
                     audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // 在移动端，需要用户交互后才能播放音频
+                    if (audioContext.state === 'suspended') {
+                        // 尝试恢复音频上下文
+                        audioContext.resume();
+                    }
+                    
+                    audioInitialized = true;
                 } catch (e) {
                     console.log('Audio not supported');
                 }
+            }
+            
+            // 移动端音频初始化 - 用户交互后激活音频
+            function enableAudioOnMobile() {
+                if (audioInitialized) return;
+                
+                // 在用户交互后初始化音频
+                document.addEventListener('touchstart', initAudio, { once: true });
+                document.addEventListener('click', initAudio, { once: true });
             }
             
             // 创建吃食物的音效
@@ -584,6 +613,7 @@
                         togglePause();
                         break;
                 }
+                enableAudioOnMobile(); // 启用移动端音频
             });
             
             // 初始化手势控制器
@@ -603,6 +633,7 @@
                         }
                     }
                     e.preventDefault();
+                    enableAudioOnMobile(); // 启用移动端音频
                 },
                 onSwipeRight: (e, data) => {
                     console.log('Swipe right detected', { isPaused, gameOver, direction }); // 调试信息
@@ -613,6 +644,7 @@
                         }
                     }
                     e.preventDefault();
+                    enableAudioOnMobile(); // 启用移动端音频
                 },
                 onSwipeUp: (e, data) => {
                     console.log('Swipe up detected', { isPaused, gameOver, direction }); // 调试信息
@@ -623,6 +655,7 @@
                         }
                     }
                     e.preventDefault();
+                    enableAudioOnMobile(); // 启用移动端音频
                 },
                 onSwipeDown: (e, data) => {
                     console.log('Swipe down detected', { isPaused, gameOver, direction }); // 调试信息
@@ -633,16 +666,27 @@
                         }
                     }
                     e.preventDefault();
+                    enableAudioOnMobile(); // 启用移动端音频
                 }
             });
             
             // 按钮事件处理
-            document.getElementById('startBtn').addEventListener('click', toggleGame);
-            document.getElementById('pauseBtn').addEventListener('click', togglePause);
-            document.getElementById('resetBtn').addEventListener('click', resetGame);
+            document.getElementById('startBtn').addEventListener('click', () => {
+                toggleGame();
+                enableAudioOnMobile(); // 启用移动端音频
+            });
+            document.getElementById('pauseBtn').addEventListener('click', () => {
+                togglePause();
+                enableAudioOnMobile(); // 启用移动端音频
+            });
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                resetGame();
+                enableAudioOnMobile(); // 启用移动端音频
+            });
             
             // 初始化并开始游戏
             initGame();
+            enableAudioOnMobile(); // 启用移动端音频
         });
     </script>
 </body>

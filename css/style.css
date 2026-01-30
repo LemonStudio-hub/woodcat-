@@ -58,21 +58,49 @@ body {
     padding: 10px 0;
 }
 
-.nav a {
-    display: block;
-    text-decoration: none;
-    color: #34495e;
-    font-weight: 500;
-    padding: 10px;
-    border-radius: 4px;
-    background: #f8f9fa;
-    text-align: center;
-}
-
+    .nav a {
+        display: block;
+        text-decoration: none;
+        color: #34495e;
+        font-weight: 500;
+        padding: 10px;
+        border-radius: 4px;
+        background: #f8f9fa;
+        text-align: center;
+    }
+    
+    .feedback-menu-item a {
+        background: #3498db;
+        color: white;
+    }
+    
+    .feedback-menu-item a:hover {
+        background: #2980b9;
+    }
 .nav a:hover,
 .nav a.active {
     background: #3498db;
     color: white;
+}
+
+.feedback-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #3498db;
+    color: white;
+    font-size: 1.2rem;
+    margin-left: 10px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.feedback-link:hover {
+    background: #2980b9;
+    transform: scale(1.1);
 }
 
 /* 移动端菜单按钮 */
@@ -373,6 +401,7 @@ body {
         text-align: initial;
     }
     
+        
     .hero {
         padding: 40px;
         margin-bottom: 40px;
@@ -508,4 +537,61 @@ body {
     .feature-card {
         padding: 25px;
     }
+}
+
+/* 反馈部分样式 */
+.feedback-section {
+    background: linear-gradient(135deg, #74b9ff, #0984e3);
+    padding: 40px 20px;
+    margin-top: 40px;
+}
+
+.feedback-container {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+    color: white;
+}
+
+.feedback-container h3 {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.feedback-container p {
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+    opacity: 0.9;
+}
+
+.feedback-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 25px;
+    border-radius: 50px;
+    text-decoration: none;
+    color: white;
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    min-width: 220px;
+    margin: 0 auto;
+    justify-content: center;
+}
+
+.feedback-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.btn-icon {
+    font-size: 1.2rem;
+}
+
+.btn-text {
+    font-weight: 600;
 }

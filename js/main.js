@@ -37,6 +37,16 @@ document.addEventListener('DOMContentLoaded', function() {
             title: '跳棋',
             description: '经典双人对战，通过跳跃吃掉对方棋子获得胜利',
             url: 'games/checkers.html'
+        },
+        'tic-tac-toe': {
+            title: '井字棋',
+            description: '经典策略游戏，两个玩家轮流在3x3网格上放置标记',
+            url: 'games/tic-tac-toe.html'
+        },
+        'memory-card': {
+            title: '记忆卡牌',
+            description: '考验记忆能力，翻转卡牌找到匹配的对',
+            url: 'games/memory-card.html'
         }
     };
     
@@ -69,12 +79,60 @@ document.addEventListener('DOMContentLoaded', function() {
     if (mobileMenuBtn) {
         mobileMenuBtn.addEventListener('click', function() {
             const nav = document.querySelector('.nav');
-            nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
+            const navList = nav.querySelector('ul');
             
-            // 旋转菜单按钮
-            this.classList.toggle('active');
+            // 检查当前窗口大小
+            if (window.innerWidth <= 768) { // 移动端
+                // 获取当前计算样式
+                const computedStyle = window.getComputedStyle(navList);
+                
+                if (computedStyle.display === 'flex' || computedStyle.display === 'block') {
+                    // 菜单当前显示，需要隐藏
+                    navList.style.display = 'none';
+                    this.classList.remove('active');
+                } else {
+                    // 菜单当前隐藏，需要显示
+                    navList.style.display = 'flex';
+                    this.classList.add('active'); // 添加active类来实现动画效果
+                    
+                    // 检查是否已经添加了反馈项，避免重复添加
+                    const existingFeedbackItem = navList.querySelector('.feedback-menu-item');
+                    if (!existingFeedbackItem) {
+                        const feedbackItem = document.createElement('li');
+                        feedbackItem.className = 'feedback-menu-item';
+                        feedbackItem.innerHTML = '<a href="feedback.html">反馈与支持</a>';
+                        navList.appendChild(feedbackItem);
+                    }
+                }
+            }
         });
     }
+    
+    // 确保桌面端导航栏在小屏幕时隐藏，大屏幕时显示
+    function updateNavDisplay() {
+        const nav = document.querySelector('.nav');
+        const navList = nav.querySelector('ul');
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        
+        if (window.innerWidth > 768) {
+            // 桌面端：始终显示导航，隐藏反馈项（如果存在）
+            navList.style.display = 'flex'; // 桌面端使用flex显示
+            navList.style.flexDirection = 'row'; // 桌面端水平排列
+            const existingFeedbackItem = document.querySelector('.feedback-menu-item');
+            if (existingFeedbackItem) {
+                existingFeedbackItem.remove();
+            }
+            mobileMenuBtn.classList.remove('active');
+        } else {
+            // 移动端：默认隐藏，仅在点击按钮时显示
+            navList.style.display = 'none';
+            mobileMenuBtn.classList.remove('active');
+        }
+    }
+    
+    // 页面加载时和窗口大小改变时更新导航显示
+    updateNavDisplay();
+    window.addEventListener('resize', updateNavDisplay);
     
     // 添加页面滚动效果
     window.addEventListener('scroll', function() {

@@ -202,26 +202,33 @@
         
         .back-home {
             position: absolute;
-            top: 8px;
-            left: 8px;
-            background: #9e8c7c;
-            color: #f9f6f2;
+            top: 10px;
+            left: 10px;
+            background: #34495e;
+            color: white;
             border: none;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             font-size: 16px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.3s ease;
             z-index: 20;
-            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
         }
         
         .back-home:hover {
-            background: #8f7a66;
-            transform: scale(1.1);
+            background: #2c3e50;
+            transform: scale(1.15) rotate(-10deg);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .back-home:active {
+            transform: scale(1.05);
         }
         
         .instructions {
@@ -390,14 +397,36 @@
             let gameOver = false;
             let gameWon = false;
             
-            // 创建音频上下文
-            let audioContext;
+            // 创建音频上下文 - 移动端需要用户交互后才能播放音频
+            let audioContext = null;
+            let audioInitialized = false;
+            
             function initAudio() {
+                if (audioInitialized) return;
+                
                 try {
+                    // 创建音频上下文
                     audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // 在移动端，需要用户交互后才能播放音频
+                    if (audioContext.state === 'suspended') {
+                        // 尝试恢复音频上下文
+                        audioContext.resume();
+                    }
+                    
+                    audioInitialized = true;
                 } catch (e) {
                     console.log('Audio not supported');
                 }
+            }
+            
+            // 移动端音频初始化 - 用户交互后激活音频
+            function enableAudioOnMobile() {
+                if (audioInitialized) return;
+                
+                // 在用户交互后初始化音频
+                document.addEventListener('touchstart', initAudio, { once: true });
+                document.addEventListener('click', initAudio, { once: true });
             }
             
             // 移动音效
@@ -755,24 +784,28 @@
                         move('left');
                     }
                     e.preventDefault();
+                    enableAudioOnMobile(); // 启用移动端音频
                 },
                 onSwipeRight: (e, data) => {
                     if (!gameOver) {
                         move('right');
                     }
                     e.preventDefault();
+                    enableAudioOnMobile(); // 启用移动端音频
                 },
                 onSwipeUp: (e, data) => {
                     if (!gameOver) {
                         move('up');
                     }
                     e.preventDefault();
+                    enableAudioOnMobile(); // 启用移动端音频
                 },
                 onSwipeDown: (e, data) => {
                     if (!gameOver) {
                         move('down');
                     }
                     e.preventDefault();
+                    enableAudioOnMobile(); // 启用移动端音频
                 }
             });
             
@@ -786,24 +819,28 @@
                     case 'W':
                         e.preventDefault();
                         move('up');
+                        enableAudioOnMobile(); // 启用移动端音频
                         break;
                     case 'ArrowDown':
                     case 's':
                     case 'S':
                         e.preventDefault();
                         move('down');
+                        enableAudioOnMobile(); // 启用移动端音频
                         break;
                     case 'ArrowLeft':
                     case 'a':
                     case 'A':
                         e.preventDefault();
                         move('left');
+                        enableAudioOnMobile(); // 启用移动端音频
                         break;
                     case 'ArrowRight':
                     case 'd':
                     case 'D':
                         e.preventDefault();
                         move('right');
+                        enableAudioOnMobile(); // 启用移动端音频
                         break;
                 }
             });
@@ -811,12 +848,12 @@
             // 按钮事件
             document.getElementById('new-game').addEventListener('click', () => {
                 initGame();
-                initAudio(); // 重新初始化音频，确保可以播放
+                enableAudioOnMobile(); // 启用移动端音频
             });
             
-            // 初始化游戏和音频
+            // 初始化游戏
             initGame();
-            initAudio();
+            enableAudioOnMobile(); // 启用移动端音频
         });
     </script>
 </body>

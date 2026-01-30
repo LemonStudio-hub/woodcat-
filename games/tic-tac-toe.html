@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>井字棋 - 木头猫</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 15px;
+            color: #333;
+            overflow-x: hidden;
+        }
+        
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            max-width: 100%;
+            width: 100%;
+            max-width: 370px;
+            margin: 10px 0;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            animation: containerPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin: 8px 0 12px;
+            text-align: center;
+            font-size: 1.6rem;
+            font-weight: 600;
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .stat-box {
+            background: #e8f4f8;
+            color: #2c3e50;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 80px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-box h3 {
+            margin: 0;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #34495e;
+        }
+        
+        .stat-box p {
+            margin: 2px 0 0;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        
+        .mode-selector {
+            width: 100%;
+            text-align: center;
+            margin: 8px 0;
+            padding: 10px;
+            background: #e8f4f8;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: #2c3e50;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        #current-mode {
+            color: #3498db;
+            font-weight: bold;
+        }
+        
+        #change-mode-btn {
+            padding: 5px 12px;
+            font-size: 0.85rem;
+            background: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        #change-mode-btn:hover {
+            background: #7f8c8d;
+        }
+        
+        .turn-indicator {
+            width: 100%;
+            text-align: center;
+            margin: 8px 0 12px;
+            padding: 10px;
+            background: #e8f4f8;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #2c3e50;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            animation: pulse 2s infinite;
+        }
+        
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            width: 100%;
+            aspect-ratio: 1/1;
+            margin-bottom: 12px;
+            border: 2px solid #7f8c8d;
+            position: relative;
+            overflow: hidden;
+            background: #bdc3c7;
+            border-radius: 4px;
+        }
+        
+        .cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            user-select: none;
+            transition: all 0.2s ease;
+            position: relative;
+            background: #ecf0f1;
+            cursor: pointer;
+            font-weight: bold;
+            border-right: 1px solid #7f8c8d;
+            border-bottom: 1px solid #7f8c8d;
+        }
+        
+        .cell:nth-child(3n) {
+            border-right: none;
+        }
+        
+        .cell:nth-child(n+7) {
+            border-bottom: none;
+        }
+        
+        .cell:hover {
+            background: #d6eaf8;
+        }
+        
+        .cell.x {
+            color: #e74c3c;
+        }
+        
+        .cell.o {
+            color: #3498db;
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        
+        .back-home {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #34495e;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 20;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+        }
+        
+        .back-home:hover {
+            background: #2c3e50;
+            transform: scale(1.15) rotate(-10deg);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .back-home:active {
+            transform: scale(1.05);
+        }
+        
+        .winning-cell {
+            background: #2ecc71 !important;
+            color: white !important;
+            animation: winPulse 1s infinite;
+        }
+        
+        /* 动画定义 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes containerPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            70% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes capture {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+        
+        @keyframes movePiece {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes winPulse {
+            0% { box-shadow: 0 0 5px rgba(46, 204, 113, 0.5); }
+            50% { box-shadow: 0 0 15px rgba(46, 204, 113, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(46, 204, 113, 0.5); }
+        }
+        
+        @keyframes drawPulse {
+            0% { background-color: #ecf0f1; }
+            50% { background-color: #f1c40f; }
+            100% { background-color: #ecf0f1; }
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes pulseDot {
+            0% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.6; }
+        }
+        
+        @keyframes pulseBorder {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+        
+        .captured {
+            animation: capture 0.4s ease-out;
+        }
+        
+        .moved {
+            animation: movePiece 0.3s ease-out;
+        }
+        
+        .win-glow {
+            animation: winPulse 1.5s infinite;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+            animation: modalPop 0.3s forwards;
+        }
+        
+        @keyframes modalPop {
+            to { transform: scale(1); }
+        }
+        
+        .modal-header {
+            padding: 20px;
+            background: #3498db;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        
+        .modal-close {
+            font-size: 1.5rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .modal-body p {
+            margin: 0;
+            font-size: 1rem;
+            color: #333;
+            line-height: 1.5;
+        }
+        
+        .modal-footer {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: flex-end;
+            border-top: 1px solid #eee;
+        }
+        
+        .mode-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .mode-option {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .mode-option:hover {
+            border-color: #3498db;
+            background: #f8f9fa;
+        }
+        
+        .mode-option h4 {
+            margin: 0 0 5px 0;
+            color: #2c3e50;
+        }
+        
+        .mode-option p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+        
+        .mode-option.selected {
+            border-color: #3498db;
+            background: #e1f0fa;
+        }
+        
+        /* 移动端优化 */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .game-container {
+                padding: 15px;
+                width: 100%;
+                max-width: 100%;
+                margin: 5px 0;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+                margin: 6px 0 10px;
+            }
+            
+            .stats {
+                margin-bottom: 8px;
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            
+            .stat-box {
+                min-width: 65px;
+                padding: 6px 8px;
+                flex: 1;
+                min-width: 50px;
+            }
+            
+            .stat-box h3 {
+                font-size: 0.6rem;
+            }
+            
+            .stat-box p {
+                font-size: 0.9rem;
+            }
+            
+            .turn-indicator {
+                font-size: 1rem;
+                padding: 8px;
+                margin: 6px 0 10px;
+            }
+            
+            .game-board {
+                margin-bottom: 10px;
+            }
+            
+            .cell {
+                font-size: 28px;
+                border-width: 1px;
+            }
+            
+            button {
+                padding: 9px 14px;
+                font-size: 0.85rem;
+                flex: 1;
+                min-width: 120px;
+            }
+            
+            .buttons {
+                flex-direction: row;
+            }
+            
+            .back-home {
+                top: 10px;
+                left: 10px;
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a class="back-home" href="../index.html">←</a>
+    <div class="game-container">
+        <h1>井字棋</h1>
+        <div class="stats">
+            <div class="stat-box">
+                <h3>玩家X</h3>
+                <p id="player-x-wins">0</p>
+            </div>
+            <div class="stat-box">
+                <h3>平局</h3>
+                <p id="draws">0</p>
+            </div>
+            <div class="stat-box">
+                <h3>玩家O</h3>
+                <p id="player-o-wins">0</p>
+            </div>
+        </div>
+        <div class="mode-selector">
+            <span>游戏模式：</span>
+            <span id="current-mode">双人对战</span>
+            <button id="change-mode-btn" class="btn-secondary">更改</button>
+        </div>
+        <div class="turn-indicator" id="turn-indicator">玩家 X 回合</div>
+        <div class="game-board" id="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+        <div class="controls">
+            <div class="buttons">
+                <button id="resetBtn">新游戏</button>
+                <button id="resetScoresBtn">重置计分</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模式选择模态框 -->
+    <div id="mode-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>选择游戏模式</h3>
+                <span id="mode-modal-close" class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="mode-options">
+                    <div class="mode-option" data-mode="pvp">
+                        <h4>双人对战</h4>
+                        <p>两名玩家轮流对战</p>
+                    </div>
+                    <div class="mode-option" data-mode="pvc">
+                        <h4>人机对战</h4>
+                        <p>与AI对战挑战</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/modal.js"></script>
+    <script>
+        // 井字棋核心游戏逻辑
+        document.addEventListener('DOMContentLoaded', () => {
+            const board = document.getElementById('board');
+            const cells = document.querySelectorAll('.cell');
+            const turnIndicator = document.getElementById('turn-indicator');
+            const resetBtn = document.getElementById('resetBtn');
+            const resetScoresBtn = document.getElementById('resetScoresBtn');
+            const playerXWinsEl = document.getElementById('player-x-wins');
+            const playerOWinsEl = document.getElementById('player-o-wins');
+            const drawsEl = document.getElementById('draws');
+            const gameModeSelect = document.getElementById('game-mode');
+            const currentModeSpan = document.getElementById('current-mode');
+            const changeModeBtn = document.getElementById('change-mode-btn');
+            
+            // 模态框元素
+            const modeModal = document.getElementById('mode-modal');
+            const modeModalClose = document.getElementById('mode-modal-close');
+            const modeOptions = document.querySelectorAll('.mode-option');
+            
+            let currentPlayer = 'X';
+            let gameBoard = ['', '', '', '', '', '', '', '', ''];
+            let gameActive = true;
+            let gameMode = 'pvp'; // 'pvp' for player vs player, 'pvc' for player vs computer
+            let playerXWins = 0;
+            let playerOWins = 0;
+            let draws = 0;
+            
+            // 获胜组合
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // 横向
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // 纵向
+                [0, 4, 8], [2, 4, 6]             // 对角线
+            ];
+            
+            // AI算法：Minimax算法实现
+            function minimax(board, depth, isMaximizing) {
+                const winner = checkWinnerWithoutUpdatingUI();
+                
+                if (winner === 'O') {
+                    return 10 - depth; // AI获胜
+                } else if (winner === 'X') {
+                    return depth - 10; // 玩家获胜
+                } else if (isBoardFull(board)) {
+                    return 0; // 平局
+                }
+                
+                if (isMaximizing) {
+                    // AI回合，最大化得分
+                    let bestScore = -Infinity;
+                    for (let i = 0; i < 9; i++) {
+                        if (board[i] === '') {
+                            board[i] = 'O';
+                            let score = minimax(board, depth + 1, false);
+                            board[i] = '';
+                            bestScore = Math.max(score, bestScore);
+                        }
+                    }
+                    return bestScore;
+                } else {
+                    // 玩家回合，最小化得分
+                    let bestScore = Infinity;
+                    for (let i = 0; i < 9; i++) {
+                        if (board[i] === '') {
+                            board[i] = 'X';
+                            let score = minimax(board, depth + 1, true);
+                            board[i] = '';
+                            bestScore = Math.min(score, bestScore);
+                        }
+                    }
+                    return bestScore;
+                }
+            }
+            
+            // 检查棋盘是否已满
+            function isBoardFull(board) {
+                return board.every(cell => cell !== '');
+            }
+            
+            // 检查获胜者（不更新UI）
+            function checkWinnerWithoutUpdatingUI() {
+                for (const pattern of winPatterns) {
+                    const [a, b, c] = pattern;
+                    if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+                        return gameBoard[a];
+                    }
+                }
+                
+                if (!gameBoard.includes('')) {
+                    return 'draw';
+                }
+                
+                return null;
+            }
+            
+            // AI选择最佳位置
+            function getBestMove() {
+                let bestScore = -Infinity;
+                let bestMove;
+                
+                for (let i = 0; i < 9; i++) {
+                    if (gameBoard[i] === '') {
+                        gameBoard[i] = 'O';
+                        let score = minimax(gameBoard, 0, false);
+                        gameBoard[i] = '';
+                        
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestMove = i;
+                        }
+                    }
+                }
+                
+                return bestMove;
+            }
+            
+            // 检查获胜者（更新UI）
+            function checkWinner() {
+                // 清除之前的获胜高亮
+                cells.forEach(cell => {
+                    cell.classList.remove('winning-cell');
+                });
+                
+                for (const pattern of winPatterns) {
+                    const [a, b, c] = pattern;
+                    if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+                        // 高亮获胜组合
+                        cells[a].classList.add('winning-cell');
+                        cells[b].classList.add('winning-cell');
+                        cells[c].classList.add('winning-cell');
+                        
+                        // 为获胜棋子添加特殊动画
+                        cells[a].style.animation = 'winPulse 0.5s 3';
+                        cells[b].style.animation = 'winPulse 0.5s 3';
+                        cells[c].style.animation = 'winPulse 0.5s 3';
+                        
+                        return gameBoard[a];
+                    }
+                }
+                
+                // 检查平局
+                if (!gameBoard.includes('')) {
+                    // 为所有格子添加平局动画
+                    cells.forEach(cell => {
+                        if (!cell.classList.contains('winning-cell')) {
+                            cell.style.animation = 'drawPulse 0.5s 2';
+                        }
+                    });
+                    return 'draw';
+                }
+                
+                return null;
+            }
+            
+            // 创建音频上下文 - 移动端需要用户交互后才能播放音频
+            let audioContext = null;
+            let audioInitialized = false;
+            
+            function initAudio() {
+                if (audioInitialized) return;
+                
+                try {
+                    // 创建音频上下文
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // 在移动端，需要用户交互后才能播放音频
+                    if (audioContext.state === 'suspended') {
+                        // 尝试恢复音频上下文
+                        audioContext.resume();
+                    }
+                    
+                    audioInitialized = true;
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+            
+            // 移动端音频初始化 - 用户交互后激活音频
+            function enableAudioOnMobile() {
+                if (audioInitialized) return;
+                
+                // 在用户交互后初始化音频
+                document.addEventListener('touchstart', initAudio, { once: true });
+                document.addEventListener('click', initAudio, { once: true });
+            }
+            
+            // 震动反馈函数
+            function vibrate(duration) {
+                if (navigator.vibrate) {
+                    navigator.vibrate(duration);
+                }
+            }
+            
+            // 移动音效
+            function playMoveSound() {
+                if (!audioContext) return;
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.value = 300;
+                gainNode.gain.value = 0.1;
+                
+                oscillator.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.2);
+                
+                setTimeout(() => {
+                    oscillator.stop();
+                }, 200);
+            }
+            
+            // 胜利音效
+            function playWinSound() {
+                if (!audioContext) return;
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.type = 'sine';
+                
+                // 播放上升的音调
+                oscillator.frequency.setValueAtTime(261.63, audioContext.currentTime); // C
+                oscillator.frequency.exponentialRampToValueAtTime(329.63, audioContext.currentTime + 0.2); // E
+                oscillator.frequency.exponentialRampToValueAtTime(392.00, audioContext.currentTime + 0.4); // G
+                oscillator.frequency.exponentialRampToValueAtTime(523.25, audioContext.currentTime + 0.6); // C
+                
+                gainNode.gain.value = 0.15;
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.8);
+                
+                oscillator.start();
+                
+                setTimeout(() => {
+                    oscillator.stop();
+                }, 800);
+                
+                // 胜利震动反馈
+                vibrate([100, 50, 100]);
+            }
+            
+            // 平局音效
+            function playDrawSound() {
+                if (!audioContext) return;
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.type = 'sine';
+                
+                // 播放连续两个音调
+                oscillator.frequency.setValueAtTime(220, audioContext.currentTime); // A
+                oscillator.frequency.setValueAtTime(196, audioContext.currentTime + 0.2); // G
+                
+                gainNode.gain.value = 0.15;
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.4);
+                
+                oscillator.start();
+                
+                setTimeout(() => {
+                    oscillator.stop();
+                }, 400);
+                
+                // 平局震动反馈
+                vibrate(50);
+            }
+            
+            // 处理单元格点击
+            function handleCellClick(e) {
+                const cell = e.target;
+                const index = parseInt(cell.getAttribute('data-index'));
+                
+                // 检查是否可以放置
+                if (gameBoard[index] !== '' || !gameActive) {
+                    return;
+                }
+                
+                // 在人机对战模式下，只允许玩家（X）走棋
+                if (gameMode === 'pvc' && currentPlayer !== 'X') {
+                    return;
+                }
+                
+                // 更新游戏板
+                makeMove(index, currentPlayer);
+                
+                // 检查游戏状态
+                const winner = checkWinner();
+                if (winner) {
+                    handleGameEnd(winner);
+                    return;
+                }
+                
+                // 如果是人机对战模式，AI自动走棋
+                if (gameMode === 'pvc') {
+                    setTimeout(() => {
+                        if (gameActive) {
+                            aiMove();
+                        }
+                    }, 600); // 给玩家一点反应时间
+                } else {
+                    // 双人对战模式，切换玩家
+                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                    turnIndicator.textContent = `玩家 ${currentPlayer} 回合`;
+                }
+            }
+            
+            // 执行移动
+            function makeMove(index, player) {
+                gameBoard[index] = player;
+                const cell = document.querySelector(`.cell[data-index="${index}"]`);
+                cell.textContent = player;
+                cell.classList.add(player.toLowerCase());
+                
+                // 添加进入动画
+                cell.style.transform = 'scale(0)';
+                cell.style.animation = 'popIn 0.3s forwards';
+                
+                // 播放音效和震动反馈
+                playMoveSound();
+                vibrate(30); // 简短震动反馈
+            }
+            
+            // AI移动
+            function aiMove() {
+                if (!gameActive) return;
+                
+                // 使用Minimax算法找到最佳移动
+                const bestMove = getBestMove();
+                if (bestMove !== undefined) {
+                    makeMove(bestMove, 'O');
+                    
+                    // 检查游戏状态
+                    const winner = checkWinner();
+                    if (winner) {
+                        handleGameEnd(winner);
+                    } else {
+                        currentPlayer = 'X';
+                        turnIndicator.textContent = `玩家 ${currentPlayer} 回合`;
+                    }
+                }
+            }
+            
+            // 处理游戏结束
+            function handleGameEnd(winner) {
+                gameActive = false;
+                
+                let title, message;
+                
+                if (winner === 'X') {
+                    if (gameMode === 'pvc') {
+                        playerXWins++; // 玩家获胜
+                        title = '恭喜！';
+                        message = '你赢了！';
+                    } else {
+                        playerXWins++; // 玩家X获胜
+                        title = '游戏结束';
+                        message = '玩家 X 获胜！';
+                    }
+                } else if (winner === 'O') {
+                    if (gameMode === 'pvc') {
+                        playerOWins++; // AI获胜
+                        title = '游戏结束';
+                        message = 'AI获胜！再试一次吧！';
+                    } else {
+                        playerOWins++; // 玩家O获胜
+                        title = '游戏结束';
+                        message = '玩家 O 获胜！';
+                    }
+                } else {
+                    draws++;
+                    drawsEl.textContent = draws;
+                    playDrawSound();
+                    title = '游戏结束';
+                    message = '平局！';
+                }
+                
+                // 更新分数显示
+                playerXWinsEl.textContent = playerXWins;
+                playerOWinsEl.textContent = playerOWins;
+                drawsEl.textContent = draws;
+                
+                // 显示结果，并自动开始新游戏
+                setTimeout(() => {
+                    showGameResult(title, message);
+                    // 自动开始新游戏
+                    setTimeout(() => {
+                        resetGame();
+                    }, 1500); // 1.5秒后自动开始新游戏
+                }, 300);
+            }
+            
+            // 重置游戏
+            function resetGame() {
+                gameBoard = ['', '', '', '', '', '', '', '', ''];
+                gameActive = true;
+                currentPlayer = 'X';
+                
+                cells.forEach(cell => {
+                    // 添加淡出动画
+                    cell.style.animation = 'fadeOut 0.2s';
+                    setTimeout(() => {
+                        cell.textContent = '';
+                        cell.classList.remove('x', 'o', 'winning-cell');
+                        cell.style.animation = '';
+                        cell.style.transform = '';
+                    }, 200);
+                });
+                
+                // 更新回合指示器文本
+                updateTurnIndicator();
+                turnIndicator.style.animation = 'pulse 0.5s';
+                setTimeout(() => {
+                    turnIndicator.style.animation = '';
+                }, 500);
+            }
+            
+            // 更新回合指示器
+            function updateTurnIndicator() {
+                if (gameMode === 'pvc') {
+                    if (currentPlayer === 'X') {
+                        turnIndicator.textContent = '你的回合';
+                    } else {
+                        turnIndicator.textContent = 'AI 思考中...';
+                    }
+                } else {
+                    turnIndicator.textContent = `玩家 ${currentPlayer} 回合`;
+                }
+            }
+            
+            // 显示游戏结果
+            function showGameResult(title, message) {
+                // 创建临时提示信息而不是使用模态框，以避免阻塞自动游戏
+                const tempNotification = document.createElement('div');
+                tempNotification.style.position = 'fixed';
+                tempNotification.style.top = '20px';
+                tempNotification.style.left = '50%';
+                tempNotification.style.transform = 'translateX(-50%)';
+                tempNotification.style.backgroundColor = '#3498db';
+                tempNotification.style.color = 'white';
+                tempNotification.style.padding = '10px 20px';
+                tempNotification.style.borderRadius = '5px';
+                tempNotification.style.zIndex = '10000';
+                tempNotification.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+                tempNotification.textContent = message;
+                
+                document.body.appendChild(tempNotification);
+                
+                // 1.5秒后移除提示信息
+                setTimeout(() => {
+                    if (tempNotification.parentNode) {
+                        document.body.removeChild(tempNotification);
+                    }
+                }, 1500);
+            }
+            
+            // 显示模式选择模态框
+            function showModeModal() {
+                modeModal.classList.add('show');
+                
+                // 为模式选项添加选中状态
+                modeOptions.forEach(option => {
+                    if (option.getAttribute('data-mode') === gameMode) {
+                        option.classList.add('selected');
+                    } else {
+                        option.classList.remove('selected');
+                    }
+                });
+                
+                // 模式选项点击事件
+                const handleModeSelect = (e) => {
+                    const selectedMode = e.currentTarget.getAttribute('data-mode');
+                    gameMode = selectedMode;
+                    
+                    // 更新当前模式显示
+                    updateCurrentModeDisplay();
+                    
+                    modeModal.classList.remove('show');
+                    
+                    // 清除所有事件监听器
+                    modeOptions.forEach(opt => {
+                        opt.removeEventListener('click', handleModeSelect);
+                    });
+                    modeModalClose.removeEventListener('click', handleModeModalClose);
+                    modeModal.removeEventListener('click', handleModeOverlayClick);
+                    
+                    resetGame();
+                };
+                
+                // 模式模态框关闭事件
+                const handleModeModalClose = () => {
+                    modeModal.classList.remove('show');
+                    modeOptions.forEach(opt => {
+                        opt.removeEventListener('click', handleModeSelect);
+                    });
+                    modeModalClose.removeEventListener('click', handleModeModalClose);
+                    modeModal.removeEventListener('click', handleModeOverlayClick);
+                };
+                
+                // 点击遮罩层关闭模式选择
+                const handleModeOverlayClick = (e) => {
+                    if (e.target === modeModal) {
+                        modeModal.classList.remove('show');
+                        modeOptions.forEach(opt => {
+                            opt.removeEventListener('click', handleModeSelect);
+                        });
+                        modeModalClose.removeEventListener('click', handleModeModalClose);
+                        modeModal.removeEventListener('click', handleModeOverlayClick);
+                    }
+                };
+                
+                modeOptions.forEach(option => {
+                    option.removeEventListener('click', handleModeSelect); // 避免重复添加
+                    option.addEventListener('click', handleModeSelect);
+                });
+                
+                modeModalClose.addEventListener('click', handleModeModalClose);
+                modeModal.addEventListener('click', handleModeOverlayClick);
+            }
+            
+            // 更新当前模式显示
+            function updateCurrentModeDisplay() {
+                if (currentModeSpan) {
+                    currentModeSpan.textContent = gameMode === 'pvp' ? '双人对战' : '人机对战';
+                }
+            }
+            
+            // 添加淡出动画定义
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeOut {
+                    from { opacity: 1; transform: scale(1); }
+                    to { opacity: 0; transform: scale(0.8); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // 重置计分
+            function resetScores() {
+                playerXWins = 0;
+                playerOWins = 0;
+                draws = 0;
+                
+                playerXWinsEl.textContent = playerXWins;
+                playerOWinsEl.textContent = playerOWins;
+                drawsEl.textContent = draws;
+                
+                resetGame();
+            }
+            
+            // 事件监听器
+            cells.forEach(cell => {
+                cell.addEventListener('click', handleCellClick);
+                cell.addEventListener('click', () => enableAudioOnMobile()); // 启用移动端音频
+            });
+            
+            resetBtn.addEventListener('click', () => {
+                resetGame();
+                enableAudioOnMobile(); // 启用移动端音频
+            });
+            
+            resetScoresBtn.addEventListener('click', () => {
+                resetScores();
+                enableAudioOnMobile(); // 启用移动端音频
+            });
+            
+            // 点击更改模式按钮打开模态框
+            if (changeModeBtn) {
+                changeModeBtn.addEventListener('click', showModeModal);
+            }
+            
+            // 初始化
+            playerXWinsEl.textContent = playerXWins;
+            playerOWinsEl.textContent = playerOWins;
+            drawsEl.textContent = draws;
+            
+            updateCurrentModeDisplay(); // 设置当前模式显示
+            updateTurnIndicator();
+            
+            enableAudioOnMobile(); // 启用移动端音频
+        });
+    </script>
+</body>
+</html>
