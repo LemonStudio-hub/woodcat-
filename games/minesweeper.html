@@ -665,8 +665,42 @@
                 }, 1000);
             }
             
+            // 记录最佳时间
+            let bestTime = gameDataManager.loadData('minesweeper', 'bestTime', Infinity);
+            
             // 重置游戏
             document.getElementById('resetBtn').addEventListener('click', initGame);
+            
+            // 重写返回主页按钮的逻辑，添加提交分数选项
+            const backHomeButton = document.querySelector('.back-home');
+            if (backHomeButton) {
+                backHomeButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 如果游戏正在进行中，询问是否保存
+                    if (gameStarted && !gameOver) {
+                        const shouldSave = confirm(`当前用时: ${seconds}秒\n是否将当前进度添加到排行榜？`);
+                        if (shouldSave) {
+                            // 跳转到主页并带上时间、游戏类型和状态参数
+                            window.location.href = `../index.html?score=${seconds}&game=minesweeper`;
+                        } else {
+                            // 直接返回主页
+                            window.location.href = `../index.html`;
+                        }
+                    } else if (gameOver) {
+                        // 游戏结束时，询问是否提交最终时间
+                        const shouldSave = confirm(`游戏结束！用时: ${seconds}秒\n是否将此成绩添加到排行榜？`);
+                        if (shouldSave) {
+                            window.location.href = `../index.html?score=${seconds}&game=minesweeper`;
+                        } else {
+                            window.location.href = `../index.html`;
+                        }
+                    } else {
+                        // 如果没有进行游戏，直接返回主页
+                        window.location.href = `../index.html`;
+                    }
+                });
+            }
             
             // 初始化游戏
             initGame();

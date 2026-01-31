@@ -746,275 +746,221 @@
                                 // 绘制函数
 
                                 function drawBall() {
-
+                                    // 创建带有光泽效果的球
                                     ctx.beginPath();
-
                                     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-
+                                    
+                                    // 创建径向渐变
                                     const gradient = ctx.createRadialGradient(
-
-                                        ball.x - 3, ball.y - 3, 1,
-
+                                        ball.x - ball.radius/3, ball.y - ball.radius/3, 1,
                                         ball.x, ball.y, ball.radius
-
                                     );
-
                                     gradient.addColorStop(0, "#ffffff");
-
-                                    gradient.addColorStop(0.2, "#e74c3c");
-
+                                    gradient.addColorStop(0.3, "#e74c3c");
                                     gradient.addColorStop(1, "#c0392b");
-
+                                    
                                     ctx.fillStyle = gradient;
-
                                     ctx.fill();
-
+                                    
+                                    // 添加高光效果
+                                    ctx.beginPath();
+                                    ctx.arc(
+                                        ball.x - ball.radius/3, 
+                                        ball.y - ball.radius/3, 
+                                        ball.radius/3, 
+                                        0, 
+                                        Math.PI * 2
+                                    );
+                                    ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+                                    ctx.fill();
+                                    
                                     ctx.closePath();
-
+                                    
+                                    // 添加轨迹效果（可选）
+                                    if (gameRunning && !gamePaused) {
+                                        ctx.beginPath();
+                                        ctx.arc(ball.x - ball.dx * 0.3, ball.y - ball.dy * 0.3, ball.radius * 0.7, 0, Math.PI * 2);
+                                        ctx.fillStyle = "rgba(231, 76, 60, 0.3)";
+                                        ctx.fill();
+                                        ctx.closePath();
+                                    }
                                 }
 
                                 
 
                                 function drawPaddle() {
-
+                                    // 绘制挡板主体
                                     ctx.beginPath();
-
                                     ctx.roundRect(paddle.x, canvas.height - paddle.height, paddle.width, paddle.height, 5);
-
-                                    ctx.fillStyle = "#3498db";
-
+                                    
+                                    // 创建线性渐变
+                                    const gradient = ctx.createLinearGradient(
+                                        paddle.x, canvas.height - paddle.height,
+                                        paddle.x, canvas.height
+                                    );
+                                    gradient.addColorStop(0, "#3498db");
+                                    gradient.addColorStop(1, "#2980b9");
+                                    
+                                    ctx.fillStyle = gradient;
                                     ctx.fill();
-
+                                    
+                                    // 添加边框
+                                    ctx.strokeStyle = "#1f618d";
+                                    ctx.lineWidth = 2;
+                                    ctx.stroke();
+                                    
+                                    // 添加高光效果
+                                    ctx.beginPath();
+                                    ctx.roundRect(paddle.x + 2, canvas.height - paddle.height + 2, paddle.width - 4, 4, 2);
+                                    ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+                                    ctx.fill();
+                                    
                                     ctx.closePath();
-
                                 }
 
                                 
 
-                                function drawBricks() {
+                                // 砖块破碎动画系统
+                                const brickParticles = [];
 
-                                    for (let r = 0; r < brick.rowCount; r++) {
-
-                                        for (let c = 0; c < brick.colCount; c++) {
-
-                                            const b = brick.rows[r][c];
-
-                                            if (b.status) {
-
-                                                ctx.beginPath();
-
-                                                ctx.roundRect(b.x, b.y, brick.width, brick.height, 3);
-
-                                                ctx.fillStyle = b.color;
-
-                                                ctx.fill();
-
-                                                ctx.strokeStyle = "#2c3e50";
-
-                                                ctx.lineWidth = 1;
-
-                                                ctx.stroke();
-
-                                                ctx.closePath();
-
-                                            }
-
-                                        }
-
+                                function createBrickParticles(x, y, color) {
+                                    for (let i = 0; i < 8; i++) {
+                                        brickParticles.push({
+                                            x: x,
+                                            y: y,
+                                            size: Math.random() * 4 + 2,
+                                            speedX: (Math.random() - 0.5) * 6,
+                                            speedY: (Math.random() - 0.5) * 6,
+                                            color: color,
+                                            life: 20
+                                        });
                                     }
+                                }
 
+                                function updateBrickParticles() {
+                                    for (let i = brickParticles.length - 1; i >= 0; i--) {
+                                        const p = brickParticles[i];
+                                        p.x += p.speedX;
+                                        p.y += p.speedY;
+                                        p.life--;
+                                        
+                                        if (p.life <= 0) {
+                                            brickParticles.splice(i, 1);
+                                        }
+                                    }
+                                }
+
+                                function drawBrickParticles() {
+                                    for (const p of brickParticles) {
+                                        ctx.globalAlpha = p.life / 20;
+                                        ctx.fillStyle = p.color;
+                                        ctx.beginPath();
+                                        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                                        ctx.fill();
+                                    }
+                                    ctx.globalAlpha = 1.0;
+                                }
+
+                                function drawBricks() {
+                                    for (let r = 0; r < brick.rowCount; r++) {
+                                        for (let c = 0; c < brick.colCount; c++) {
+                                            const b = brick.rows[r][c];
+                                            if (b.status) {
+                                                ctx.beginPath();
+                                                ctx.roundRect(b.x, b.y, brick.width, brick.height, 3);
+                                                ctx.fillStyle = b.color;
+                                                ctx.fill();
+                                                ctx.strokeStyle = "#2c3e50";
+                                                ctx.lineWidth = 1;
+                                                ctx.stroke();
+                                                ctx.closePath();
+                                                
+                                                // 添加砖块光泽效果
+                                                ctx.beginPath();
+                                                ctx.roundRect(b.x + 2, b.y + 2, brick.width - 4, 4, 2);
+                                                ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+                                                ctx.fill();
+                                                ctx.closePath();
+                                            }
+                                        }
+                                    }
                                 }
 
                         
 
                                                         // 碰撞检测
 
-                        
-
                                                         function detectCollisions() {
-
-                        
-
                                                             // 砖块碰撞
-
-                        
-
                                                             for (let r = 0; r < brick.rowCount; r++) {
-
-                        
-
                                                                 for (let c = 0; c < brick.colCount; c++) {
-
-                        
-
                                                                     const b = brick.rows[r][c];
-
-                        
-
                                                                     if (b.status) {
-
-                        
-
                                                                         if (
-
-                        
-
                                                                             ball.x + ball.radius > b.x && 
-
-                        
-
                                                                             ball.x - ball.radius < b.x + brick.width && 
-
-                        
-
                                                                             ball.y + ball.radius > b.y && 
-
-                        
-
                                                                             ball.y - ball.radius < b.y + brick.height
-
-                        
-
                                                                         ) {
-
-                        
-
                                                                             b.status = false;
-
-                        
-
-                                                                            ball.dy = -ball.dy;
-
-                        
-
+                                                                            // 根据球与砖块的碰撞方向调整反弹方向
+                                                                            const ballCenterX = ball.x;
+                                                                            const ballCenterY = ball.y;
+                                                                            const brickCenterX = b.x + brick.width / 2;
+                                                                            const brickCenterY = b.y + brick.height / 2;
+                                                                            
+                                                                            // 计算球心到砖块中心的向量
+                                                                            const dx = ballCenterX - brickCenterX;
+                                                                            const dy = ballCenterY - brickCenterY;
+                                                                            
+                                                                            // 根据碰撞方向调整反弹
+                                                                            if (Math.abs(dx) > Math.abs(dy)) {
+                                                                                // 水平方向碰撞
+                                                                                ball.dx = -ball.dx;
+                                                                            } else {
+                                                                                // 垂直方向碰撞
+                                                                                ball.dy = -ball.dy;
+                                                                            }
+                                                                            
                                                                             score += 10;
-
-                        
-
                                                                             scoreDisplay.textContent = score;
-
-                        
-
                                                                             
-
-                        
-
                                                                             // 检查高分记录
-
-                        
-
                                                                             if (score > highScore) {
-
-                        
-
                                                                                 highScore = score;
-
-                        
-
                                                                                 gameDataManager.saveData('arkanoid', 'highScore', highScore);
-
-                        
-
                                                                                 highScoreDisplay.textContent = highScore;
-
-                        
-
                                                                             }
-
-                        
-
                                                                             
-
-                        
-
+                                                                            // 创建破碎粒子效果
+                                                                            createBrickParticles(
+                                                                                b.x + brick.width / 2, 
+                                                                                b.y + brick.height / 2, 
+                                                                                b.color
+                                                                            );
+                                                                            
                                                                             playBrickHitSound();
-
-                        
-
                                                                             
-
-                        
-
                                                                             // 检查是否所有砖块都被清除
-
-                        
-
                                                                             let allBricksBroken = true;
-
-                        
-
                                                                             for (let r2 = 0; r2 < brick.rowCount; r2++) {
-
-                        
-
                                                                                 for (let c2 = 0; c2 < brick.colCount; c2++) {
-
-                        
-
                                                                                     if (brick.rows[r2][c2].status) {
-
-                        
-
                                                                                         allBricksBroken = false;
-
-                        
-
                                                                                         break;
-
-                        
-
                                                                                     }
-
-                        
-
                                                                                 }
-
-                        
-
                                                                                 if (!allBricksBroken) break;
-
-                        
-
                                                                             }
-
-                        
-
                                                                             
-
-                        
-
                                                                             if (allBricksBroken) {
-
-                        
-
                                                                                 levelUp();
-
-                        
-
                                                                             }
-
-                        
-
                                                                             
-
-                        
-
                                                                             return true; // 砖块碰撞已处理
-
-                        
-
                                                                         }
-
-                        
-
                                                                     }
-
-                        
-
                                                                 }
-
-                        
-
                                                             }
 
                         
@@ -1202,71 +1148,42 @@
                         
 
                         // 游戏循环
-
                         function gameLoop() {
-
                             if (!gameRunning || gamePaused) {
-
                                 animationId = requestAnimationFrame(gameLoop);
-
                                 return;
-
                             }
-
                             
-
                             // 清空画布
-
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
                             
-
                             // 移动球
-
                             ball.x += ball.dx;
-
                             ball.y += ball.dy;
-
                             
-
                             // 检测碰撞
-
                             detectCollisions();
-
                             
-
+                            // 更新粒子系统
+                            updateBrickParticles();
+                            
                             // 绘制游戏元素
-
                             drawBricks();
-
+                            drawBrickParticles(); // 绘制破碎粒子
                             drawBall();
-
                             drawPaddle();
-
                             
-
                             // 暂停显示
-
                             if (gamePaused) {
-
                                 ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-
                                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-
                                 ctx.font = 'bold 30px Arial';
-
                                 ctx.fillStyle = 'white';
-
                                 ctx.textAlign = 'center';
-
                                 ctx.fillText('游戏暂停', canvas.width/2, canvas.height/2);
-
                             }
-
                             
-
                             animationId = requestAnimationFrame(gameLoop);
-
                         }
 
                         
@@ -1494,22 +1411,21 @@
                         
 
                         // 触摸控制
-
                         canvas.addEventListener('touchmove', (e) => {
-
                             if (!gameRunning || gamePaused) return;
-
                             
-
                             e.preventDefault();
-
                             const rect = canvas.getBoundingClientRect();
-
                             const relativeX = e.touches[0].clientX - rect.left;
-
                             paddle.x = Math.max(0, Math.min(relativeX - paddle.width / 2, canvas.width - paddle.width));
-
                         }, { passive: false });
+                        
+                        // 触摸开始事件，用于移动端体验优化
+                        canvas.addEventListener('touchstart', (e) => {
+                            if (!gameRunning) {
+                                startGame(); // 如果游戏未开始，触摸开始时自动开始游戏
+                            }
+                        });
 
                         
 

@@ -142,9 +142,65 @@
                     <p>定期添加新游戏，保持新鲜感</p>
                 </div>
             </section>
+            
+            <!-- 排行榜部分 -->
+            <section class="leaderboard-section" id="leaderboard">
+                <h3>排行榜</h3>
+                <div class="leaderboard-container">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>排名</th>
+                                <th>玩家</th>
+                                <th>分数</th>
+                                <th>游戏</th>
+                                <th>日期</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body">
+                            <!-- 排行榜数据将通过JavaScript动态加载 -->
+                        </tbody>
+                    </table>
+                    <div class="leaderboard-loading" id="leaderboard-loading">
+                        <p>正在加载排行榜...</p>
+                    </div>
+                    <div class="leaderboard-empty" id="leaderboard-empty" style="display: none;">
+                        <p>暂无排行榜数据</p>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
+    <!-- 排行榜提交模态框 -->
+    <div id="score-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>提交分数</h3>
+                <span class="modal-close" id="score-modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>您的分数: <span id="current-score">0</span></p>
+                <p>游戏: <span id="current-game">未知</span></p>
+                <div class="form-group">
+                    <label for="player-name">请输入您的昵称:</label>
+                    <input type="text" id="player-name" maxlength="20" placeholder="输入昵称">
+                </div>
+                <div class="modal-actions">
+                    <button id="submit-score-btn" class="btn-primary">提交分数</button>
+                    <button id="cancel-score-btn" class="btn-secondary">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="js/main.js"></script>
+    <!-- 排行榜相关脚本（动态加载） -->
+    <!-- js/main.js会根据需要动态加载配置和Supabase库 -->
+    
+    <!-- 版权声明 -->
+    <div class="copyright-notice">
+        <p>&copy; 2026 木头猫 - 保留所有权利</p>
+    </div>
 </body>
 </html>

@@ -739,6 +739,37 @@
                             enableAudioOnMobile(); // 启用移动端音频
                         });
                         
+                        // 重写返回主页按钮的逻辑，添加提交分数选项
+                        const backHomeButton = document.querySelector('.back-home');
+                        if (backHomeButton) {
+                            backHomeButton.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                
+                                // 如果游戏正在进行中，询问是否保存分数
+                                if (gameStarted && score > 0) {
+                                    const shouldSave = confirm(`当前得分: ${score}\n是否将当前分数添加到排行榜？`);
+                                    if (shouldSave) {
+                                        // 跳转到主页并带上分数和游戏类型参数
+                                        window.location.href = `../index.html?score=${score}&game=snake`;
+                                    } else {
+                                        // 直接返回主页
+                                        window.location.href = `../index.html`;
+                                    }
+                                } else if (gameOver) {
+                                    // 游戏结束时，询问是否提交最终分数
+                                    const shouldSave = confirm(`游戏结束！最终得分: ${score}\n是否将此分数添加到排行榜？`);
+                                    if (shouldSave) {
+                                        window.location.href = `../index.html?score=${score}&game=snake`;
+                                    } else {
+                                        window.location.href = `../index.html`;
+                                    }
+                                } else {
+                                    // 如果没有分数，直接返回主页
+                                    window.location.href = `../index.html`;
+                                }
+                            });
+                        }
+                        
 
                         
                         // 初始化并开始游戏

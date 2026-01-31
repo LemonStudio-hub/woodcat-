@@ -1,0 +1,23 @@
+{
+  "name": "woodcat",
+  "version": "1.0.0",
+  "description": "木头猫 - 小游戏合集",
+  "main": "js/main.js",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 8000",
+    "lint": "echo 'No linting configured yet'",
+    "test": "echo 'No tests configured yet'"
+  },
+  "keywords": [
+    "games",
+    "html5",
+    "javascript",
+    "supabase"
+  ],
+  "author": "Woodcat",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0"
+  }
+}
