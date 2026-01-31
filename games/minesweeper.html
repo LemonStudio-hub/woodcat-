@@ -321,6 +321,7 @@
         </div>
     </div>
 
+    <script src="../js/data-manager.js"></script>
     <script>
         // 扫雷核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
@@ -523,6 +524,13 @@
                 if (revealedCount === rows * cols - mines) {
                     gameOver = true;
                     clearInterval(timerInterval);
+                    
+                    // 检查并更新最佳时间记录
+                    if (seconds < bestTime) {
+                        bestTime = seconds;
+                        gameDataManager.saveData('minesweeper', 'bestTime', bestTime);
+                        document.getElementById('best-time').textContent = bestTime;
+                    }
                     
                     // 为所有格子添加获胜动画
                     const cells = document.querySelectorAll('.cell');

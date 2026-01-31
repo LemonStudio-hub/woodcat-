@@ -342,6 +342,7 @@
     </div>
 
     <script src="../js/gesture-controller.js"></script>
+    <script src="../js/data-manager.js"></script>
     <script>
         // 俄罗斯方块核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
@@ -352,6 +353,7 @@
             // 游戏状态
             let board = [];
             let score = 0;
+            let highScore = gameDataManager.loadData('tetris', 'highScore', 0);
             let level = 1;
             let lines = 0;
             let gameOver = false;
@@ -359,6 +361,9 @@
             let gameInterval;
             let dropCounter = 0;
             const dropInterval = 600; // 调整初始下落间隔
+            
+            // 更新高分显示
+            document.getElementById('high-score-value').textContent = highScore;
             
             // 当前方块
             let currentPiece = {
@@ -480,6 +485,13 @@
                         
                         // 更新等级（每5行升一级）
                         level = Math.floor(lines / 5) + 1;
+                        
+                        // 检查是否打破高分记录
+                        if (score > highScore) {
+                            highScore = score;
+                            gameDataManager.saveData('tetris', 'highScore', highScore);
+                            document.getElementById('high-score-value').textContent = highScore;
+                        }
                         
                         // 更新UI
                         document.getElementById('score').textContent = score;

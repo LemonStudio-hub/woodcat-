@@ -609,9 +609,15 @@
     </div>
 
     <script src="../js/modal.js"></script>
+    <script src="../js/data-manager.js"></script>
     <script>
-        // 井字棋核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
+            // 加载统计数据
+            const gameStats = gameDataManager.loadData('tic-tac-toe', 'stats', {
+                playerXWins: 0,
+                playerOWins: 0,
+                draws: 0
+            });
             const board = document.getElementById('board');
             const cells = document.querySelectorAll('.cell');
             const turnIndicator = document.getElementById('turn-indicator');
@@ -633,9 +639,9 @@
             let gameBoard = ['', '', '', '', '', '', '', '', ''];
             let gameActive = true;
             let gameMode = 'pvp'; // 'pvp' for player vs player, 'pvc' for player vs computer
-            let playerXWins = 0;
-            let playerOWins = 0;
-            let draws = 0;
+            let playerXWins = gameStats.playerXWins;
+            let playerOWins = gameStats.playerOWins;
+            let draws = gameStats.draws;
             
             // 获胜组合
             const winPatterns = [
@@ -909,8 +915,17 @@
                     return;
                 }
                 
+                // 检查游戏状态
+                const winner = checkWinner();
+                if (winner) {
+                    handleGameEnd(winner);
+                    return;
+                }
+                
                 // 如果是人机对战模式，AI自动走棋
                 if (gameMode === 'pvc') {
+                    currentPlayer = 'O'; // 切换到AI回合
+                    updateTurnIndicator(); // 更新回合指示器显示AI正在思考
                     setTimeout(() => {
                         if (gameActive) {
                             aiMove();
@@ -919,7 +934,7 @@
                 } else {
                     // 双人对战模式，切换玩家
                     currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                    turnIndicator.textContent = `玩家 ${currentPlayer} 回合`;
+                    updateTurnIndicator(); // 使用专门的函数更新回合指示器
                 }
             }
             
@@ -939,25 +954,45 @@
                 vibrate(30); // 简短震动反馈
             }
             
-            // AI移动
-            function aiMove() {
-                if (!gameActive) return;
-                
-                // 使用Minimax算法找到最佳移动
-                const bestMove = getBestMove();
-                if (bestMove !== undefined) {
-                    makeMove(bestMove, 'O');
-                    
-                    // 检查游戏状态
-                    const winner = checkWinner();
-                    if (winner) {
-                        handleGameEnd(winner);
-                    } else {
-                        currentPlayer = 'X';
-                        turnIndicator.textContent = `玩家 ${currentPlayer} 回合`;
-                    }
-                }
-            }
+                        // AI移动
+            
+                        function aiMove() {
+            
+                            if (!gameActive || currentPlayer !== 'O') return; // 确保只有在AI回合时才移动
+            
+                            
+            
+                            // 使用Minimax算法找到最佳移动
+            
+                            const bestMove = getBestMove();
+            
+            
+            
+                            if (bestMove !== undefined) {
+            
+                                makeMove(bestMove, 'O');
+            
+                                
+            
+                                // 检查游戏状态
+            
+                                const winner = checkWinner();
+            
+                                if (winner) {
+            
+                                    handleGameEnd(winner);
+            
+                                } else {
+            
+                                    currentPlayer = 'X';
+            
+                                    updateTurnIndicator(); // 使用专门的函数更新回合指示器
+            
+                                }
+            
+                            }
+            
+                        }
             
             // 处理游戏结束
             function handleGameEnd(winner) {
@@ -987,7 +1022,6 @@
                     }
                 } else {
                     draws++;
-                    drawsEl.textContent = draws;
                     playDrawSound();
                     title = '游戏结束';
                     message = '平局！';
@@ -998,14 +1032,15 @@
                 playerOWinsEl.textContent = playerOWins;
                 drawsEl.textContent = draws;
                 
-                // 显示结果，并自动开始新游戏
-                setTimeout(() => {
-                    showGameResult(title, message);
-                    // 自动开始新游戏
-                    setTimeout(() => {
-                        resetGame();
-                    }, 1500); // 1.5秒后自动开始新游戏
-                }, 300);
+                // 保存统计数据
+                gameDataManager.saveData('tic-tac-toe', 'stats', {
+                    playerXWins: playerXWins,
+                    playerOWins: playerOWins,
+                    draws: draws
+                });
+                
+                // 显示结果，但不自动开始新游戏
+                showGameResult(title, message);
             }
             
             // 重置游戏
@@ -1158,6 +1193,13 @@
                 playerXWins = 0;
                 playerOWins = 0;
                 draws = 0;
+                
+                // 保存重置后的统计数据
+                gameDataManager.saveData('tic-tac-toe', 'stats', {
+                    playerXWins: playerXWins,
+                    playerOWins: playerOWins,
+                    draws: draws
+                });
                 
                 playerXWinsEl.textContent = playerXWins;
                 playerOWinsEl.textContent = playerOWins;

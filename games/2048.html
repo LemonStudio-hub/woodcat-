@@ -387,13 +387,18 @@
     </div>
 
     <script src="../js/gesture-controller.js"></script>
+    <script src="../js/data-manager.js"></script>
+    <script src="../js/audio-vibration.js"></script>
     <script>
         // 2048核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
             const GRID_SIZE = 4;
             let grid = [];
             let score = 0;
-            let highScore = localStorage.getItem('2048-high-score') || 0;
+            let highScore = gameDataManager.loadData('2048', 'highScore', 0);
+            
+            // 初始化音频模块
+            gameAudioVibration.initAudio();
             let gameOver = false;
             let gameWon = false;
             
@@ -766,7 +771,7 @@
                 
                 if (score > highScore) {
                     highScore = score;
-                    localStorage.setItem('2048-high-score', highScore);
+                    gameDataManager.saveData('2048', 'highScore', highScore);
                     document.getElementById('high-score').textContent = highScore;
                 }
             }

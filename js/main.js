@@ -47,6 +47,11 @@ document.addEventListener('DOMContentLoaded', function() {
             title: '记忆卡牌',
             description: '考验记忆能力，翻转卡牌找到匹配的对',
             url: 'games/memory-card.html'
+        },
+        'arkanoid': {
+            title: '打砖块',
+            description: '经典街机游戏，控制挡板反弹球打碎砖块',
+            url: 'games/arkanoid.html'
         }
     };
     

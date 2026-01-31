@@ -563,9 +563,16 @@
         </div>
     </div>
 
+    <script src="../js/data-manager.js"></script>
     <script>
         // 国际象棋核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
+            // 加载统计数据
+            let gameStats = gameDataManager.loadData('chess', 'stats', {
+                whiteWins: 0,
+                blackWins: 0,
+                totalGames: 0
+            });
             const board = document.getElementById('board');
             const changeModeBtn = document.getElementById('change-mode-btn');
             const currentModeSpan = document.getElementById('current-mode');
@@ -712,6 +719,74 @@
                 'king': 0  // 国王被吃游戏结束，不计分
             };
             
+            // 棋子位置评估表 - 帮助AI做出更好的位置决策
+            // 位置表是8x8的数组，对应棋盘上的每个位置
+            const pawnTable = [
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+                [0.1, 0.1, 0.2, 0.3, 0.3, 0.2, 0.1, 0.1],
+                [0.05, 0.05, 0.1, 0.25, 0.25, 0.1, 0.05, 0.05],
+                [0.0, 0.0, 0.0, 0.2, 0.2, 0.0, 0.0, 0.0],
+                [0.05, -0.05, -0.1, 0.0, 0.0, -0.1, -0.05, 0.05],
+                [0.05, 0.1, 0.1, -0.2, -0.2, 0.1, 0.1, 0.05],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            ];
+            
+            const knightTable = [
+                [-0.5, -0.4, -0.3, -0.3, -0.3, -0.3, -0.4, -0.5],
+                [-0.4, -0.2, 0.0, 0.0, 0.0, 0.0, -0.2, -0.4],
+                [-0.3, 0.0, 0.1, 0.15, 0.15, 0.1, 0.0, -0.3],
+                [-0.3, 0.05, 0.15, 0.2, 0.2, 0.15, 0.05, -0.3],
+                [-0.3, 0.0, 0.15, 0.2, 0.2, 0.15, 0.0, -0.3],
+                [-0.3, 0.05, 0.1, 0.15, 0.15, 0.1, 0.05, -0.3],
+                [-0.4, -0.2, 0.0, 0.05, 0.05, 0.0, -0.2, -0.4],
+                [-0.5, -0.4, -0.3, -0.3, -0.3, -0.3, -0.4, -0.5]
+            ];
+            
+            const bishopTable = [
+                [-0.2, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.2],
+                [-0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.1],
+                [-0.1, 0.0, 0.05, 0.1, 0.1, 0.05, 0.0, -0.1],
+                [-0.1, 0.05, 0.05, 0.1, 0.1, 0.05, 0.05, -0.1],
+                [-0.1, 0.0, 0.1, 0.1, 0.1, 0.1, 0.0, -0.1],
+                [-0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, -0.1],
+                [-0.1, 0.05, 0.0, 0.0, 0.0, 0.0, 0.05, -0.1],
+                [-0.2, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.2]
+            ];
+            
+            const rookTable = [
+                [0.0, 0.0, 0.0, 0.05, 0.05, 0.0, 0.0, 0.0],
+                [-0.05, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.05],
+                [-0.05, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.05],
+                [-0.05, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.05],
+                [-0.05, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.05],
+                [-0.05, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.05],
+                [-0.05, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.05],
+                [0.0, 0.0, 0.0, 0.05, 0.05, 0.0, 0.0, 0.0]
+            ];
+            
+            const queenTable = [
+                [-0.2, -0.1, -0.1, -0.05, -0.05, -0.1, -0.1, -0.2],
+                [-0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.1],
+                [-0.1, 0.0, 0.05, 0.05, 0.05, 0.05, 0.0, -0.1],
+                [-0.05, 0.0, 0.05, 0.05, 0.05, 0.05, 0.0, -0.05],
+                [0.0, 0.0, 0.05, 0.05, 0.05, 0.05, 0.0, -0.05],
+                [-0.1, 0.05, 0.05, 0.05, 0.05, 0.05, 0.0, -0.1],
+                [-0.1, 0.0, 0.05, 0.0, 0.0, 0.0, 0.0, -0.1],
+                [-0.2, -0.1, -0.1, -0.05, -0.05, -0.1, -0.1, -0.2]
+            ];
+            
+            const kingTable = [
+                [-0.3, -0.4, -0.4, -0.5, -0.5, -0.4, -0.4, -0.3],
+                [-0.3, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.3],
+                [-0.3, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.3],
+                [-0.3, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.3],
+                [-0.2, -0.3, -0.3, -0.4, -0.4, -0.3, -0.3, -0.2],
+                [-0.1, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.1],
+                [0.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.2, 0.2],
+                [0.3, 0.3, 0.1, 0.0, 0.0, 0.1, 0.3, 0.3]
+            ];
+            
             // 棋子符号
             const pieces = {
                 'white': {
@@ -743,30 +818,29 @@
                         const piece = gameBoard[row][col];
                         if (piece) {
                             // 基础分值
-                            const value = pieceValues[piece.type];
+                            let value = pieceValues[piece.type];
+                            
+                            // 根据棋子类型和位置添加位置分值
+                            if (piece.type === 'pawn') {
+                                value += (piece.color === 'white') ? pawnTable[row][col] : pawnTable[7 - row][col];
+                            } else if (piece.type === 'knight') {
+                                value += (piece.color === 'white') ? knightTable[row][col] : knightTable[7 - row][col];
+                            } else if (piece.type === 'bishop') {
+                                value += (piece.color === 'white') ? bishopTable[row][col] : bishopTable[7 - row][col];
+                            } else if (piece.type === 'rook') {
+                                value += (piece.color === 'white') ? rookTable[row][col] : rookTable[7 - row][col];
+                            } else if (piece.type === 'queen') {
+                                value += (piece.color === 'white') ? queenTable[row][col] : queenTable[7 - row][col];
+                            } else if (piece.type === 'king') {
+                                value += (piece.color === 'white') ? kingTable[row][col] : kingTable[7 - row][col];
+                            }
                             
                             if (piece.color === 'black') {
                                 // AI是黑方，黑棋加分
                                 score += value;
-                                
-                                // 位置加分（鼓励控制中心）
-                                if (gameMode === 'pvc') {
-                                    // AI作为黑方的策略
-                                    if (row >= 2 && row <= 5 && col >= 2 && col <= 5) {
-                                        score += 0.1; // 中心控制加分
-                                    }
-                                }
                             } else {
                                 // 玩家是白方，白棋减分
                                 score -= value;
-                                
-                                if (gameMode === 'pvc') {
-                                    // 鼓励白方棋子向前移动
-                                    score -= (7 - row) * 0.02; // 白方棋子位置分
-                                } else {
-                                    // 鼓励黑方棋子向前移动（当黑方是AI时）
-                                    score += row * 0.02;
-                                }
                             }
                         }
                     }
@@ -881,28 +955,104 @@
                 const possibleMoves = getAllPossibleMoves('black'); // AI是黑方
                 if (possibleMoves.length === 0) return null;
                 
-                let bestMove = possibleMoves[0];
-                let bestScore = -Infinity;
+                // 根据游戏阶段动态调整搜索深度
+                const gamePhase = getGamePhase();
+                let searchDepth = 3; // 基础深度为3
                 
-                // 对每个可能的移动进行评估
+                // 根据游戏阶段调整搜索深度
+                if (gamePhase === 'opening') {
+                    searchDepth = 3; // 开局阶段，使用基础深度
+                } else if (gamePhase === 'midgame') {
+                    searchDepth = 4; // 中局阶段，增加深度
+                } else {
+                    searchDepth = 3; // 残局阶段，使用基础深度
+                }
+                
+                // 评估所有可能的移动
+                const moveScores = [];
+                
                 for (const move of possibleMoves) {
                     // 模拟移动
                     const originalState = copyGameState();
                     makeMoveWithoutUI(move.from.row, move.from.col, move.to.row, move.to.col);
                     
                     // 使用Minimax评估这个移动
-                    const score = minimax(0, false); // 从AI回合开始，不是最大值层
+                    const score = minimax(0, -Infinity, Infinity, false, searchDepth); // 从AI回合开始，不是最大值层
                     
                     // 恢复原始状态
                     restoreGameState(originalState);
                     
-                    if (score > bestScore) {
-                        bestScore = score;
-                        bestMove = move;
+                    moveScores.push({ move, score });
+                }
+                
+                // 按分数排序
+                moveScores.sort((a, b) => b.score - a.score);
+                
+                // 实现"最佳移动选择策略"，增加一些随机性
+                // 选择评分最高的前几项移动之一
+                const topMoves = [];
+                if (moveScores.length > 0) {
+                    const bestScore = moveScores[0].score;
+                    
+                    // 选择评分在最佳评分一定范围内的移动
+                    for (const moveScore of moveScores) {
+                        // 如果移动评分在最佳评分的一定范围内（例如0.5分内），则考虑该移动
+                        if (moveScore.score >= bestScore - 0.5) {
+                            topMoves.push(moveScore.move);
+                        }
                     }
                 }
                 
-                return bestMove;
+                // 从顶级移动中随机选择一个
+                if (topMoves.length > 0) {
+                    // 考虑游戏阶段来决定随机性程度
+                    let randomFactor = 0.3; // 基础随机因子
+                    if (gamePhase === 'opening') {
+                        randomFactor = 0.5; // 开局阶段增加随机性
+                    } else if (gamePhase === 'endgame') {
+                        randomFactor = 0.1; // 残局阶段减少随机性
+                    }
+                    
+                    // 有一定概率选择最佳移动，否则从顶级移动中随机选择
+                    if (Math.random() < (1 - randomFactor) && topMoves.length > 0) {
+                        return topMoves[0]; // 选择最佳移动
+                    } else {
+                        return topMoves[Math.floor(Math.random() * topMoves.length)]; // 随机选择一个顶级移动
+                    }
+                }
+                
+                // 如果没有找到合适的移动，则返回第一个可能的移动
+                return possibleMoves[0];
+            }
+            
+            // 根据棋子数量判断游戏阶段
+            function getGamePhase() {
+                let whitePieces = 0;
+                let blackPieces = 0;
+                
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        const piece = gameBoard[row][col];
+                        if (piece) {
+                            if (piece.color === 'white') {
+                                whitePieces++;
+                            } else {
+                                blackPieces++;
+                            }
+                        }
+                    }
+                }
+                
+                const totalPieces = whitePieces + blackPieces;
+                
+                // 根据棋子数量判断游戏阶段
+                if (totalPieces > 24) {
+                    return 'opening'; // 开局：大部分棋子还在
+                } else if (totalPieces > 10) {
+                    return 'midgame'; // 中局：中等数量棋子
+                } else {
+                    return 'endgame'; // 残局：少量棋子
+                }
             }
             
             // 复制游戏状态
@@ -943,9 +1093,9 @@
                 blackScore = state.blackScore;
             }
             
-            // Minimax算法实现
-            function minimax(depth, isMaximizing) {
-                if (depth >= 2) { // 限制搜索深度以提高性能
+            // Minimax算法实现，带Alpha-Beta剪枝
+            function minimax(depth, alpha, beta, isMaximizing, maxDepth = 3) {
+                if (depth >= maxDepth) { // 使用动态搜索深度
                     return evaluateBoard();
                 }
                 
@@ -954,15 +1104,36 @@
                     let bestScore = -Infinity;
                     const moves = getAllPossibleMoves('black');
                     
+                    // 按照评估值对移动进行排序，优化Alpha-Beta剪枝效果
+                    moves.sort((a, b) => {
+                        const stateA = copyGameState();
+                        makeMoveWithoutUI(a.from.row, a.from.col, a.to.row, a.to.col);
+                        const evalA = evaluateBoard();
+                        restoreGameState(stateA);
+                        
+                        const stateB = copyGameState();
+                        makeMoveWithoutUI(b.from.row, b.from.col, b.to.row, b.to.col);
+                        const evalB = evaluateBoard();
+                        restoreGameState(stateB);
+                        
+                        return evalB - evalA; // 降序排列，优先考虑更好的移动
+                    });
+                    
                     for (const move of moves) {
                         const originalState = copyGameState();
                         makeMoveWithoutUI(move.from.row, move.from.col, move.to.row, move.to.col);
                         
-                        const score = minimax(depth + 1, false);
+                        const score = minimax(depth + 1, alpha, beta, false, maxDepth);
                         
                         restoreGameState(originalState);
                         
                         bestScore = Math.max(score, bestScore);
+                        alpha = Math.max(alpha, bestScore);
+                        
+                        // Alpha-Beta剪枝
+                        if (beta <= alpha) {
+                            break; // 剪枝
+                        }
                     }
                     
                     return bestScore;
@@ -971,15 +1142,36 @@
                     let bestScore = Infinity;
                     const moves = getAllPossibleMoves('white');
                     
+                    // 按照评估值对移动进行排序，优化Alpha-Beta剪枝效果
+                    moves.sort((a, b) => {
+                        const stateA = copyGameState();
+                        makeMoveWithoutUI(a.from.row, a.from.col, a.to.row, a.to.col);
+                        const evalA = evaluateBoard();
+                        restoreGameState(stateA);
+                        
+                        const stateB = copyGameState();
+                        makeMoveWithoutUI(b.from.row, b.from.col, b.to.row, b.to.col);
+                        const evalB = evaluateBoard();
+                        restoreGameState(stateB);
+                        
+                        return evalA - evalB; // 升序排列，优先考虑对AI不利的移动
+                    });
+                    
                     for (const move of moves) {
                         const originalState = copyGameState();
                         makeMoveWithoutUI(move.from.row, move.from.col, move.to.row, move.to.col);
                         
-                        const score = minimax(depth + 1, true);
+                        const score = minimax(depth + 1, alpha, beta, true, maxDepth);
                         
                         restoreGameState(originalState);
                         
                         bestScore = Math.min(score, bestScore);
+                        beta = Math.min(beta, bestScore);
+                        
+                        // Alpha-Beta剪枝
+                        if (beta <= alpha) {
+                            break; // 剪枝
+                        }
                     }
                     
                     return bestScore;
@@ -1013,8 +1205,20 @@
             async function aiMove() {
                 if (gameOver || currentPlayer !== 'black' || gameMode !== 'pvc') return;
                 
+                // 根据游戏阶段动态调整思考时间
+                const gamePhase = getGamePhase();
+                let thinkTime = 800; // 基础思考时间
+                
+                if (gamePhase === 'opening') {
+                    thinkTime = 500; // 开局阶段快速移动
+                } else if (gamePhase === 'midgame') {
+                    thinkTime = 1000; // 中局阶段正常思考
+                } else {
+                    thinkTime = 700; // 残局阶段适中思考
+                }
+                
                 // 添加一个延迟，让玩家看到AI正在"思考"
-                await new Promise(resolve => setTimeout(resolve, 800));
+                await new Promise(resolve => setTimeout(resolve, thinkTime));
                 
                 const bestMove = getBestMove();
                 if (bestMove) {
@@ -1117,6 +1321,7 @@
                         movePiece(selectedPiece.row, selectedPiece.col, row, col);
                         
                         // 在人机对战模式下，玩家移动后轮到AI移动
+                        // 由于movePiece中已经切换了currentPlayer，现在应该是黑方回合
                         if (gameMode === 'pvc' && currentPlayer === 'black' && !gameOver) {
                             setTimeout(() => aiMove(), 500);
                         }
@@ -1304,12 +1509,26 @@
                         if (gameMode === 'pvc') {
                             if (piece.color === 'white') {
                                 winner = '恭喜你获胜！';
+                                gameStats.whiteWins++;
                             } else {
                                 winner = 'AI获胜！';
+                                gameStats.blackWins++;
                             }
                         } else {
-                            winner = `${piece.color === 'white' ? '白方' : '黑方'}获胜！`;
+                            if (piece.color === 'white') {
+                                winner = '白方获胜！';
+                                gameStats.whiteWins++;
+                            } else {
+                                winner = '黑方获胜！';
+                                gameStats.blackWins++;
+                            }
                         }
+                        
+                        // 更新总游戏数
+                        gameStats.totalGames++;
+                        
+                        // 保存统计数据
+                        gameDataManager.saveData('chess', 'stats', gameStats);
                         
                         alert(`${winner}吃掉了对方的国王！`);
                         
@@ -1372,20 +1591,18 @@
                     }, 300);
                 }
                 
-                // 切换玩家
-                currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
-                
                 // 增加移动次数
                 moveCount++;
                 
-                // 在人机对战模式下，如果轮到AI移动，则执行AI移动
-                if (gameMode === 'pvc' && currentPlayer === 'black' && !gameOver) {
-                    setTimeout(() => aiMove(), 500);
-                }
+                // 切换玩家
+                currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
                 
                 // 更新界面
                 updateTurnIndicator();
                 updateMoveCount();
+                
+                // 注意：这里不再自动调用AI移动
+                // AI移动只在用户移动后触发，这样可以避免AI连续移动的问题
             }
             
             // 更新分数显示
@@ -1495,6 +1712,18 @@
             // 重置游戏（保留当前模式）
             function resetGame() {
                 initBoard();
+            }
+            
+            // 更新统计信息
+            function updateStats() {
+                const stats = gameDataManager.loadData('chess', 'stats', {
+                    wins: 0,
+                    losses: 0,
+                    draws: 0
+                });
+                
+                document.getElementById('white-wins').textContent = stats.wins;
+                document.getElementById('black-wins').textContent = stats.losses;
             }
             
             // 点击更改模式按钮打开模态框

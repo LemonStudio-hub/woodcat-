@@ -492,6 +492,7 @@
         </div>
     </div>
 
+    <script src="../js/data-manager.js"></script>
     <script>
         // 记忆卡牌核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
@@ -809,6 +810,19 @@
                         if (matches === gamePairs) {
                             clearInterval(timerInterval);
                             setTimeout(() => {
+                                // 检查是否打破最佳时间记录
+                                const currentDifficulty = difficultySelect.value;
+                                const isBestTime = timer < bestTime.time || 
+                                    (timer === bestTime.time && currentDifficulty !== bestTime.difficulty);
+                                
+                                // 保存最佳时间（如果当前时间更短）
+                                if (timer < bestTime.time || 
+                                    (timer === bestTime.time && currentDifficulty !== bestTime.difficulty)) {
+                                    bestTime = { time: timer, difficulty: currentDifficulty };
+                                    gameDataManager.saveData('memory-card', 'bestTime', bestTime);
+                                    bestTimeDisplay.textContent = `${bestTime.time}s (${bestTime.difficulty})`;
+                                }
+                                
                                 // 更美观的胜利提示
                                 const winMessage = document.createElement('div');
                                 winMessage.style.position = 'fixed';
@@ -823,9 +837,11 @@
                                 winMessage.style.zIndex = '1000';
                                 winMessage.style.maxWidth = '90%';
                                 winMessage.innerHTML = `
-                                    <h2 style="color: #00b894; margin: 0 0 15px; font-size: 1.8rem;">🎉 恭喜完成！</h2>
+                                    <h2 style="color: #00b894; margin: 0 0 15px; font-size: 1.8rem;">🎉 ${isBestTime ? '新纪录！' : '恭喜完成！'}</h2>
                                     <p style="font-size: 1.2rem; margin: 10px 0; color: #2d3436;">完成时间：${timer}秒</p>
                                     <p style="font-size: 1.2rem; margin: 10px 0; color: #2d3436;">总步数：${moves}步</p>
+                                    <p style="font-size: 1.1rem; margin: 10px 0; color: #74b9ff;">难度：${currentDifficulty}</p>
+                                    ${isBestTime ? '<p style="font-size: 1.1rem; margin: 10px 0; color: #00b894; font-weight: bold;">🎉 恭喜打破最佳记录！</p>' : ''}
                                     <button id="continue-btn" style="
                                         margin-top: 20px;
                                         padding: 12px 25px;

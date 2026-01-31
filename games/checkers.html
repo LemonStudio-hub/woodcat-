@@ -613,9 +613,16 @@
         </div>
     </div>
 
+    <script src="../js/data-manager.js"></script>
     <script>
         // 跳棋核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
+            // 加载统计数据
+            let gameStats = gameDataManager.loadData('checkers', 'stats', {
+                playerWins: 0,
+                aiWins: 0,
+                totalGames: 0
+            });
             const board = document.getElementById('board');
             const changeModeBtn = document.getElementById('change-mode-btn');
             const currentModeSpan = document.getElementById('current-mode');
@@ -1439,20 +1446,34 @@
                     playWinSound(); // 播放胜利音效
                     setTimeout(() => {
                         if (gameMode === 'pvc') {
+                            // AI获胜
+                            gameStats.aiWins++;
                             alert('AI获胜！再试一次吧！');
                         } else {
+                            // 玩家2获胜
+                            gameStats.player2Wins = (gameStats.player2Wins || 0) + 1;
                             alert('玩家2获胜！');
                         }
+                        // 更新总游戏数并保存统计数据
+                        gameStats.totalGames = (gameStats.totalGames || 0) + 1;
+                        gameDataManager.saveData('checkers', 'stats', gameStats);
                     }, 100);
                 } else if (p2Count === 0) {
                     gameOver = true;
                     playWinSound(); // 播放胜利音效
                     setTimeout(() => {
                         if (gameMode === 'pvc') {
+                            // 玩家获胜
+                            gameStats.playerWins = (gameStats.playerWins || 0) + 1;
                             alert('恭喜你获胜！');
                         } else {
+                            // 玩家1获胜
+                            gameStats.player1Wins = (gameStats.player1Wins || 0) + 1;
                             alert('玩家1获胜！');
                         }
+                        // 更新总游戏数并保存统计数据
+                        gameStats.totalGames = (gameStats.totalGames || 0) + 1;
+                        gameDataManager.saveData('checkers', 'stats', gameStats);
                     }, 100);
                 } else if (p1Count !== player1Pieces || p2Count !== player2Pieces) {
                     // 更新计数器

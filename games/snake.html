@@ -90,6 +90,11 @@
             position: relative;
             overflow: hidden;
             border-radius: 4px;
+            touch-action: none; /* 防止浏览器默认触摸行为干扰 */
+            -webkit-tap-highlight-color: transparent; /* 移除点击高亮 */
+            -webkit-touch-callout: none; /* 防止长按弹出菜单 */
+            -webkit-user-select: none; /* 防止选择文本 */
+            -webkit-user-drag: none; /* 防止拖拽 */
         }
         
         .cell {
@@ -265,10 +270,12 @@
                 <button id="pauseBtn">暂停</button>
                 <button id="resetBtn">重置</button>
             </div>
+            <p style="margin-top: 10px; color: #7f8c8d; font-size: 0.85rem;">使用 ← → ↑ ↓ 键或滑动手势控制方向</p>
         </div>
     </div>
 
     <script src="../js/gesture-controller.js"></script>
+    <script src="../js/data-manager.js"></script>
     <script>
         // 贪吃蛇核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
@@ -282,9 +289,13 @@
             let direction = 'right';
             let nextDirection = 'right';
             let score = 0;
+            let highScore = gameDataManager.loadData('snake', 'highScore', 0);
             let gameInterval;
             let isPaused = false;
             let gameOver = false;
+            
+            // 更新高分显示
+            document.getElementById('high-score').textContent = highScore;
             
             // 初始化游戏
             function initGame() {
@@ -526,6 +537,13 @@
                     // 增加分数
                     score += 10;
                     document.getElementById('score').textContent = score;
+                    
+                    // 检查是否打破高分记录
+                    if (score > highScore) {
+                        highScore = score;
+                        gameDataManager.saveData('snake', 'highScore', highScore);
+                        document.getElementById('high-score').textContent = highScore;
+                    }
                     document.getElementById('length').textContent = snake.length;
                     
                     // 播放吃食物音效
@@ -619,51 +637,56 @@
             // 初始化手势控制器
             const gameBoardElement = document.getElementById('board');
             
+            // 添加防抖功能，防止快速滑动导致方向变化过快
+            let lastDirectionChange = 0;
+            const directionChangeDelay = 80; // 80ms的防抖延迟
+            
+            function canChangeDirection() {
+                return Date.now() - lastDirectionChange > directionChangeDelay;
+            }
+            
+            function updateDirection(newDirection) {
+                if (canChangeDirection()) {
+                    // 在不与当前方向相反的情况下更新方向
+                    if ((direction === 'up' && newDirection !== 'down') || 
+                        (direction === 'down' && newDirection !== 'up') ||
+                        (direction === 'left' && newDirection !== 'right') || 
+                        (direction === 'right' && newDirection !== 'left')) {
+                        nextDirection = newDirection;
+                        lastDirectionChange = Date.now();
+                    }
+                }
+            }
+            
             // 手势控制器
             const gestureController = new GestureController(gameBoardElement, {
-                minSwipeDistance: 15,  // 降低最小滑动距离以提高灵敏度
-                minSwipeSpeed: 0.1,    // 降低最小滑动速度阈值
+                minSwipeDistance: 10,  // 降低最小滑动距离以提高灵敏度
+                minSwipeSpeed: 0.05,   // 降低最小滑动速度阈值
                 preventDefault: true,
                 onSwipeLeft: (e, data) => {
-                    console.log('Swipe left detected', { isPaused, gameOver, direction }); // 调试信息
                     if (!isPaused && !gameOver) {
-                        if (direction !== 'right') {
-                            nextDirection = 'left';
-                            console.log('Direction changed to left'); // 调试信息
-                        }
+                        updateDirection('left');
                     }
                     e.preventDefault();
                     enableAudioOnMobile(); // 启用移动端音频
                 },
                 onSwipeRight: (e, data) => {
-                    console.log('Swipe right detected', { isPaused, gameOver, direction }); // 调试信息
                     if (!isPaused && !gameOver) {
-                        if (direction !== 'left') {
-                            nextDirection = 'right';
-                            console.log('Direction changed to right'); // 调试信息
-                        }
+                        updateDirection('right');
                     }
                     e.preventDefault();
                     enableAudioOnMobile(); // 启用移动端音频
                 },
                 onSwipeUp: (e, data) => {
-                    console.log('Swipe up detected', { isPaused, gameOver, direction }); // 调试信息
                     if (!isPaused && !gameOver) {
-                        if (direction !== 'down') {
-                            nextDirection = 'up';
-                            console.log('Direction changed to up'); // 调试信息
-                        }
+                        updateDirection('up');
                     }
                     e.preventDefault();
                     enableAudioOnMobile(); // 启用移动端音频
                 },
                 onSwipeDown: (e, data) => {
-                    console.log('Swipe down detected', { isPaused, gameOver, direction }); // 调试信息
                     if (!isPaused && !gameOver) {
-                        if (direction !== 'up') {
-                            nextDirection = 'down';
-                            console.log('Direction changed to down'); // 调试信息
-                        }
+                        updateDirection('down');
                     }
                     e.preventDefault();
                     enableAudioOnMobile(); // 启用移动端音频
