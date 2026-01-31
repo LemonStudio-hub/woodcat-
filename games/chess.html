@@ -1085,7 +1085,21 @@
             
             // 恢复游戏状态
             function restoreGameState(state) {
-                gameBoard = state.board;
+                // 深度复制board，避免引用问题
+                gameBoard = [];
+                for (let r = 0; r < 8; r++) {
+                    gameBoard[r] = [];
+                    for (let c = 0; c < 8; c++) {
+                        if (state.board[r][c]) {
+                            gameBoard[r][c] = {
+                                type: state.board[r][c].type,
+                                color: state.board[r][c].color
+                            };
+                        } else {
+                            gameBoard[r][c] = null;
+                        }
+                    }
+                }
                 currentPlayer = state.currentPlayer;
                 gameOver = state.gameOver;
                 moveCount = state.moveCount;
@@ -1182,16 +1196,6 @@
             function makeMoveWithoutUI(fromRow, fromCol, toRow, toCol) {
                 const piece = gameBoard[fromRow][fromCol];
                 const targetPiece = gameBoard[toRow][toCol];
-                
-                // 如果吃掉了对方棋子，则加分
-                if (targetPiece) {
-                    const value = pieceValues[targetPiece.type];
-                    if (piece.color === 'white') {
-                        whiteScore += value;
-                    } else {
-                        blackScore += value;
-                    }
-                }
                 
                 // 移动棋子
                 gameBoard[toRow][toCol] = piece;

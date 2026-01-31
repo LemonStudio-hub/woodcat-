@@ -386,7 +386,7 @@
         </div>
     </div>
 
-    <script src="../js/gesture-controller.js"></script>
+    <script src="../js/lib/hammer.min.js"></script>
     <script src="../js/data-manager.js"></script>
     <script src="../js/audio-vibration.js"></script>
     <script>
@@ -776,42 +776,43 @@
                 }
             }
             
-            // 初始化手势控制器
+            // 初始化hammer.js手势控制器
             const gameBoardElement = document.getElementById('board');
             
-            // 手势控制器
-            const gestureController = new GestureController(gameBoardElement, {
-                minSwipeDistance: 25,  // 调整最小滑动距离以提高灵敏度
-                minSwipeSpeed: 0.15,   // 调整最小滑动速度
-                preventDefault: true,
-                onSwipeLeft: (e, data) => {
-                    if (!gameOver) {
-                        move('left');
-                    }
-                    e.preventDefault();
-                    enableAudioOnMobile(); // 启用移动端音频
-                },
-                onSwipeRight: (e, data) => {
-                    if (!gameOver) {
-                        move('right');
-                    }
-                    e.preventDefault();
-                    enableAudioOnMobile(); // 启用移动端音频
-                },
-                onSwipeUp: (e, data) => {
-                    if (!gameOver) {
-                        move('up');
-                    }
-                    e.preventDefault();
-                    enableAudioOnMobile(); // 启用移动端音频
-                },
-                onSwipeDown: (e, data) => {
-                    if (!gameOver) {
-                        move('down');
-                    }
-                    e.preventDefault();
-                    enableAudioOnMobile(); // 启用移动端音频
+            // 使用hammer.js实现手势控制
+            const hammerManager = new Hammer.Manager(gameBoardElement);
+            hammerManager.add(new Hammer.Swipe({ direction: Hammer.DIRECTION_ALL, threshold: 25, velocity: 0.2 }));
+            
+            hammerManager.on('swipeleft', (e) => {
+                if (!gameOver) {
+                    move('left');
                 }
+                e.preventDefault();
+                enableAudioOnMobile(); // 启用移动端音频
+            });
+            
+            hammerManager.on('swiperight', (e) => {
+                if (!gameOver) {
+                    move('right');
+                }
+                e.preventDefault();
+                enableAudioOnMobile(); // 启用移动端音频
+            });
+            
+            hammerManager.on('swipeup', (e) => {
+                if (!gameOver) {
+                    move('up');
+                }
+                e.preventDefault();
+                enableAudioOnMobile(); // 启用移动端音频
+            });
+            
+            hammerManager.on('swipedown', (e) => {
+                if (!gameOver) {
+                    move('down');
+                }
+                e.preventDefault();
+                enableAudioOnMobile(); // 启用移动端音频
             });
             
             // 键盘事件

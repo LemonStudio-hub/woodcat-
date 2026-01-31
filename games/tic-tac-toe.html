@@ -626,7 +626,6 @@
             const playerXWinsEl = document.getElementById('player-x-wins');
             const playerOWinsEl = document.getElementById('player-o-wins');
             const drawsEl = document.getElementById('draws');
-            const gameModeSelect = document.getElementById('game-mode');
             const currentModeSpan = document.getElementById('current-mode');
             const changeModeBtn = document.getElementById('change-mode-btn');
             
@@ -907,13 +906,6 @@
                 
                 // 更新游戏板
                 makeMove(index, currentPlayer);
-                
-                // 检查游戏状态
-                const winner = checkWinner();
-                if (winner) {
-                    handleGameEnd(winner);
-                    return;
-                }
                 
                 // 检查游戏状态
                 const winner = checkWinner();

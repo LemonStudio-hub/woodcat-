@@ -83,17 +83,14 @@
         .game-board {
             display: grid;
             grid-template-columns: repeat(10, 1fr);
-            grid-template-rows: repeat(10, 1fr);
+            grid-template-rows: repeat(10, 1fr); /* 10行，符合10x10网格 */
             width: 100%;
-            flex: 1;
-            min-height: 0;
-            min-width: 0;
+            height: 300px; /* 设置合适高度以适应10x10网格 */
             border: 2px solid #ddd;
             background: #ecf0f1;
             margin-bottom: 8px;
             padding: 2px;
             border-radius: 4px;
-            flex-shrink: 0;
             position: relative;
             overflow: hidden;
         }
@@ -103,7 +100,6 @@
             height: 100%;
             background: #fff;
             border: 1px solid #e0e0e0;
-            aspect-ratio: 1/1;
             transition: all 0.15s ease;
         }
         
@@ -233,6 +229,14 @@
             animation: clearRowAnimation 0.3s ease-out forwards;
         }
         
+        .cell.clearing-horizontal {
+            animation: clearRowAnimationHorizontal 0.3s ease-out forwards;
+        }
+        
+        .cell.clearing-vertical {
+            animation: clearRowAnimationVertical 0.3s ease-out forwards;
+        }
+        
         /* 动画定义 */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
@@ -254,6 +258,16 @@
             0% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.2); opacity: 0.7; }
             100% { transform: scale(0); opacity: 0; }
+        }
+        
+        @keyframes clearRowAnimationHorizontal {
+            0% { transform: scaleX(1); opacity: 1; }
+            100% { transform: scaleX(0); opacity: 0; }
+        }
+        
+        @keyframes clearRowAnimationVertical {
+            0% { transform: scaleY(1); opacity: 1; }
+            100% { transform: scaleY(0); opacity: 0; }
         }
         
         @keyframes textPop {
@@ -341,14 +355,14 @@
         </div>
     </div>
 
-    <script src="../js/gesture-controller.js"></script>
+    <script src="../js/lib/hammer.min.js"></script>
     <script src="../js/data-manager.js"></script>
     <script>
         // 俄罗斯方块核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
             // 游戏常量
             const COLS = 10;
-            const ROWS = 10;
+            const ROWS = 10;  // 使用10x10网格
             
             // 游戏状态
             let board = [];
@@ -362,8 +376,8 @@
             let dropCounter = 0;
             const dropInterval = 600; // 调整初始下落间隔
             
-            // 更新高分显示
-            document.getElementById('high-score-value').textContent = highScore;
+            // 初始化高分显示（虽然HTML中没有专门的高分元素，但我们可以添加到页面上）
+            // 注意：当前HTML中没有显示高分的元素，所以跳过此功能
             
             // 当前方块
             let currentPiece = {
@@ -458,21 +472,29 @@
                 }
                 
                 if (linesToClear.length > 0) {
-                    // 添加清除动画
+                    // 为要清除的行中的每个单元格添加动画
                     linesToClear.forEach(lineIndex => {
                         for (let x = 0; x < COLS; x++) {
-                            const cellElement = document.querySelector(`#board > div:nth-child(${lineIndex * COLS + x + 1})`);
+                            // 计算单元格在DOM中的正确索引
+                            // 网格是按行排列的，所以 y * COLS + x
+                            const cellIndex = lineIndex * COLS + x;
+                            const cellElement = document.querySelector(`#board > div:nth-child(${cellIndex + 1})`);
                             if (cellElement) {
-                                cellElement.classList.add('clearing');
+                                // 随机选择一种清除动画效果
+                                const animationTypes = ['clearing', 'clearing-horizontal', 'clearing-vertical'];
+                                const randomAnimation = animationTypes[Math.floor(Math.random() * animationTypes.length)];
+                                cellElement.classList.add(randomAnimation);
                             }
                         }
                     });
                     
                     // 延迟处理行消除，以便显示动画
                     setTimeout(() => {
-                        // 实际清除行
+                        // 实际清除行 - 先更新逻辑board状态
                         linesToClear.forEach(lineIndex => {
+                            // 从board数组中移除完整的行（从高索引开始删除，避免索引错位）
                             board.splice(lineIndex, 1);
+                            // 在顶部添加新的空行
                             board.unshift(Array.from({ length: COLS }, () => ({ filled: false, color: '#fff' })));
                         });
                         
@@ -490,7 +512,7 @@
                         if (score > highScore) {
                             highScore = score;
                             gameDataManager.saveData('tetris', 'highScore', highScore);
-                            document.getElementById('high-score-value').textContent = highScore;
+                            // 注意：当前HTML中没有显示高分的元素，所以跳过更新UI
                         }
                         
                         // 更新UI
@@ -498,7 +520,20 @@
                         document.getElementById('level').textContent = level;
                         document.getElementById('lines').textContent = lines;
                         
+                        // 重新绘制游戏板，但要保留正在播放动画的类
                         drawBoard();
+                        
+                        // 清除动画类
+                        linesToClear.forEach(lineIndex => {
+                            for (let x = 0; x < COLS; x++) {
+                                const cellIndex = lineIndex * COLS + x;
+                                const cellElement = document.querySelector(`#board > div:nth-child(${cellIndex + 1})`);
+                                if (cellElement) {
+                                    cellElement.classList.remove('clearing', 'clearing-horizontal', 'clearing-vertical');
+                                }
+                            }
+                        });
+                        
                     }, 300); // 等待动画完成
                 }
                 
@@ -508,6 +543,23 @@
             // 绘制游戏板
             function drawBoard() {
                 const boardElement = document.getElementById('board');
+                
+                // 保存当前正在播放动画的单元格的信息
+                const animatingCells = new Set();
+                for (let y = 0; y < ROWS; y++) {
+                    for (let x = 0; x < COLS; x++) {
+                        const cellIndex = y * COLS + x;
+                        const cellElement = boardElement.children[cellIndex];
+                        if (cellElement && 
+                            (cellElement.classList.contains('clearing') || 
+                             cellElement.classList.contains('clearing-horizontal') || 
+                             cellElement.classList.contains('clearing-vertical'))) {
+                            animatingCells.add(cellIndex);
+                        }
+                    }
+                }
+                
+                // 清空游戏板
                 boardElement.innerHTML = '';
                 
                 // 绘制已固定的方块
@@ -533,12 +585,30 @@
                             if (boardY >= 0 && boardY < ROWS && boardX >= 0 && boardX < COLS) {
                                 const index = boardY * COLS + boardX;
                                 const cell = boardElement.children[index];
-                                cell.classList.add('filled', 'new-piece');
-                                cell.style.backgroundColor = currentPiece.color;
+                                if (cell) {
+                                    cell.classList.add('filled', 'new-piece');
+                                    cell.style.backgroundColor = currentPiece.color;
+                                }
                             }
                         }
                     }
                 }
+                
+                // 恢复动画类到对应的单元格
+                animatingCells.forEach(index => {
+                    const cellElement = boardElement.children[index];
+                    if (cellElement) {
+                        // 检查原始动画状态并重新应用
+                        const row = Math.floor(index / COLS);
+                        const col = index % COLS;
+                        if (board[row][col].filled) {
+                            // 使用随机动画类型，因为原始动画信息已丢失
+                            const animationTypes = ['clearing', 'clearing-horizontal', 'clearing-vertical'];
+                            const randomAnimation = animationTypes[Math.floor(Math.random() * animationTypes.length)];
+                            cellElement.classList.add(randomAnimation);
+                        }
+                    }
+                });
             }
             
             // 旋转方块
@@ -734,44 +804,45 @@
                 }
             });
             
-            // 初始化手势控制器
+            // 初始化hammer.js手势控制器
             const gameBoardElement = document.getElementById('board');
-            let gestureController = null;
+            let hammerManager = null;
             
             // 修复手势控制器，确保在正确的时间初始化
             setTimeout(() => {
-                gestureController = new GestureController(gameBoardElement, {
-                    minSwipeDistance: 15,  // 进一步降低最小滑动距离
-                    minSwipeSpeed: 0.1,    // 降低最小滑动速度
-                    preventDefault: true,
-                    onSwipeLeft: (e, data) => {
-                        if (!isPaused && !gameOver) {
-                            movePiece(-1, 0);
-                        }
-                        e.preventDefault();
-                    },
-                    onSwipeRight: (e, data) => {
-                        if (!isPaused && !gameOver) {
-                            movePiece(1, 0);
-                        }
-                        e.preventDefault();
-                    },
-                    onSwipeUp: (e, data) => {
-                        if (!isPaused && !gameOver) {
-                            rotatePiece();
-                        }
-                        e.preventDefault();
-                    },
-                    onSwipeDown: (e, data) => {
-                        if (!isPaused && !gameOver) {
-                            movePiece(0, 1);
-                        }
-                        e.preventDefault();
+                hammerManager = new Hammer.Manager(gameBoardElement);
+                hammerManager.add(new Hammer.Swipe({ direction: Hammer.DIRECTION_ALL, threshold: 15, velocity: 0.3 }));
+                
+                hammerManager.on('swipeleft', (e) => {
+                    if (!isPaused && !gameOver) {
+                        movePiece(-1, 0);
                     }
+                    e.preventDefault();
+                });
+                
+                hammerManager.on('swiperight', (e) => {
+                    if (!isPaused && !gameOver) {
+                        movePiece(1, 0);
+                    }
+                    e.preventDefault();
+                });
+                
+                hammerManager.on('swipeup', (e) => {
+                    if (!isPaused && !gameOver) {
+                        rotatePiece();
+                    }
+                    e.preventDefault();
+                });
+                
+                hammerManager.on('swipedown', (e) => {
+                    if (!isPaused && !gameOver) {
+                        movePiece(0, 1);
+                    }
+                    e.preventDefault();
                 });
                 
                 // 保存控制器实例以便在游戏状态变化时能访问
-                window.gestureController = gestureController;
+                window.hammerManager = hammerManager;
             }, 100); // 延迟初始化，确保DOM完全加载
             
             // 按钮事件处理
