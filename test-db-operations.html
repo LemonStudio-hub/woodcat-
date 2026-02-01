@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase数据表操作测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .log {
+            background: #f5f5f5;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 3px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        button {
+            padding: 8px 15px;
+            margin: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Supabase数据表操作测试</h1>
+    
+    <div class="test-section">
+        <h2>配置信息</h2>
+        <div id="config-status"></div>
+        <button id="loadConfig">加载配置</button>
+        <button id="initSupabase">初始化Supabase客户端</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>数据表操作测试</h2>
+        <button id="testInsert" disabled>插入测试数据</button>
+        <button id="testSelect" disabled>查询测试数据</button>
+        <button id="testUpdate" disabled>更新测试数据</button>
+        <button id="testDelete" disabled>删除测试数据</button>
+        <button id="testAll" disabled>运行所有测试</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>操作日志</h2>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        let supabaseClient = null;
+        
+        function log(message, isError = false) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            if (isError) {
+                logDiv.className = 'log error';
+            }
+            console.log(message);
+        }
+        
+        async function loadConfig() {
+            log('正在加载配置文件...');
+            try {
+                const response = await fetch('js/config.js');
+                const configText = await response.text();
+                
+                // 创建script标签执行配置代码
+                const script = document.createElement('script');
+                script.textContent = configText;
+                document.head.appendChild(script);
+                
+                if (window.AppConfig && window.AppConfig.supabase) {
+                    log('配置加载成功！', false);
+                    document.getElementById('config-status').innerHTML = 
+                        `<div class="success">配置加载成功</div>
+                         <p><strong>URL:</strong> ${window.AppConfig.supabase.url}</p>
+                         <p><strong>Key:</strong> ${window.AppConfig.supabase.key ? '已配置' : '未配置'}</p>`;
+                    return true;
+                } else {
+                    log('配置加载失败！', true);
+                    document.getElementById('config-status').innerHTML = 
+                        '<div class="error">配置加载失败</div>';
+                    return false;
+                }
+            } catch (error) {
+                log(`配置加载出错: ${error.message}`, true);
+                document.getElementById('config-status').innerHTML = 
+                    `<div class="error">配置加载出错: ${error.message}</div>`;
+                return false;
+            }
+        }
+        
+        async function initSupabase() {
+            log('正在初始化Supabase客户端...');
+            try {
+                // 如果window.supabase不存在，则动态加载
+                if (typeof window.supabase === 'undefined') {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+                    await new Promise((resolve, reject) => {
+                        script.onload = resolve;
+                        script.onerror = reject;
+                        document.head.appendChild(script);
+                    });
+                }
+                
+                if (window.AppConfig && window.AppConfig.supabase) {
+                    supabaseClient = window.supabase.createClient(
+                        window.AppConfig.supabase.url,
+                        window.AppConfig.supabase.key
+                    );
+                    
+                    log('Supabase客户端初始化成功！', false);
+                    
+                    // 启用测试按钮
+                    document.querySelectorAll('#testInsert, #testSelect, #testUpdate, #testDelete, #testAll')
+                        .forEach(btn => btn.disabled = false);
+                    
+                    return true;
+                } else {
+                    log('配置未加载或无效！', true);
+                    return false;
+                }
+            } catch (error) {
+                log(`Supabase客户端初始化出错: ${error.message}`, true);
+                return false;
+            }
+        }
+        
+        async function testInsert() {
+            log('开始测试数据插入...');
+            try {
+                // 生成测试数据
+                const testData = {
+                    player_name: `测试用户${Date.now()}`,
+                    score: Math.floor(Math.random() * 1000),
+                    game: '测试游戏',
+                    created_at: new Date().toISOString()
+                };
+                
+                log(`插入数据: ${JSON.stringify(testData)}`);
+                
+                const { data, error } = await supabaseClient
+                    .from('leaderboard')
+                    .insert([testData]);
+                
+                if (error) {
+                    log(`插入失败: ${error.message}`, true);
+                    log(`错误详情: ${JSON.stringify(error)}`, true);
+                    return false;
+                }
+                
+                log(`插入成功！返回数据: ${JSON.stringify(data)}`, false);
+                return { success: true, data: data, testData: testData };
+            } catch (error) {
+                log(`插入操作出错: ${error.message}`, true);
+                return false;
+            }
+        }
+        
+        async function testSelect() {
+            log('开始测试数据查询...');
+            try {
+                const { data, error } = await supabaseClient
+                    .from('leaderboard')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+                
+                if (error) {
+                    log(`查询失败: ${error.message}`, true);
+                    log(`错误详情: ${JSON.stringify(error)}`, true);
+                    return false;
+                }
+                
+                log(`查询成功！返回 ${data.length} 条记录`, false);
+                if (data.length > 0) {
+                    log(`最近的记录: ${JSON.stringify(data[0])}`, false);
+                }
+                return { success: true, data: data };
+            } catch (error) {
+                log(`查询操作出错: ${error.message}`, true);
+                return false;
+            }
+        }
+        
+        async function testAll() {
+            log('开始运行所有测试...');
+            
+            // 先插入测试数据
+            const insertResult = await testInsert();
+            if (!insertResult || !insertResult.success) {
+                log('插入测试失败，终止所有测试', true);
+                return;
+            }
+            
+            // 查询验证数据是否已插入
+            const selectResult = await testSelect();
+            if (!selectResult || !selectResult.success) {
+                log('查询测试失败', true);
+                return;
+            }
+            
+            log('所有测试完成！', false);
+        }
+        
+        // 绑定事件
+        document.getElementById('loadConfig').addEventListener('click', loadConfig);
+        document.getElementById('initSupabase').addEventListener('click', async () => {
+            await loadConfig(); // 确保配置已加载
+            await initSupabase();
+        });
+        document.getElementById('testInsert').addEventListener('click', testInsert);
+        document.getElementById('testSelect').addEventListener('click', testSelect);
+        document.getElementById('testAll').addEventListener('click', testAll);
+        
+        // 页面加载时尝试自动加载配置
+        window.addEventListener('load', () => {
+            log('页面已加载，准备进行测试...');
+        });
+    </script>
+</body>
+</html>

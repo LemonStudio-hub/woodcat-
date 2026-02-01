@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase连接测试</title>
+</head>
+<body>
+    <h1>Supabase连接测试</h1>
+    <div id="status"></div>
+    <button id="testBtn">测试连接</button>
+
+    <script>
+        document.getElementById('testBtn').addEventListener('click', async () => {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '正在加载配置...';
+            
+            try {
+                // 动态加载配置
+                const configScript = document.createElement('script');
+                configScript.src = 'js/config.js';
+                document.head.appendChild(configScript);
+                
+                // 等待配置加载
+                await new Promise(resolve => {
+                    configScript.onload = resolve;
+                });
+                
+                statusDiv.innerHTML += '<br>配置加载成功，正在加载Supabase库...';
+                
+                // 动态加载Supabase库
+                const supabaseScript = document.createElement('script');
+                supabaseScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+                document.head.appendChild(supabaseScript);
+                
+                await new Promise(resolve => {
+                    supabaseScript.onload = resolve;
+                });
+                
+                statusDiv.innerHTML += '<br>Supabase库加载成功，正在初始化客户端...';
+                
+                // 初始化Supabase客户端
+                const supabase = window.supabase.createClient(
+                    window.AppConfig.supabase.url,
+                    window.AppConfig.supabase.key
+                );
+                
+                statusDiv.innerHTML += '<br>客户端初始化成功，正在测试查询...';
+                
+                // 测试查询
+                const { data, error } = await supabase
+                    .from('leaderboard')
+                    .select('*')
+                    .limit(1);
+                
+                if (error) {
+                    statusDiv.innerHTML += `<br><span style="color: red;">查询失败: ${error.message}</span>`;
+                    statusDiv.innerHTML += `<br>错误码: ${error.code}`;
+                    statusDiv.innerHTML += `<br>错误详情: ${error.details || 'N/A'}`;
+                } else {
+                    statusDiv.innerHTML += `<br><span style="color: green;">查询成功！</span>`;
+                    statusDiv.innerHTML += `<br>返回数据: ${JSON.stringify(data)}`;
+                }
+            } catch (err) {
+                statusDiv.innerHTML += `<br><span style="color: red;">错误: ${err.message}</span>`;
+            }
+        });
+    </script>
+</body>
+</html>

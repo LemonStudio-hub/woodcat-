@@ -83,6 +83,15 @@ body {
     color: white;
 }
 
+.connection-status-item {
+    border-top: 1px solid #333 !important;
+    margin-top: 10px !important;
+    padding: 10px !important;
+    text-align: center !important;
+    font-size: 14px !important;
+    color: #ccc !important;
+}
+
 
 
 .feedback-link {

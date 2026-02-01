@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分数提交功能测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .log {
+            background: #f5f5f5;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 3px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        button {
+            padding: 8px 15px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        input, select {
+            padding: 5px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>分数提交功能测试</h1>
+    
+    <div class="test-section">
+        <h2>模拟分数提交</h2>
+        <label>游戏: <select id="gameSelect">
+            <option value="tetris">俄罗斯方块</option>
+            <option value="snake">贪吃蛇</option>
+            <option value="minesweeper">扫雷</option>
+            <option value="2048">2048</option>
+            <option value="chess">国际象棋</option>
+            <option value="checkers">跳棋</option>
+            <option value="tic-tac-toe">井字棋</option>
+            <option value="memory-card">记忆卡牌</option>
+            <option value="arkanoid">打砖块</option>
+        </select></label>
+        <label>分数: <input type="number" id="scoreInput" value="1234"></label>
+        <label>昵称: <input type="text" id="playerNameInput" value="测试玩家"></label>
+        <br><br>
+        <button id="testSubmit">测试提交分数</button>
+        <button id="testLoad">测试加载排行榜</button>
+        <button id="testLocalData">查看本地数据</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>操作日志</h2>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script src="js/data-manager.js"></script>
+    <script>
+        function log(message, isError = false) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            if (isError) {
+                logDiv.className = 'log error';
+            }
+            console.log(message);
+        }
+        
+        // 模拟games对象
+        const games = {
+            tetris: { title: '俄罗斯方块' },
+            snake: { title: '贪吃蛇' },
+            minesweeper: { title: '扫雷' },
+            '2048': { title: '2048' },
+            chess: { title: '国际象棋' },
+            checkers: { title: '跳棋' },
+            'tic-tac-toe': { title: '井字棋' },
+            'memory-card': { title: '记忆卡牌' },
+            'arkanoid': { title: '打砖块' }
+        };
+        
+        async function testSubmit() {
+            log('开始测试分数提交...');
+            
+            const game = document.getElementById('gameSelect').value;
+            const score = parseInt(document.getElementById('scoreInput').value);
+            const playerName = document.getElementById('playerNameInput').value.trim();
+            
+            if (!playerName) {
+                log('请输入昵称', true);
+                return;
+            }
+            
+            try {
+                // 模拟提交分数的逻辑
+                const insertData = {
+                    player_name: playerName,
+                    score: score,
+                    game: games[game]?.title || game,
+                    created_at: new Date().toISOString()
+                };
+                
+                log(`准备提交数据: ${JSON.stringify(insertData)}`);
+                
+                // 首先保存到本地
+                const localKey = `${game}_${Date.now()}`;
+                const localSuccess = await gameDataManager.saveData('leaderboard', localKey, insertData);
+                
+                if (localSuccess) {
+                    log('✅ 分数已成功保存到本地存储');
+                } else {
+                    log('❌ 本地存储失败', true);
+                }
+                
+                // 尝试显示排行榜数据
+                const localData = await gameDataManager.getAllGameData();
+                const localLeaderboardEntries = Object.keys(localData)
+                    .filter(key => key.startsWith('woodcat_leaderboard_'))
+                    .map(key => localData[key])
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 10);
+                
+                log(`📊 本地排行榜数据 (${localLeaderboardEntries.length} 条):`);
+                localLeaderboardEntries.forEach((entry, index) => {
+                    log(`  ${index + 1}. ${entry.player_name} - ${entry.score} - ${entry.game}`);
+                });
+                
+            } catch (error) {
+                log(`❌ 提交分数时出错: ${error.message}`, true);
+            }
+        }
+        
+        async function testLoad() {
+            log('开始测试加载排行榜...');
+            
+            try {
+                const localData = await gameDataManager.getAllGameData();
+                const localLeaderboardEntries = Object.keys(localData)
+                    .filter(key => key.startsWith('woodcat_leaderboard_'))
+                    .map(key => localData[key])
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 20);
+                
+                log(`✅ 加载到 ${localLeaderboardEntries.length} 条排行榜数据:`);
+                
+                if (localLeaderboardEntries.length > 0) {
+                    localLeaderboardEntries.forEach((entry, index) => {
+                        const date = new Date(entry.created_at);
+                        log(`  ${index + 1}. ${entry.player_name} - ${entry.score} - ${entry.game} - ${date.toLocaleDateString()}`);
+                    });
+                } else {
+                    log('  暂无排行榜数据');
+                }
+            } catch (error) {
+                log(`❌ 加载排行榜时出错: ${error.message}`, true);
+            }
+        }
+        
+        async function testLocalData() {
+            log('开始测试本地数据...');
+            
+            try {
+                const storageInfo = await gameDataManager.getStorageInfo();
+                log(`📊 存储信息:\n                总记录数: ${storageInfo.count}\n                总大小: ${storageInfo.totalSize} 字节\n                游戏数据分布: ${JSON.stringify(storageInfo.gameSizes)}`);
+                
+                const allData = await gameDataManager.getAllGameData();
+                const leaderboardEntries = Object.keys(allData)
+                    .filter(key => key.startsWith('woodcat_leaderboard_'))
+                    .map(key => ({ key, data: allData[key] }));
+                
+                log(`📋 本地排行榜数据 (${leaderboardEntries.length} 条):`);
+                leaderboardEntries.forEach((entry, index) => {
+                    log(`  ${index + 1}. Key: ${entry.key}, Data: ${JSON.stringify(entry.data)}`);
+                });
+            } catch (error) {
+                log(`❌ 测试本地数据时出错: ${error.message}`, true);
+            }
+        }
+        
+        // 绑定事件
+        document.getElementById('testSubmit').addEventListener('click', testSubmit);
+        document.getElementById('testLoad').addEventListener('click', testLoad);
+        document.getElementById('testLocalData').addEventListener('click', testLocalData);
+        
+        log('分数提交功能测试页面已加载。');
+    </script>
+</body>
+</html>

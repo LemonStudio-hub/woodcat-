@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase客户端初始化测试</title>
+</head>
+<body>
+    <h1>Supabase客户端初始化测试</h1>
+    <div id="status"></div>
+    <button id="testInit">测试初始化</button>
+    <button id="testSubmit">测试分数提交</button>
+
+    <script>
+        async function testInit() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '正在加载配置和Supabase库...<br>';
+            
+            try {
+                // 加载配置
+                const configResponse = await fetch('js/config.js');
+                const configText = await configResponse.text();
+                eval(configText);
+                
+                statusDiv.innerHTML += '配置加载完成<br>';
+                
+                // 加载Supabase库
+                if (typeof window.supabase === 'undefined') {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+                    await new Promise(resolve => {
+                        script.onload = resolve;
+                        document.head.appendChild(script);
+                    });
+                    statusDiv.innerHTML += 'Supabase库加载完成<br>';
+                }
+                
+                // 初始化客户端
+                if (window.AppConfig && window.AppConfig.supabase) {
+                    const supabaseClient = window.supabase.createClient(
+                        window.AppConfig.supabase.url,
+                        window.AppConfig.supabase.key
+                    );
+                    
+                    statusDiv.innerHTML += 'Supabase客户端初始化完成<br>';
+                    statusDiv.innerHTML += `客户端状态: ${supabaseClient ? '已创建' : '未创建'}<br>`;
+                    
+                    // 尝试进行一个简单的操作来检查连接
+                    try {
+                        const { data, error } = await supabaseClient
+                            .from('leaderboard')
+                            .select('*')
+                            .limit(1);
+                            
+                        if (error) {
+                            statusDiv.innerHTML += `连接测试失败: ${error.message}<br>`;
+                            statusDiv.innerHTML += `错误代码: ${error.code}<br>`;
+                        } else {
+                            statusDiv.innerHTML += `连接测试成功，可访问leaderboard表<br>`;
+                        }
+                    } catch (testError) {
+                        statusDiv.innerHTML += `连接测试异常: ${testError.message}<br>`;
+                    }
+                } else {
+                    statusDiv.innerHTML += '错误：配置无效<br>';
+                }
+            } catch (error) {
+                statusDiv.innerHTML += `初始化失败: ${error.message}<br>`;
+                console.error('测试初始化失败:', error);
+            }
+        }
+        
+        async function testSubmit() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '正在测试分数提交流程...<br>';
+            
+            // 加载配置和库
+            try {
+                // 加载配置
+                const configResponse = await fetch('js/config.js');
+                const configText = await configResponse.text();
+                eval(configText);
+                
+                // 加载Supabase库
+                if (typeof window.supabase === 'undefined') {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+                    await new Promise(resolve => {
+                        script.onload = resolve;
+                        document.head.appendChild(script);
+                    });
+                }
+                
+                // 初始化客户端
+                let supabaseClient = null;
+                if (window.AppConfig && window.AppConfig.supabase) {
+                    supabaseClient = window.supabase.createClient(
+                        window.AppConfig.supabase.url,
+                        window.AppConfig.supabase.key
+                    );
+                    statusDiv.innerHTML += '客户端已初始化<br>';
+                }
+                
+                // 准备测试数据
+                const testData = {
+                    player_name: '测试用户',
+                    score: 1000,
+                    game: '测试游戏',
+                    created_at: new Date().toISOString()
+                };
+                
+                statusDiv.innerHTML += `准备提交数据: ${JSON.stringify(testData)}<br>`;
+                
+                if (supabaseClient) {
+                    // 尝试提交数据
+                    const { data, error } = await supabaseClient
+                        .from('leaderboard')
+                        .insert([testData]);
+                        
+                    if (error) {
+                        statusDiv.innerHTML += `提交失败: ${error.message}<br>`;
+                        statusDiv.innerHTML += `错误代码: ${error.code}<br>`;
+                        statusDiv.innerHTML += `错误详情: ${error.details || 'N/A'}<br>`;
+                    } else {
+                        statusDiv.innerHTML += `提交成功: ${JSON.stringify(data)}<br>`;
+                    }
+                } else {
+                    statusDiv.innerHTML += '无法提交：客户端未初始化<br>';
+                }
+            } catch (error) {
+                statusDiv.innerHTML += `提交测试失败: ${error.message}<br>`;
+                console.error('提交测试失败:', error);
+            }
+        }
+        
+        document.getElementById('testInit').addEventListener('click', testInit);
+        document.getElementById('testSubmit').addEventListener('click', testSubmit);
+    </script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase API测试</title>
+</head>
+<body>
+    <h1>Supabase API测试</h1>
+    <div id="output"></div>
+    <button id="runTest">运行测试</button>
+
+    <script>
+        async function runTest() {
+            const output = document.getElementById('output');
+            output.innerHTML = '测试开始...<br>';
+
+            try {
+                // 加载配置
+                output.innerHTML += '1. 加载配置...<br>';
+                const configResponse = await fetch('js/config.js');
+                const configText = await configResponse.text();
+                
+                // 执行配置代码
+                eval(configText);
+                
+                if (window.AppConfig && window.AppConfig.supabase) {
+                    output.innerHTML += '   配置加载成功<br>';
+                    output.innerHTML += `   URL: ${window.AppConfig.supabase.url}<br>`;
+                } else {
+                    output.innerHTML += '   配置加载失败<br>';
+                    return;
+                }
+
+                // 加载Supabase库
+                output.innerHTML += '2. 加载Supabase库...<br>';
+                const supabaseScript = document.createElement('script');
+                supabaseScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+                await new Promise(resolve => {
+                    supabaseScript.onload = resolve;
+                    document.head.appendChild(supabaseScript);
+                });
+                output.innerHTML += '   Supabase库加载成功<br>';
+
+                // 初始化客户端
+                output.innerHTML += '3. 初始化Supabase客户端...<br>';
+                const supabase = window.supabase.createClient(
+                    window.AppConfig.supabase.url,
+                    window.AppConfig.supabase.key
+                );
+                output.innerHTML += '   客户端初始化成功<br>';
+
+                // 测试数据插入
+                output.innerHTML += '4. 测试数据插入...<br>';
+                const insertData = {
+                    player_name: `测试用户${Date.now()}`,
+                    score: Math.floor(Math.random() * 1000),
+                    game: '测试游戏',
+                    created_at: new Date().toISOString()
+                };
+                
+                const { data: insertDataResult, error: insertError } = await supabase
+                    .from('leaderboard')
+                    .insert([insertData]);
+                
+                if (insertError) {
+                    output.innerHTML += `   插入失败: ${insertError.message}<br>`;
+                    output.innerHTML += `   错误代码: ${insertError.code}<br>`;
+                    output.innerHTML += `   详细信息: ${insertError.details || 'N/A'}<br>`;
+                } else {
+                    output.innerHTML += '   插入成功<br>';
+                    output.innerHTML += `   插入数据: ${JSON.stringify(insertDataResult)}<br>`;
+                }
+
+                // 测试数据查询
+                output.innerHTML += '5. 测试数据查询...<br>';
+                const { data: selectData, error: selectError } = await supabase
+                    .from('leaderboard')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(3);
+                
+                if (selectError) {
+                    output.innerHTML += `   查询失败: ${selectError.message}<br>`;
+                    output.innerHTML += `   错误代码: ${selectError.code}<br>`;
+                    output.innerHTML += `   详细信息: ${selectError.details || 'N/A'}<br>`;
+                } else {
+                    output.innerHTML += '   查询成功<br>';
+                    output.innerHTML += `   查询到 ${selectData.length} 条记录<br>`;
+                    if (selectData.length > 0) {
+                        output.innerHTML += `   最新记录: ${JSON.stringify(selectData[0])}<br>`;
+                    }
+                }
+
+                output.innerHTML += '<br><strong>测试完成</strong>';
+            } catch (error) {
+                output.innerHTML += `<br><strong>测试出错: ${error.message}</strong>`;
+                console.error('测试出错:', error);
+            }
+        }
+
+        document.getElementById('runTest').addEventListener('click', runTest);
+    </script>
+</body>
+</html>
