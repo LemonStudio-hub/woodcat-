@@ -395,12 +395,18 @@
             const GRID_SIZE = 4;
             let grid = [];
             let score = 0;
-            let highScore = gameDataManager.loadData('2048', 'highScore', 0);
+            let highScore = 0; // 初始化为0
+            let gameOver = false;
+            let gameWon = false;
+            
+            // 异步加载高分
+            gameDataManager.loadData('2048', 'highScore', 0).then(loadedHighScore => {
+                highScore = loadedHighScore;
+                document.getElementById('high-score').textContent = highScore;
+            });
             
             // 初始化音频模块
             gameAudioVibration.initAudio();
-            let gameOver = false;
-            let gameWon = false;
             
             // 创建音频上下文 - 移动端需要用户交互后才能播放音频
             let audioContext = null;

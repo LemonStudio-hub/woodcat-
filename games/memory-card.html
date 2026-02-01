@@ -519,14 +519,18 @@
             let currentLevel = 'easy';
             let cards = [];
             let gameStarted = false;
-            let bestTime = gameDataManager.loadData('memory-card', 'bestTime', { time: Infinity, difficulty: 'none' });
+            let bestTime = { time: Infinity, difficulty: 'none' }; // 初始化默认值
             
-            // 显示最佳时间
-            if (bestTime.time !== Infinity) {
-                bestTimeDisplay.textContent = `${bestTime.time}s (${bestTime.difficulty})`;
-            } else {
-                bestTimeDisplay.textContent = '-';
-            }
+            // 异步加载最佳时间
+            gameDataManager.loadData('memory-card', 'bestTime', { time: Infinity, difficulty: 'none' }).then(loadedBestTime => {
+                bestTime = loadedBestTime;
+                // 显示最佳时间
+                if (bestTime.time !== Infinity) {
+                    bestTimeDisplay.textContent = `${bestTime.time}s (${bestTime.difficulty})`;
+                } else {
+                    bestTimeDisplay.textContent = '-';
+                }
+            });
             
             // 创建音频上下文 - 用于音效
             let audioContext = null;

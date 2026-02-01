@@ -670,9 +670,13 @@
             }
             
             // 记录最佳时间
-            let bestTime = gameDataManager.loadData('minesweeper', 'bestTime', Infinity);
-            // 显示最佳时间，如果为Infinity则显示"-"
-            document.getElementById('best-time').textContent = bestTime === Infinity ? '-' : bestTime;
+            let bestTime = Infinity; // 初始化为无穷大
+            // 异步加载最佳时间
+            gameDataManager.loadData('minesweeper', 'bestTime', Infinity).then(loadedBestTime => {
+                bestTime = loadedBestTime;
+                // 显示最佳时间，如果为Infinity则显示"-"
+                document.getElementById('best-time').textContent = bestTime === Infinity ? '-' : bestTime;
+            });
             
             // 重置游戏
             document.getElementById('resetBtn').addEventListener('click', initGame);

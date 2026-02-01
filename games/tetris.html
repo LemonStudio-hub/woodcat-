@@ -371,7 +371,7 @@
             // 游戏状态
             let board = [];
             let score = 0;
-            let highScore = gameDataManager.loadData('tetris', 'highScore', 0);
+            let highScore = 0; // 初始化为0
             let level = 1;
             let lines = 0;
             let gameOver = false;
@@ -380,8 +380,11 @@
             let dropCounter = 0;
             const dropInterval = 600; // 调整初始下落间隔
             
-            // 显示高分
-            document.getElementById('high-score').textContent = highScore;
+            // 异步加载高分
+            gameDataManager.loadData('tetris', 'highScore', 0).then(loadedHighScore => {
+                highScore = loadedHighScore;
+                document.getElementById('high-score').textContent = highScore;
+            });
             
             // 当前方块
             let currentPiece = {

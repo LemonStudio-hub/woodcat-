@@ -306,14 +306,17 @@
                         let direction = 'right';
                         let nextDirection = 'right';
                         let score = 0;
-                        let highScore = gameDataManager.loadData('snake', 'highScore', 0);
+                        let highScore = 0; // 初始化为0
                         let gameInterval;
                         let isPaused = false;
                         let gameOver = false;
                         let gameStarted = false; // 添加游戏是否真正开始的标志
                         
-                        // 更新高分显示
-                        document.getElementById('high-score').textContent = highScore;
+                        // 异步加载高分
+                        gameDataManager.loadData('snake', 'highScore', 0).then(loadedHighScore => {
+                            highScore = loadedHighScore;
+                            document.getElementById('high-score').textContent = highScore;
+                        });
                         
                         // 初始化游戏
                         function initGame() {

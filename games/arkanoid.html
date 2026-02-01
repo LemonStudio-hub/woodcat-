@@ -517,13 +517,17 @@
 
                                 let animationId = null;
 
-                                let highScore = gameDataManager.loadData('arkanoid', 'highScore', 0);
+                                let highScore = 0; // 初始化为0
 
-                                
+                                            // 异步加载高分
 
-                                // 更新高分显示
+                                            gameDataManager.loadData('arkanoid', 'highScore', 0).then(loadedHighScore => {
 
-                                highScoreDisplay.textContent = highScore;
+                                                highScore = loadedHighScore;
+
+                                                highScoreDisplay.textContent = highScore;
+
+                                            });
 
                                 
 
