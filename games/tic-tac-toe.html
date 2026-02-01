@@ -810,84 +810,25 @@
             
             // 移动音效
             function playMoveSound() {
-                if (!audioContext) return;
-                
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.type = 'sine';
-                oscillator.frequency.value = 300;
-                gainNode.gain.value = 0.1;
-                
-                oscillator.start();
-                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.2);
-                
-                setTimeout(() => {
-                    oscillator.stop();
-                }, 200);
+                if (gameAudioVibration) {
+                    gameAudioVibration.playClickSound();
+                }
             }
             
             // 胜利音效
             function playWinSound() {
-                if (!audioContext) return;
-                
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.type = 'sine';
-                
-                // 播放上升的音调
-                oscillator.frequency.setValueAtTime(261.63, audioContext.currentTime); // C
-                oscillator.frequency.exponentialRampToValueAtTime(329.63, audioContext.currentTime + 0.2); // E
-                oscillator.frequency.exponentialRampToValueAtTime(392.00, audioContext.currentTime + 0.4); // G
-                oscillator.frequency.exponentialRampToValueAtTime(523.25, audioContext.currentTime + 0.6); // C
-                
-                gainNode.gain.value = 0.15;
-                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.8);
-                
-                oscillator.start();
-                
-                setTimeout(() => {
-                    oscillator.stop();
-                }, 800);
-                
-                // 胜利震动反馈
-                vibrate([100, 50, 100]);
+                if (gameAudioVibration) {
+                    gameAudioVibration.playWinSound();
+                    gameAudioVibration.vibrateSuccess();
+                }
             }
             
             // 平局音效
             function playDrawSound() {
-                if (!audioContext) return;
-                
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.type = 'sine';
-                
-                // 播放连续两个音调
-                oscillator.frequency.setValueAtTime(220, audioContext.currentTime); // A
-                oscillator.frequency.setValueAtTime(196, audioContext.currentTime + 0.2); // G
-                
-                gainNode.gain.value = 0.15;
-                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.4);
-                
-                oscillator.start();
-                
-                setTimeout(() => {
-                    oscillator.stop();
-                }, 400);
-                
-                // 平局震动反馈
-                vibrate(50);
+                if (gameAudioVibration) {
+                    gameAudioVibration.playErrorSound();
+                    gameAudioVibration.vibrateShort();
+                }
             }
             
             // 处理单元格点击

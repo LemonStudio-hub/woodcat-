@@ -445,81 +445,23 @@
                         
                         // 创建吃食物的音效
                         function playEatSound() {
-                            if (!audioContext) return;
-                            
-                            // 确保音频上下文已恢复
-                            resumeAudioContext();
-                            
-                            const oscillator = audioContext.createOscillator();
-                            const gainNode = audioContext.createGain();
-                            
-                            oscillator.connect(gainNode);
-                            gainNode.connect(audioContext.destination);
-                            
-                            oscillator.type = 'sine';
-                            oscillator.frequency.value = 523.25; // C5
-                            gainNode.gain.value = 0.3;
-                            
-                            oscillator.start();
-                            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.3);
-                            
-                            setTimeout(() => {
-                                oscillator.stop();
-                            }, 300);
+                            if (gameAudioVibration) {
+                                gameAudioVibration.playSuccessSound();
+                            }
                         }
                         
                         // 创建游戏结束的音效
                         function playGameOverSound() {
-                            if (!audioContext) return;
-                            
-                            // 确保音频上下文已恢复
-                            resumeAudioContext();
-                            
-                            const oscillator = audioContext.createOscillator();
-                            const gainNode = audioContext.createGain();
-                            
-                            oscillator.connect(gainNode);
-                            gainNode.connect(audioContext.destination);
-                            
-                            oscillator.type = 'sine';
-                            
-                            // 播放下降的音调
-                            oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
-                            oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.8);
-                            
-                            gainNode.gain.value = 0.3;
-                            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.8);
-                            
-                            oscillator.start();
-                            
-                            setTimeout(() => {
-                                oscillator.stop();
-                            }, 800);
+                            if (gameAudioVibration) {
+                                gameAudioVibration.playLoseSound();
+                            }
                         }
                         
                         // 创建移动音效
                         function playMoveSound() {
-                            if (!audioContext) return;
-                            
-                            // 确保音频上下文已恢复
-                            resumeAudioContext();
-                            
-                            const oscillator = audioContext.createOscillator();
-                            const gainNode = audioContext.createGain();
-                            
-                            oscillator.connect(gainNode);
-                            gainNode.connect(audioContext.destination);
-                            
-                            oscillator.type = 'square';
-                            oscillator.frequency.value = 200;
-                            gainNode.gain.value = 0.1;
-                            
-                            oscillator.start();
-                            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.1);
-                            
-                            setTimeout(() => {
-                                oscillator.stop();
-                            }, 100);
+                            if (gameAudioVibration) {
+                                gameAudioVibration.playClickSound();
+                            }
                         }
                         
                         // 移动蛇
