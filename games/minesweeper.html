@@ -312,6 +312,10 @@
                 <div class="label">时间</div>
                 <div class="value" id="timer">0</div>
             </div>
+            <div class="stat-box">
+                <div class="label">最佳</div>
+                <div class="value" id="best-time">-</div>
+            </div>
         </div>
         <div class="game-board" id="board"></div>
         <div class="controls">
@@ -667,6 +671,8 @@
             
             // 记录最佳时间
             let bestTime = gameDataManager.loadData('minesweeper', 'bestTime', Infinity);
+            // 显示最佳时间，如果为Infinity则显示"-"
+            document.getElementById('best-time').textContent = bestTime === Infinity ? '-' : bestTime;
             
             // 重置游戏
             document.getElementById('resetBtn').addEventListener('click', initGame);

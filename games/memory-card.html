@@ -471,6 +471,10 @@
                 <h3>时间</h3>
                 <p id="timer">0s</p>
             </div>
+            <div class="stat-box">
+                <h3>最佳</h3>
+                <p id="best-time">-</p>
+            </div>
         </div>
         
         <div class="controls">
@@ -500,6 +504,7 @@
             const movesDisplay = document.getElementById('moves');
             const matchesDisplay = document.getElementById('matches');
             const timerDisplay = document.getElementById('timer');
+            const bestTimeDisplay = document.getElementById('best-time');
             const resetBtn = document.getElementById('resetBtn');
             const hintBtn = document.getElementById('hintBtn');
             const levelButtons = document.querySelectorAll('.level-btn');
@@ -514,6 +519,14 @@
             let currentLevel = 'easy';
             let cards = [];
             let gameStarted = false;
+            let bestTime = gameDataManager.loadData('memory-card', 'bestTime', { time: Infinity, difficulty: 'none' });
+            
+            // 显示最佳时间
+            if (bestTime.time !== Infinity) {
+                bestTimeDisplay.textContent = `${bestTime.time}s (${bestTime.difficulty})`;
+            } else {
+                bestTimeDisplay.textContent = '-';
+            }
             
             // 创建音频上下文 - 用于音效
             let audioContext = null;

@@ -332,6 +332,10 @@
                 <div class="value" id="score">0</div>
             </div>
             <div class="stat-box">
+                <div class="label">最高分</div>
+                <div class="value" id="high-score">0</div>
+            </div>
+            <div class="stat-box">
                 <div class="label">等级</div>
                 <div class="value" id="level">1</div>
             </div>
@@ -376,8 +380,8 @@
             let dropCounter = 0;
             const dropInterval = 600; // 调整初始下落间隔
             
-            // 初始化高分显示（虽然HTML中没有专门的高分元素，但我们可以添加到页面上）
-            // 注意：当前HTML中没有显示高分的元素，所以跳过此功能
+            // 显示高分
+            document.getElementById('high-score').textContent = highScore;
             
             // 当前方块
             let currentPiece = {
@@ -512,7 +516,7 @@
                         if (score > highScore) {
                             highScore = score;
                             gameDataManager.saveData('tetris', 'highScore', highScore);
-                            // 注意：当前HTML中没有显示高分的元素，所以跳过更新UI
+                            document.getElementById('high-score').textContent = highScore;
                         }
                         
                         // 更新UI
