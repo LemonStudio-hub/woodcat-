@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>排行榜 - 木头猫</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 100%;
+            width: 100%;
+            max-width: 600px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin: 0 0 30px;
+            font-size: 2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .back-home {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #34495e;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            z-index: 10;
+        }
+        
+        .back-home:hover {
+            background: #2c3e50;
+            transform: scale(1.1) rotate(-10deg);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .game-leaderboard {
+            margin-bottom: 25px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .game-header {
+            background: #34495e;
+            color: white;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .game-stats {
+            padding: 15px;
+            background: #f8f9fa;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: #34495e;
+        }
+        
+        .reset-all-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .reset-all-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #7f8c8d;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 1.6rem;
+                margin: 0 0 20px;
+            }
+            
+            .back-home {
+                top: 10px;
+                left: 10px;
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a class="back-home" href="./index.html">←</a>
+    
+    <div class="container">
+        <h1>游戏排行榜</h1>
+        <div id="leaderboards">
+            <div class="loading">加载中...</div>
+        </div>
+        <button class="reset-all-btn" id="resetAllBtn">重置所有游戏数据</button>
+    </div>
+
+    <script src="./js/data-manager.js"></script>
+    <script src="./js/score-manager.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const leaderboardsContainer = document.getElementById('leaderboards');
+            const resetAllBtn = document.getElementById('resetAllBtn');
+            
+            // 加载并显示排行榜
+            async function loadLeaderboards() {
+                try {
+                    const leaderboard = await scoreManager.getGlobalLeaderboard();
+                    
+                    if (Object.keys(leaderboard).length === 0) {
+                        leaderboardsContainer.innerHTML = '<div class="loading">暂无游戏数据</div>';
+                        return;
+                    }
+                    
+                    let html = '';
+                    
+                    for (const gameName in leaderboard) {
+                        const gameData = leaderboard[gameName];
+                        html += `
+                            <div class="game-leaderboard">
+                                <div class="game-header">${gameData.name}</div>
+                                <div class="game-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-label">最高分</span>
+                                        <span class="stat-value">${scoreManager.formatScore(gameName, gameData.highScore)}</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">总游戏数</span>
+                                        <span class="stat-value">${gameData.stats.totalGames || 0}</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">胜场</span>
+                                        <span class="stat-value">${gameData.stats.wins || 0}</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">负场</span>
+                                        <span class="stat-value">${gameData.stats.losses || 0}</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">胜率</span>
+                                        <span class="stat-value">${gameData.stats.winRate || 0}%</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">总得分</span>
+                                        <span class="stat-value">${gameData.stats.totalScore || 0}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    leaderboardsContainer.innerHTML = html;
+                } catch (error) {
+                    console.error('加载排行榜失败:', error);
+                    leaderboardsContainer.innerHTML = '<div class="loading">加载失败，请稍后重试</div>';
+                }
+            }
+            
+            // 重置所有游戏数据
+            resetAllBtn.addEventListener('click', async () => {
+                const confirmReset = confirm('确定要重置所有游戏的统计数据吗？此操作不可撤销！');
+                if (confirmReset) {
+                    try {
+                        // 遍历所有游戏类型并重置
+                        const gameTypes = Object.keys(scoreManager.gameTypes);
+                        let successCount = 0;
+                        
+                        for (const gameName of gameTypes) {
+                            const success = await scoreManager.resetGameStats(gameName);
+                            if (success) {
+                                successCount++;
+                            }
+                        }
+                        
+                        alert(`成功重置了 ${successCount} 个游戏的统计数据`);
+                        
+                        // 重新加载排行榜
+                        loadLeaderboards();
+                    } catch (error) {
+                        console.error('重置游戏数据失败:', error);
+                        alert('重置失败，请稍后重试');
+                    }
+                }
+            });
+            
+            // 初始加载
+            loadLeaderboards();
+        });
+    </script>
+</body>
+</html>

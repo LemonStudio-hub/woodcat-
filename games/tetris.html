@@ -361,6 +361,7 @@
 
     <script src="../js/lib/hammer.min.js"></script>
     <script src="../js/data-manager.js"></script>
+    <script src="../js/score-manager.js"></script>
     <script>
         // 俄罗斯方块核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
@@ -381,11 +382,10 @@
             const dropInterval = 600; // 调整初始下落间隔
             
             // 异步加载高分
-            gameDataManager.loadData('tetris', 'highScore', 0).then(loadedHighScore => {
-                highScore = loadedHighScore;
-                document.getElementById('high-score').textContent = highScore;
-            });
-            
+                                    scoreManager.getHighScore('tetris', 0).then(loadedHighScore => {
+                                        highScore = loadedHighScore;
+                                        document.getElementById('high-score').textContent = highScore;
+                                    });            
             // 当前方块
             let currentPiece = {
                 shape: [],
@@ -515,13 +515,12 @@
                         // 更新等级（每5行升一级）
                         level = Math.floor(lines / 5) + 1;
                         
-                        // 检查是否打破高分记录
-                        if (score > highScore) {
-                            highScore = score;
-                            gameDataManager.saveData('tetris', 'highScore', highScore);
-                            document.getElementById('high-score').textContent = highScore;
-                        }
-                        
+                                                        // 检查是否打破高分记录
+                                                        if (score > highScore) {
+                                                            highScore = score;
+                                                            scoreManager.updateHighScore('tetris', highScore);
+                                                            document.getElementById('high-score').textContent = highScore;
+                                                        }                        
                         // 更新UI
                         document.getElementById('score').textContent = score;
                         document.getElementById('level').textContent = level;
@@ -664,20 +663,22 @@
                     currentPiece = createNewPiece();
                     
                     // 检查游戏结束
-                    if (isCollision(currentPiece)) {
-                        gameOver = true;
-                        if (gameInterval) {
-                            cancelAnimationFrame(gameInterval);
-                            gameInterval = null;
-                        }
-                        
-                        // 显示游戏结束界面
-                        document.getElementById('final-score').textContent = score;
-                        const gameOverElement = document.getElementById('game-over');
-                        gameOverElement.classList.add('show');
-                        return false;
-                    }
-                    drawBoard(); // 更新显示
+                                            if (isCollision(currentPiece)) {
+                                                gameOver = true;
+                                                if (gameInterval) {
+                                                    cancelAnimationFrame(gameInterval);
+                                                    gameInterval = null;
+                                                }
+                                                
+                                                // 记录游戏结果
+                                                scoreManager.recordGameResult('tetris', 'loss', score);
+                                                
+                                                // 显示游戏结束界面
+                                                document.getElementById('final-score').textContent = score;
+                                                const gameOverElement = document.getElementById('game-over');
+                                                gameOverElement.classList.add('show');
+                                                return false;
+                                            }                    drawBoard(); // 更新显示
                     return false;
                 }
                 

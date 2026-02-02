@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>贪吃蛇 - 木头猫</title>
     <style>
+
         * {
             margin: 0;
             padding: 0;
@@ -293,6 +294,7 @@
 
     <script src="../js/lib/hammer.min.js"></script>
     <script src="../js/data-manager.js"></script>
+    <script src="../js/score-manager.js"></script>
     <script>
                     // 贪吃蛇核心游戏逻辑
                     document.addEventListener('DOMContentLoaded', () => {
@@ -313,7 +315,7 @@
                         let gameStarted = false; // 添加游戏是否真正开始的标志
                         
                         // 异步加载高分
-                        gameDataManager.loadData('snake', 'highScore', 0).then(loadedHighScore => {
+                        scoreManager.getHighScore('snake', 0).then(loadedHighScore => {
                             highScore = loadedHighScore;
                             document.getElementById('high-score').textContent = highScore;
                         });
@@ -523,7 +525,7 @@
                         
                         // 移动蛇
                         function moveSnake() {
-                            if (isPaused || gameOver) return;
+                            if (isPaused || gameOver || !gameStarted) return;
                             
                             // 更新方向（确保在游戏未暂停或结束时才更新）
                             direction = nextDirection;
@@ -576,7 +578,7 @@
                                 // 检查是否打破高分记录
                                 if (score > highScore) {
                                     highScore = score;
-                                    gameDataManager.saveData('snake', 'highScore', highScore);
+                                    scoreManager.updateHighScore('snake', highScore);
                                     document.getElementById('high-score').textContent = highScore;
                                 }
                                 document.getElementById('length').textContent = snake.length;
@@ -600,14 +602,17 @@
                         
                         // 开始/暂停游戏
                         function toggleGame() {
-                            if (!gameInterval) {
+                            if (!gameStarted || gameOver) {
+                                // 如果游戏尚未开始或游戏已结束，则开始游戏
                                 gameInterval = setInterval(moveSnake, 150);
                                 document.getElementById('startBtn').textContent = '重新开始';
                                 gameStarted = true; // 游戏真正开始
+                                gameOver = false; // 确保游戏结束状态被重置
                                 
                                 // 初始化音频
                                 initAudio();
                             } else {
+                                // 如果游戏已经开始，则重置游戏
                                 resetGame();
                             }
                         }
@@ -627,6 +632,9 @@
                                 clearInterval(gameInterval);
                                 gameInterval = null;
                             }
+                            
+                            // 记录游戏结果
+                            scoreManager.recordGameResult('snake', 'loss', score);
                             
                             // 播放游戏结束音效
                             playGameOverSound();
@@ -650,19 +658,19 @@
                             
                             switch (e.key) {
                                 case 'ArrowUp':
-                                    if (direction !== 'down') nextDirection = 'up';
+                                    if (gameStarted && direction !== 'down') nextDirection = 'up'; // 只有在游戏开始后才能改变方向
                                     break;
                                 case 'ArrowDown':
-                                    if (direction !== 'up') nextDirection = 'down';
+                                    if (gameStarted && direction !== 'up') nextDirection = 'down'; // 只有在游戏开始后才能改变方向
                                     break;
                                 case 'ArrowLeft':
-                                    if (direction !== 'right') nextDirection = 'left';
+                                    if (gameStarted && direction !== 'right') nextDirection = 'left'; // 只有在游戏开始后才能改变方向
                                     break;
                                 case 'ArrowRight':
-                                    if (direction !== 'left') nextDirection = 'right';
+                                    if (gameStarted && direction !== 'left') nextDirection = 'right'; // 只有在游戏开始后才能改变方向
                                     break;
                                 case ' ': // 空格键暂停
-                                    togglePause();
+                                    if (gameStarted) togglePause(); // 只有在游戏开始后才能暂停
                                     break;
                             }
                             enableAudioOnMobile(); // 启用移动端音频
@@ -697,7 +705,7 @@
                         hammerManager.add(new Hammer.Swipe({ direction: Hammer.DIRECTION_ALL, threshold: 10, velocity: 0.3 }));
                         
                         hammerManager.on('swipeleft', (e) => {
-                            if (!isPaused && !gameOver) { // 允许在游戏开始前设置方向
+                            if (!isPaused && !gameOver && gameStarted) { // 只有在游戏开始后才能改变方向
                                 updateDirection('left');
                             }
                             e.preventDefault();
@@ -705,7 +713,7 @@
                         });
                         
                         hammerManager.on('swiperight', (e) => {
-                            if (!isPaused && !gameOver) { // 允许在游戏开始前设置方向
+                            if (!isPaused && !gameOver && gameStarted) { // 只有在游戏开始后才能改变方向
                                 updateDirection('right');
                             }
                             e.preventDefault();
@@ -713,7 +721,7 @@
                         });
                         
                         hammerManager.on('swipeup', (e) => {
-                            if (!isPaused && !gameOver) { // 允许在游戏开始前设置方向
+                            if (!isPaused && !gameOver && gameStarted) { // 只有在游戏开始后才能改变方向
                                 updateDirection('up');
                             }
                             e.preventDefault();
@@ -721,7 +729,7 @@
                         });
                         
                         hammerManager.on('swipedown', (e) => {
-                            if (!isPaused && !gameOver) { // 允许在游戏开始前设置方向
+                            if (!isPaused && !gameOver && gameStarted) { // 只有在游戏开始后才能改变方向
                                 updateDirection('down');
                             }
                             e.preventDefault();

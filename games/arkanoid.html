@@ -409,6 +409,7 @@
 
         <script src="../js/lib/hammer.min.js"></script>
         <script src="../js/data-manager.js"></script>
+    <script src="../js/score-manager.js"></script>
         <script src="../js/audio-vibration.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
@@ -521,13 +522,13 @@
 
                                             // 异步加载高分
 
-                                            gameDataManager.loadData('arkanoid', 'highScore', 0).then(loadedHighScore => {
+                                                                    scoreManager.getHighScore('arkanoid', 0).then(loadedHighScore => {
 
-                                                highScore = loadedHighScore;
+                                                                        highScore = loadedHighScore;
 
-                                                highScoreDisplay.textContent = highScore;
+                                                                        highScoreDisplay.textContent = highScore;
 
-                                            });
+                                                                    });
 
                                 
 
@@ -930,12 +931,11 @@
                                                                             scoreDisplay.textContent = score;
                                                                             
                                                                             // 检查高分记录
-                                                                            if (score > highScore) {
-                                                                                highScore = score;
-                                                                                gameDataManager.saveData('arkanoid', 'highScore', highScore);
-                                                                                highScoreDisplay.textContent = highScore;
-                                                                            }
-                                                                            
+                                                                                                    if (score > highScore) {
+                                                                                                        highScore = score;
+                                                                                                        scoreManager.updateHighScore('arkanoid', highScore);
+                                                                                                        highScoreDisplay.textContent = highScore;
+                                                                                                    }                                                                            
                                                                             // 创建破碎粒子效果
                                                                             createBrickParticles(
                                                                                 b.x + brick.width / 2, 
@@ -1244,6 +1244,9 @@
 
                             gameOverScreen.style.display = "flex";
 
+                            // 记录游戏结果
+                            scoreManager.recordGameResult('arkanoid', 'loss', score);
+
                             playLoseSound();
 
                         }
@@ -1259,6 +1262,9 @@
                             winScoreDisplay.textContent = score;
 
                             gameWinScreen.style.display = "flex";
+
+                            // 记录游戏结果
+                            scoreManager.recordGameResult('arkanoid', 'win', score);
 
                             playWinSound();
 

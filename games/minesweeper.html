@@ -326,6 +326,7 @@
     </div>
 
     <script src="../js/data-manager.js"></script>
+    <script src="../js/score-manager.js"></script>
     <script>
         // 扫雷核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
@@ -503,8 +504,12 @@
                     cell.classList.add('explosion'); // 添加爆炸动画
                     revealAllMines();
                     clearInterval(timerInterval);
+                    
+                    // 使用记分管理模块记录游戏结果
+                    scoreManager.recordGameResult('minesweeper', 'loss', seconds);
+                    
                     setTimeout(() => {
-                        alert('踩到地雷了！游戏结束。');
+                        alert('踩到地雷了！游戏结束。用时: ' + seconds + '秒');
                     }, 100);
                 } else {
                     // 检查是否胜利 - 揭开所有非雷格子
@@ -532,9 +537,11 @@
                     // 检查并更新最佳时间记录
                     if (seconds < bestTime) {
                         bestTime = seconds;
-                        gameDataManager.saveData('minesweeper', 'bestTime', bestTime);
                         document.getElementById('best-time').textContent = bestTime;
                     }
+                    
+                    // 使用记分管理模块记录游戏结果
+                    scoreManager.recordGameResult('minesweeper', 'win', seconds);
                     
                     // 为所有格子添加获胜动画
                     const cells = document.querySelectorAll('.cell');
@@ -543,7 +550,7 @@
                     });
                     
                     setTimeout(() => {
-                        alert('恭喜！你成功清除了所有地雷！');
+                        alert('恭喜！你成功清除了所有地雷！用时: ' + seconds + '秒');
                     }, 100);
                 }
             }
@@ -599,6 +606,9 @@
                         gameOver = true;
                         clearInterval(timerInterval);
                         
+                        // 使用记分管理模块记录游戏结果
+                        scoreManager.recordGameResult('minesweeper', 'win', seconds);
+                        
                         // 为所有格子添加获胜动画
                         const cells = document.querySelectorAll('.cell');
                         cells.forEach(cell => {
@@ -606,7 +616,7 @@
                         });
                         
                         setTimeout(() => {
-                            alert('恭喜！你成功清除了所有地雷！');
+                            alert('恭喜！你成功标记了所有地雷！用时: ' + seconds + '秒');
                         }, 100);
                     }
                 }
@@ -672,7 +682,7 @@
             // 记录最佳时间
             let bestTime = Infinity; // 初始化为无穷大
             // 异步加载最佳时间
-            gameDataManager.loadData('minesweeper', 'bestTime', Infinity).then(loadedBestTime => {
+            scoreManager.getHighScore('minesweeper', Infinity).then(loadedBestTime => {
                 bestTime = loadedBestTime;
                 // 显示最佳时间，如果为Infinity则显示"-"
                 document.getElementById('best-time').textContent = bestTime === Infinity ? '-' : bestTime;

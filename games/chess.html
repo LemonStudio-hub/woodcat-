@@ -564,6 +564,7 @@
     </div>
 
     <script src="../js/data-manager.js"></script>
+    <script src="../js/score-manager.js"></script>
     <script>
         // 国际象棋核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
@@ -881,18 +882,19 @@
                 
                 switch (piece.type) {
                     case 'pawn':
-                        // 简化兵的移动规则
+                        // 兵的移动规则
                         const direction = piece.color === 'white' ? -1 : 1;
                         // 前进一格
                         if (isValidPosition(row + direction, col) && !gameBoard[row + direction][col]) {
                             moves.push([row + direction, col]);
                             // 如果在初始位置，可以前進两格
                             const startRow = piece.color === 'white' ? 6 : 1;
-                            if (row === startRow && !gameBoard[row + 2 * direction][col]) {
+                            if (row === startRow && !gameBoard[row + 2 * direction][col] && 
+                                isValidPosition(row + 2 * direction, col)) {
                                 moves.push([row + 2 * direction, col]);
                             }
                         }
-                        // 吃子
+                        // 吃子（对角线移动）
                         if (isValidPosition(row + direction, col - 1) && gameBoard[row + direction][col - 1] && 
                             gameBoard[row + direction][col - 1].color !== piece.color) {
                             moves.push([row + direction, col - 1]);
@@ -1375,7 +1377,7 @@
                 
                 switch (piece.type) {
                     case 'pawn':
-                        // 简化兵的移动规则
+                        // 兵的移动规则
                         const direction = piece.color === 'white' ? -1 : 1;
                         // 前进一格
                         if (isValidPosition(row + direction, col) && !gameBoard[row + direction][col]) {
@@ -1386,7 +1388,7 @@
                                 moves.push([row + 2 * direction, col]);
                             }
                         }
-                        // 吃子
+                        // 吃子（对角线移动）
                         if (isValidPosition(row + direction, col - 1) && gameBoard[row + direction][col - 1] && 
                             gameBoard[row + direction][col - 1].color !== piece.color) {
                             moves.push([row + direction, col - 1]);
@@ -1397,12 +1399,12 @@
                         }
                         break;
                     case 'knight':
-                        // 马的移动
+                        // 马的移动（L形：2格直行+1格横行，或1格直行+2格横行）
                         const knightMoves = [
-                            [row - 2, col - 1], [row - 2, col + 1],
-                            [row - 1, col - 2], [row - 1, col + 2],
-                            [row + 1, col - 2], [row + 1, col + 2],
-                            [row + 2, col - 1], [row + 2, col + 1]
+                            [row - 2, col - 1], [row - 2, col + 1],  // 上2左1，上2右1
+                            [row - 1, col - 2], [row - 1, col + 2],  // 上1左2，上1右2
+                            [row + 1, col - 2], [row + 1, col + 2],  // 下1左2，下1右2
+                            [row + 2, col - 1], [row + 2, col + 1]   // 下2左1，下2右1
                         ];
                         for (const [r, c] of knightMoves) {
                             if (isValidPosition(r, c) && (!gameBoard[r][c] || gameBoard[r][c].color !== piece.color)) {
@@ -1411,31 +1413,33 @@
                         }
                         break;
                     case 'bishop':
-                        // 象的移动
+                        // 象的移动（对角线方向）
                         moves = moves.concat(getDirectionalMoves(row, col, [[-1, -1], [-1, 1], [1, -1], [1, 1]]));
                         break;
                     case 'rook':
-                        // 車的移动
+                        // 車的移动（直线方向：上下左右）
                         moves = moves.concat(getDirectionalMoves(row, col, [[-1, 0], [1, 0], [0, -1], [0, 1]]));
                         break;
                     case 'queen':
-                        // 后的移动
+                        // 后的移动（直线+对角线方向）
                         moves = moves.concat(getDirectionalMoves(row, col, [
-                            [-1, -1], [-1, 0], [-1, 1],
-                            [0, -1],           [0, 1],
-                            [1, -1],  [1, 0],  [1, 1]
+                            [-1, -1], [-1, 0], [-1, 1],  // 左上、上、右上
+                            [0, -1],           [0, 1],    // 左、右
+                            [1, -1],  [1, 0],  [1, 1]    // 左下、下、右下
                         ]));
                         break;
                     case 'king':
-                        // 王的移动
+                        // 王的移动（周围8个方向，每次移动一格）
                         const kingMoves = [
-                            [row - 1, col - 1], [row - 1, col], [row - 1, col + 1],
-                            [row,     col - 1],                 [row,     col + 1],
-                            [row + 1, col - 1], [row + 1, col], [row + 1, col + 1]
+                            [row - 1, col - 1], [row - 1, col], [row - 1, col + 1],  // 上方3格
+                            [row,     col - 1],                 [row,     col + 1],  // 左右2格
+                            [row + 1, col - 1], [row + 1, col], [row + 1, col + 1]   // 下方3格
                         ];
                         for (const [r, c] of kingMoves) {
-                            if (isValidPosition(r, c) && (!gameBoard[r][c] || gameBoard[r][c].color !== piece.color)) {
-                                moves.push([r, c]);
+                            if (isValidPosition(r, c) && gameBoard[r][c] && gameBoard[r][c].color !== piece.color) {
+                                moves.push([r, c]);  // 可以吃掉对方棋子
+                            } else if (isValidPosition(r, c) && !gameBoard[r][c]) {
+                                moves.push([r, c]);  // 移动到空位置
                             }
                         }
                         break;
@@ -1444,12 +1448,14 @@
                 // 高亮有效移动位置
                 for (const [r, c] of moves) {
                     const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
-                    if (cell && !gameBoard[r][c]) {
-                        // 移动到空位置
-                        cell.classList.add('valid-move');
-                    } else if (cell && gameBoard[r][c] && gameBoard[r][c].color !== piece.color) {
-                        // 吃掉对方棋子
-                        cell.classList.add('valid-capture');
+                    if (cell) {
+                        if (!gameBoard[r][c]) {
+                            // 移动到空位置
+                            cell.classList.add('valid-move');
+                        } else if (gameBoard[r][c] && gameBoard[r][c].color !== piece.color) {
+                            // 吃掉对方棋子
+                            cell.classList.add('valid-capture');
+                        }
                     }
                 }
             }
@@ -1465,14 +1471,14 @@
                     
                     while (isValidPosition(r, c)) {
                         if (!gameBoard[r][c]) {
-                            // 空位置
+                            // 空位置，可以移动
                             moves.push([r, c]);
                         } else if (gameBoard[r][c].color !== piece.color) {
-                            // 对方棋子
+                            // 对方棋子，可以吃掉，但不能继续移动
                             moves.push([r, c]);
                             break;
                         } else {
-                            // 我方棋子
+                            // 我方棋子，不能移动到该位置，也不能继续移动
                             break;
                         }
                         
@@ -1532,6 +1538,23 @@
                         gameStats.totalGames++;
                         
                         // 保存统计数据
+                        let result = 'win';
+                        if (gameMode === 'pvc') {
+                            // 在人机对战模式中，需要根据玩家颜色判断结果
+                            if (piece.color === 'white') {
+                                scoreManager.recordGameResult('chess', 'win', 1); // 胜利
+                            } else {
+                                scoreManager.recordGameResult('chess', 'loss', 0); // 失败
+                            }
+                        } else {
+                            // 在双人对战模式中，记录双方的胜负
+                            if (piece.color === 'white') {
+                                scoreManager.recordGameResult('chess', 'win', 1);
+                            } else {
+                                scoreManager.recordGameResult('chess', 'win', 1);
+                            }
+                        }
+                        
                         gameDataManager.saveData('chess', 'stats', gameStats);
                         
                         alert(`${winner}吃掉了对方的国王！`);
