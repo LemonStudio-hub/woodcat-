@@ -407,16 +407,15 @@
         </div>
     </div>
 
-        <script src="../js/lib/hammer.min.js"></script>
-        <script src="../js/data-manager.js"></script>
+    <script src="../js/lib/hammer.min.js"></script>
+    <script src="../js/data-manager.js"></script>
     <script src="../js/score-manager.js"></script>
-        <script src="../js/audio-vibration.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
+    <script src="../js/audio-vibration.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
 
-                                // 初始化音频模块
-
-                                gameAudioVibration.initAudio();
+            // 初始化音频模块
+            gameAudioVibration.initAudio();
 
                                 
 
@@ -424,9 +423,9 @@
 
                                 function playPaddleHitSound() {
 
-                                    gameAudioVibration.playSound(300, 100, 'sine', 0.1);
+                                    gameAudioVibration.playClickSound();
 
-                                    gameAudioVibration.vibrate(50);
+                                    gameAudioVibration.vibrateShort();
 
                                 }
 
@@ -434,9 +433,9 @@
 
                                 function playBrickHitSound() {
 
-                                    gameAudioVibration.playSound(500, 150, 'square', 0.15);
+                                    gameAudioVibration.playSuccessSound();
 
-                                    gameAudioVibration.vibrate(70);
+                                    gameAudioVibration.vibrateMedium();
 
                                 }
 
@@ -444,9 +443,9 @@
 
                                 function playWallHitSound() {
 
-                                    gameAudioVibration.playSound(200, 80, 'sine', 0.08);
+                                    gameAudioVibration.playErrorSound();
 
-                                    gameAudioVibration.vibrate(30);
+                                    gameAudioVibration.vibrateShort();
 
                                 }
 

@@ -386,9 +386,9 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
     <script src="../js/lib/hammer.min.js"></script>
     <script src="../js/data-manager.js"></script>
-    <script src="../js/audio-vibration.js"></script>
     <script>
         // 2048核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
@@ -442,122 +442,37 @@
             
             // 移动音效
             function playMoveSound() {
-                if (!audioContext) return;
-                
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.type = 'sine';
-                oscillator.frequency.value = 220;
-                gainNode.gain.value = 0.1;
-                
-                oscillator.start();
-                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.3);
-                
-                setTimeout(() => {
-                    oscillator.stop();
-                }, 300);
+                if (gameAudioVibration) {
+                    gameAudioVibration.playClickSound(); // 使用新的音频模块
+                }
             }
             
             // 合并音效
             function playMergeSound() {
-                if (!audioContext) return;
-                
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.type = 'sine';
-                oscillator.frequency.value = 330;
-                gainNode.gain.value = 0.15;
-                
-                oscillator.start();
-                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.3);
-                
-                setTimeout(() => {
-                    oscillator.stop();
-                }, 300);
+                if (gameAudioVibration) {
+                    gameAudioVibration.playSuccessSound(); // 使用新的音频模块
+                }
             }
             
             // 游戏结束音效
             function playGameOverSound() {
-                if (!audioContext) return;
-                
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.type = 'sine';
-                
-                // 播放下降的音调
-                oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.8);
-                
-                gainNode.gain.value = 0.15;
-                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.8);
-                
-                oscillator.start();
-                
-                setTimeout(() => {
-                    oscillator.stop();
-                }, 800);
+                if (gameAudioVibration) {
+                    gameAudioVibration.playLoseSound(); // 使用新的音频模块
+                }
             }
             
             // 获胜音效
             function playWinSound() {
-                if (!audioContext) return;
-                
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.type = 'sine';
-                
-                // 播放上升的音调
-                oscillator.frequency.setValueAtTime(261.63, audioContext.currentTime); // C
-                oscillator.frequency.exponentialRampToValueAtTime(329.63, audioContext.currentTime + 0.2); // E
-                oscillator.frequency.exponentialRampToValueAtTime(392.00, audioContext.currentTime + 0.4); // G
-                oscillator.frequency.exponentialRampToValueAtTime(523.25, audioContext.currentTime + 0.6); // C
-                
-                gainNode.gain.value = 0.15;
-                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.8);
-                
-                oscillator.start();
-                
-                setTimeout(() => {
-                    oscillator.stop();
-                }, 800);
+                if (gameAudioVibration) {
+                    gameAudioVibration.playWinSound(); // 使用新的音频模块
+                }
             }
             
             // 新方块出现音效
             function playNewTileSound() {
-                if (!audioContext) return;
-                
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.type = 'sine';
-                oscillator.frequency.value = 523.25; // C5
-                gainNode.gain.value = 0.1;
-                
-                oscillator.start();
-                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.2);
-                
-                setTimeout(() => {
-                    oscillator.stop();
-                }, 200);
+                if (gameAudioVibration) {
+                    gameAudioVibration.playClickSound(); // 使用新的音频模块
+                }
             }
             
             // 初始化游戏

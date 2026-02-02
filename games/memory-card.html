@@ -496,6 +496,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
     <script src="../js/data-manager.js"></script>
     <script>
         // 记忆卡牌核心游戏逻辑
@@ -566,102 +567,27 @@
             
             // 音效函数
             function playFlipSound() {
-                if (!audioContext) return;
-                
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.type = 'sine';
-                oscillator.frequency.value = 300;
-                gainNode.gain.value = 0.1;
-                
-                oscillator.start();
-                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.2);
-                
-                setTimeout(() => {
-                    oscillator.stop();
-                }, 200);
+                if (gameAudioVibration) {
+                    gameAudioVibration.playCardFlipSound();
+                }
             }
             
             function playMatchSound() {
-                if (!audioContext) return;
-                
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.type = 'sine';
-                
-                // 播放上升的音调
-                oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.2);
-                oscillator.frequency.exponentialRampToValueAtTime(500, audioContext.currentTime + 0.4);
-                
-                gainNode.gain.value = 0.15;
-                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.5);
-                
-                oscillator.start();
-                
-                setTimeout(() => {
-                    oscillator.stop();
-                }, 500);
+                if (gameAudioVibration) {
+                    gameAudioVibration.playMatchSound();
+                }
             }
             
             function playMismatchSound() {
-                if (!audioContext) return;
-                
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.type = 'sine';
-                
-                // 播放下降的音调
-                oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.3);
-                
-                gainNode.gain.value = 0.1;
-                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.4);
-                
-                oscillator.start();
-                
-                setTimeout(() => {
-                    oscillator.stop();
-                }, 400);
+                if (gameAudioVibration) {
+                    gameAudioVibration.playMismatchSound();
+                }
             }
             
             function playWinSound() {
-                if (!audioContext) return;
-                
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.type = 'sine';
-                
-                // 播放上升的音调
-                oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.2);
-                oscillator.frequency.exponentialRampToValueAtTime(500, audioContext.currentTime + 0.4);
-                oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.6);
-                
-                gainNode.gain.value = 0.2;
-                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.8);
-                
-                oscillator.start();
-                
-                setTimeout(() => {
-                    oscillator.stop();
-                }, 800);
+                if (gameAudioVibration) {
+                    gameAudioVibration.playWinSound();
+                }
             }
             
             // 震动反馈函数
