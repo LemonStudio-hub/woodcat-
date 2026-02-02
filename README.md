@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="https://lemonstudio-hub.github.io/woodcat/"><strong>🎮 在线体验</strong></a> •
+  <a href="https://www.woodcat.online"><strong>🌐 官网</strong></a> •
   <a href="#-游戏列表"><strong>🎮 游戏列表</strong></a> •
   <a href="#-特色功能"><strong>✨ 特色功能</strong></a> •
   <a href="#%EF%B8%8F-安装"><strong>🛠️ 安装</strong></a>
@@ -193,7 +193,8 @@ woodcat/
 遇到问题或有建议？请随时通过以下方式联系：
 
 - 🐛 [Issue Tracker](https://github.com/LemonStudio-hub/woodcat/issues)
-- 📧 lemonstudio-hub@outlook.com
+- 🌐 [官网](https://www.woodcat.online)
+- 📧 lemonhub@163.com
 
 ---
 
