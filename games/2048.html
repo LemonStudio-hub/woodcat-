@@ -92,9 +92,6 @@
         }
         
         .game-board {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(4, 1fr);
             width: 100%;
             aspect-ratio: 1/1;
             background: #bbada0;
@@ -104,9 +101,11 @@
             position: relative;
             touch-action: none; /* 禁用默认触摸行为 */
             overflow: hidden;
+            box-sizing: border-box;
         }
         
         .cell {
+            position: absolute;
             background: rgba(238, 228, 218, 0.35);
             border-radius: 6px;
             display: flex;
@@ -115,6 +114,8 @@
             font-weight: bold;
             font-size: 20px;
             transition: all 0.15s ease;
+            width: calc(25% - 6px);
+            height: calc(25% - 6px);
         }
         
         .tile {
@@ -519,6 +520,8 @@
                     for (let x = 0; x < GRID_SIZE; x++) {
                         const cell = document.createElement('div');
                         cell.className = 'cell';
+                        cell.style.top = `${y * 25}%`;
+                        cell.style.left = `${x * 25}%`;
                         boardElement.appendChild(cell);
                     }
                 }
@@ -531,10 +534,12 @@
                             tile.className = `tile tile-${grid[y][x]} new`;
                             tile.textContent = grid[y][x];
                             // 设置位置
-                            tile.style.top = `${y * (100/GRID_SIZE)}%`;
-                            tile.style.left = `${x * (100/GRID_SIZE)}%`;
-                            tile.style.width = `calc(${100/GRID_SIZE}% - 6px)`;
-                            tile.style.height = `calc(${100/GRID_SIZE}% - 6px)`;
+                            tile.style.top = `${y * 25}%`;
+                            tile.style.left = `${x * 25}%`;
+                            tile.style.width = `calc(25% - 6px)`;
+                            tile.style.height = `calc(25% - 6px)`;
+                            // 添加内边距以匹配网格布局
+                            tile.style.padding = '3px';
                             boardElement.appendChild(tile);
                             
                             // 动画结束后移除 new 类
