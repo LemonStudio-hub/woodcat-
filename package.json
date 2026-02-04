@@ -2,12 +2,14 @@
   "name": "woodcat",
   "version": "1.0.0",
   "description": "木头猫 - 小游戏合集",
+  "type": "module",
   "main": "js/main.js",
   "scripts": {
-    "start": "python -m http.server 8000",
-    "dev": "python -m http.server 8000",
-    "lint": "echo 'No linting configured yet'",
-    "test": "echo 'No tests configured yet'"
+    "dev": "vite",
+    "build": "vite build",
+    "postbuild": "node postbuild.js",
+    "preview": "vite preview",
+    "start": "vite preview"
   },
   "keywords": [
     "games",
@@ -18,6 +20,20 @@
   "author": "Woodcat",
   "license": "MIT",
   "dependencies": {
-    "@supabase/supabase-js": "^2.0.0"
-  }
+    "@supabase/supabase-js": "^2.0.0",
+    "@vitejs/plugin-vue": "^6.0.4",
+    "vue": "^3.5.27"
+  },
+  "devDependencies": {
+    "terser": "^5.46.0",
+    "vite": "^7.3.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LemonStudio-hub/woodcat-.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LemonStudio-hub/woodcat-/issues"
+  },
+  "homepage": "https://github.com/LemonStudio-hub/woodcat-#readme"
 }

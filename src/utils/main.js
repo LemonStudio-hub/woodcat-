@@ -58,35 +58,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 为每个游戏卡片添加点击事件 - 这是关键部分，必须优先执行
     gameCards.forEach(card => {
-        // 添加触摸事件支持（移动端优化）
-        card.addEventListener('touchstart', function(e) {
-            // 记录触摸开始时间，用于区分点击和滑动
-            this.touchStartTime = Date.now();
-            this.touchStartY = e.touches[0].clientY;
-        }, { passive: true });
-
-        // 添加触摸结束事件
-        card.addEventListener('touchend', function(e) {
-            // 如果触摸时间小于300ms且移动距离小于10px，则认为是点击
-            const touchDuration = Date.now() - this.touchStartTime;
-            const touchEndY = e.changedTouches[0].clientY;
-            const touchDistance = Math.abs(touchEndY - this.touchStartY);
-
-            if (touchDuration < 300 && touchDistance < 10) {
-                // 阻止默认行为和事件冒泡
-                e.preventDefault();
-                e.stopPropagation();
-
-                const gameId = this.getAttribute('data-game');
-                const game = games[gameId];
-                if (game && game.url) {
-                    // 直接跳转到游戏页面
-                    window.location.href = game.url;
-                }
-            }
-        }, { passive: false });
-
-        // 保留原有的点击事件（桌面端）
         card.addEventListener('click', function(e) {
             e.preventDefault(); // 防止默认行为
             const gameId = this.getAttribute('data-game');
@@ -446,61 +417,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 移动端菜单按钮
         const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-
+        
         if (mobileMenuBtn) {
-            // 添加触摸事件支持（移动端优化）
-            mobileMenuBtn.addEventListener('touchstart', function(e) {
-                // 记录触摸开始时间
-                this.touchStartTime = Date.now();
-            }, { passive: true });
-
-            // 添加触摸结束事件
-            mobileMenuBtn.addEventListener('touchend', function(e) {
-                // 如果触摸时间小于300ms，则认为是点击
-                const touchDuration = Date.now() - this.touchStartTime;
-
-                if (touchDuration < 300) {
-                    // 阻止默认行为和事件冒泡
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    const nav = document.querySelector('.nav');
-                    const navList = nav.querySelector('ul');
-
-                    // 检查当前窗口大小
-                    if (window.innerWidth <= 768) { // 移动端
-                        // 检查当前显示状态
-                        if (navList.style.display === 'flex' || getComputedStyle(navList).display === 'flex') {
-                            // 菜单当前显示，需要隐藏
-                            navList.style.display = 'none';
-                            this.classList.remove('active');
-                        } else {
-                            // 菜单当前隐藏，需要显示
-                            navList.style.display = 'flex';
-                            navList.style.flexDirection = 'column';
-                            this.classList.add('active'); // 添加active类来实现动画效果
-
-                            // 检查是否已经添加了反馈项，避免重复添加
-                            const existingFeedbackItem = navList.querySelector('.feedback-menu-item');
-                            if (!existingFeedbackItem) {
-                                const feedbackItem = document.createElement('li');
-                                feedbackItem.className = 'feedback-menu-item';
-                                feedbackItem.innerHTML = '<a href="feedback.html">反馈与支持</a>';
-                                navList.appendChild(feedbackItem);
-                            }
-                        }
-                    }
-                }
-            }, { passive: false });
-
-            // 保留原有的点击事件（桌面端）
             mobileMenuBtn.addEventListener('click', function(e) {
                 e.preventDefault(); // 防止默认行为
                 e.stopPropagation(); // 阻止事件冒泡
-
+                
                 const nav = document.querySelector('.nav');
                 const navList = nav.querySelector('ul');
-
+                
                 // 检查当前窗口大小
                 if (window.innerWidth <= 768) { // 移动端
                     // 检查当前显示状态
@@ -513,7 +438,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         navList.style.display = 'flex';
                         navList.style.flexDirection = 'column';
                         this.classList.add('active'); // 添加active类来实现动画效果
-
+                        
                         // 检查是否已经添加了反馈项，避免重复添加
                         const existingFeedbackItem = navList.querySelector('.feedback-menu-item');
                         if (!existingFeedbackItem) {

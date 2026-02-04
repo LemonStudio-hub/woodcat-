@@ -611,14 +611,22 @@
     <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
     <script src="../js/modal.js"></script>
     <script src="../js/data-manager.js"></script>
+    <script src="../js/score-manager.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // 加载统计数据
-            const gameStats = gameDataManager.loadData('tic-tac-toe', 'stats', {
-                playerXWins: 0,
-                playerOWins: 0,
-                draws: 0
-            });
+            // 初始化游戏数据管理器
+            let gameStats = scoreManager.getGameStats('tic-tac-toe');
+            if (!gameStats || typeof gameStats !== 'object') {
+                gameStats = {
+                    wins: 0,
+                    losses: 0,
+                    draws: 0,
+                    totalGames: 0
+                };
+            }
+            let playerXWins = gameStats.wins;
+            let playerOWins = gameStats.losses;
+            let draws = gameStats.draws;
             const board = document.getElementById('board');
             const cells = document.querySelectorAll('.cell');
             const turnIndicator = document.getElementById('turn-indicator');
@@ -769,6 +777,113 @@
                 return null;
             }
             
+            // 创建音频震动对象
+            const gameAudioVibration = {
+                // 音效对象
+                sounds: {},
+                
+                // 初始化音频
+                init: function() {
+                    // 初始化音效（如果需要）
+                },
+                
+                // 播放点击音效
+                playClickSound: function() {
+                    // 使用Web Audio API播放简单的点击音效
+                    try {
+                        if (audioContext) {
+                            const oscillator = audioContext.createOscillator();
+                            const gainNode = audioContext.createGain();
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+                            
+                            oscillator.type = 'square';
+                            oscillator.frequency.value = 523.25; // C5
+                            gainNode.gain.value = 0.1;
+                            
+                            oscillator.start();
+                            setTimeout(() => {
+                                oscillator.stop();
+                            }, 100);
+                        }
+                    } catch (e) {
+                        // 如果Web Audio不可用，忽略错误
+                    }
+                },
+                
+                // 播放胜利音效
+                playWinSound: function() {
+                    // 使用Web Audio API播放简单的胜利音效
+                    try {
+                        if (audioContext) {
+                            const oscillator = audioContext.createOscillator();
+                            const gainNode = audioContext.createGain();
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+                            
+                            oscillator.type = 'sine';
+                            oscillator.frequency.value = 783.99; // G5
+                            gainNode.gain.value = 0.1;
+                            
+                            oscillator.start();
+                            setTimeout(() => {
+                                oscillator.stop();
+                            }, 300);
+                        }
+                    } catch (e) {
+                        // 如果Web Audio不可用，忽略错误
+                    }
+                },
+                
+                // 播放错误音效
+                playErrorSound: function() {
+                    // 使用Web Audio API播放简单的错误音效
+                    try {
+                        if (audioContext) {
+                            const oscillator = audioContext.createOscillator();
+                            const gainNode = audioContext.createGain();
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+                            
+                            oscillator.type = 'sine';
+                            oscillator.frequency.value = 349.23; // F4
+                            gainNode.gain.value = 0.1;
+                            
+                            oscillator.start();
+                            setTimeout(() => {
+                                oscillator.stop();
+                            }, 200);
+                        }
+                    } catch (e) {
+                        // 如果Web Audio不可用，忽略错误
+                    }
+                },
+                
+                // 短震动
+                vibrateShort: function() {
+                    if (navigator.vibrate) {
+                        navigator.vibrate(50);
+                    }
+                },
+                
+                // 中等震动
+                vibrateMedium: function() {
+                    if (navigator.vibrate) {
+                        navigator.vibrate(100);
+                    }
+                },
+                
+                // 成功震动
+                vibrateSuccess: function() {
+                    if (navigator.vibrate) {
+                        navigator.vibrate([100, 50, 100]);
+                    }
+                }
+            };
+            
             // 创建音频上下文 - 移动端需要用户交互后才能播放音频
             let audioContext = null;
             let audioInitialized = false;
@@ -785,6 +900,9 @@
                         // 尝试恢复音频上下文
                         audioContext.resume();
                     }
+                    
+                    // 初始化音频震动对象
+                    gameAudioVibration.init();
                     
                     audioInitialized = true;
                 } catch (e) {
@@ -966,12 +1084,24 @@
                 playerOWinsEl.textContent = playerOWins;
                 drawsEl.textContent = draws;
                 
-                // 保存统计数据
-                gameDataManager.saveData('tic-tac-toe', 'stats', {
-                    playerXWins: playerXWins,
-                    playerOWins: playerOWins,
-                    draws: draws
-                });
+                // 更新统计数据
+                if (winner === 'X') {
+                    if (gameMode === 'pvc') {
+                        scoreManager.recordGameResult('tic-tac-toe', 'loss', 0); // 玩家失败
+                    } else {
+                        // 双人对战模式，根据具体是哪个玩家获胜记录结果
+                        scoreManager.recordGameResult('tic-tac-toe', 'win', 1); // 玩家X获胜
+                    }
+                } else if (winner === 'O') {
+                    if (gameMode === 'pvc') {
+                        scoreManager.recordGameResult('tic-tac-toe', 'win', 1); // AI获胜，玩家失败
+                    } else {
+                        // 双人对战模式，玩家O获胜
+                        scoreManager.recordGameResult('tic-tac-toe', 'win', 1);
+                    }
+                } else {
+                    scoreManager.recordGameResult('tic-tac-toe', 'draw', 0);
+                }
                 
                 // 显示结果，但不自动开始新游戏
                 showGameResult(title, message);

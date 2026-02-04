@@ -569,12 +569,16 @@
     <script>
         // 国际象棋核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
-            // 加载统计数据
-            let gameStats = gameDataManager.loadData('chess', 'stats', {
-                whiteWins: 0,
-                blackWins: 0,
-                totalGames: 0
-            });
+            // 初始化游戏数据管理器
+            let gameStats = scoreManager.getGameStats('chess');
+            if (!gameStats || typeof gameStats !== 'object') {
+                gameStats = {
+                    wins: 0,
+                    losses: 0,
+                    draws: 0,
+                    totalGames: 0
+                };
+            }
             const board = document.getElementById('board');
             const changeModeBtn = document.getElementById('change-mode-btn');
             const currentModeSpan = document.getElementById('current-mode');
@@ -590,6 +594,113 @@
             let whiteScore = 0;
             let blackScore = 0;
             let gameMode = 'pvp'; // 'pvp' for player vs player, 'pvc' for player vs computer
+            
+            // 创建音频震动对象
+            const gameAudioVibration = {
+                // 音效对象
+                sounds: {},
+                
+                // 初始化音频
+                init: function() {
+                    // 初始化音效（如果需要）
+                },
+                
+                // 播放点击音效
+                playClickSound: function() {
+                    // 使用Web Audio API播放简单的点击音效
+                    try {
+                        if (audioContext) {
+                            const oscillator = audioContext.createOscillator();
+                            const gainNode = audioContext.createGain();
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+                            
+                            oscillator.type = 'square';
+                            oscillator.frequency.value = 440;
+                            gainNode.gain.value = 0.1;
+                            
+                            oscillator.start();
+                            setTimeout(() => {
+                                oscillator.stop();
+                            }, 50);
+                        }
+                    } catch (e) {
+                        // 如果Web Audio不可用，忽略错误
+                    }
+                },
+                
+                // 播放成功音效
+                playSuccessSound: function() {
+                    // 使用Web Audio API播放简单的成功音效
+                    try {
+                        if (audioContext) {
+                            const oscillator = audioContext.createOscillator();
+                            const gainNode = audioContext.createGain();
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+                            
+                            oscillator.type = 'sine';
+                            oscillator.frequency.value = 660;
+                            gainNode.gain.value = 0.1;
+                            
+                            oscillator.start();
+                            setTimeout(() => {
+                                oscillator.stop();
+                            }, 100);
+                        }
+                    } catch (e) {
+                        // 如果Web Audio不可用，忽略错误
+                    }
+                },
+                
+                // 播放胜利音效
+                playWinSound: function() {
+                    // 使用Web Audio API播放简单的胜利音效
+                    try {
+                        if (audioContext) {
+                            const oscillator = audioContext.createOscillator();
+                            const gainNode = audioContext.createGain();
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+                            
+                            oscillator.type = 'sine';
+                            oscillator.frequency.value = 880;
+                            gainNode.gain.value = 0.1;
+                            
+                            oscillator.start();
+                            setTimeout(() => {
+                                oscillator.stop();
+                            }, 300);
+                        }
+                    } catch (e) {
+                        // 如果Web Audio不可用，忽略错误
+                    }
+                },
+                
+                // 短震动
+                vibrateShort: function() {
+                    if (navigator.vibrate) {
+                        navigator.vibrate(50);
+                    }
+                },
+                
+                // 中等震动
+                vibrateMedium: function() {
+                    if (navigator.vibrate) {
+                        navigator.vibrate(100);
+                    }
+                },
+                
+                // 成功震动
+                vibrateSuccess: function() {
+                    if (navigator.vibrate) {
+                        navigator.vibrate([100, 50, 100]);
+                    }
+                }
+            };
             
             // 创建音频上下文 - 移动端需要用户交互后才能播放音频
             let audioContext = null;
@@ -607,6 +718,9 @@
                         // 尝试恢复音频上下文
                         audioContext.resume();
                     }
+                    
+                    // 初始化音频震动对象
+                    gameAudioVibration.init();
                     
                     audioInitialized = true;
                 } catch (e) {
@@ -1273,7 +1387,13 @@
                         // 在人机对战模式下，玩家移动后轮到AI移动
                         // 由于movePiece中已经切换了currentPlayer，现在应该是黑方回合
                         if (gameMode === 'pvc' && currentPlayer === 'black' && !gameOver) {
-                            setTimeout(() => aiMove(), 500);
+                            // 稍微延迟执行AI移动，让玩家看到棋子移动的效果
+                            setTimeout(() => {
+                                // 在执行AI移动前，再次确认游戏没有结束且仍是AI回合
+                                if (!gameOver && currentPlayer === 'black') {
+                                    aiMove();
+                                }
+                            }, 500);
                         }
                         
                         clearSelection();
@@ -1478,29 +1598,22 @@
                             }
                         }
                         
-                        // 更新总游戏数
-                        gameStats.totalGames++;
-                        
-                        // 保存统计数据
-                        let result = 'win';
-                        if (gameMode === 'pvc') {
-                            // 在人机对战模式中，需要根据玩家颜色判断结果
-                            if (piece.color === 'white') {
-                                scoreManager.recordGameResult('chess', 'win', 1); // 胜利
-                            } else {
-                                scoreManager.recordGameResult('chess', 'loss', 0); // 失败
-                            }
-                        } else {
-                            // 在双人对战模式中，记录双方的胜负
-                            if (piece.color === 'white') {
-                                scoreManager.recordGameResult('chess', 'win', 1);
-                            } else {
-                                scoreManager.recordGameResult('chess', 'win', 1);
-                            }
-                        }
-                        
-                        gameDataManager.saveData('chess', 'stats', gameStats);
-                        
+                                            // 更新统计数据
+                                            if (gameMode === 'pvc') {
+                                                // 在人机对战模式中，需要根据玩家颜色判断结果
+                                                if (piece.color === 'white') {
+                                                    scoreManager.recordGameResult('chess', 'win', 1); // 玩家胜利
+                                                } else {
+                                                    scoreManager.recordGameResult('chess', 'loss', 0); // 玩家失败
+                                                }
+                                            } else {
+                                                // 在双人对战模式中，记录胜负
+                                                if (piece.color === 'white') {
+                                                    scoreManager.recordGameResult('chess', 'win', 1); // 白方获胜
+                                                } else {
+                                                    scoreManager.recordGameResult('chess', 'win', 1); // 黑方获胜
+                                                }
+                                            }                        
                         alert(`${winner}吃掉了对方的国王！`);
                         
                         // 为获胜方的国王添加胜利动画
@@ -1682,6 +1795,16 @@
             
             // 重置游戏（保留当前模式）
             function resetGame() {
+                // 重新获取统计数据以确保显示正确
+                gameStats = scoreManager.getGameStats('chess');
+                if (!gameStats || typeof gameStats !== 'object') {
+                    gameStats = {
+                        wins: 0,
+                        losses: 0,
+                        draws: 0,
+                        totalGames: 0
+                    };
+                }
                 initBoard();
             }
             

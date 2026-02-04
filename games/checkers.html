@@ -615,15 +615,20 @@
 
     <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
     <script src="../js/data-manager.js"></script>
+    <script src="../js/score-manager.js"></script>
     <script>
         // 跳棋核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
-            // 加载统计数据
-            let gameStats = gameDataManager.loadData('checkers', 'stats', {
-                playerWins: 0,
-                aiWins: 0,
-                totalGames: 0
-            });
+            // 初始化游戏数据管理器
+            let gameStats = scoreManager.getGameStats('checkers');
+            if (!gameStats || typeof gameStats !== 'object') {
+                gameStats = {
+                    wins: 0,
+                    losses: 0,
+                    draws: 0,
+                    totalGames: 0
+                };
+            }
             const board = document.getElementById('board');
             const changeModeBtn = document.getElementById('change-mode-btn');
             const currentModeSpan = document.getElementById('current-mode');
@@ -639,6 +644,113 @@
             let player1Pieces = 12;
             let player2Pieces = 12;
             let gameMode = 'pvp'; // 'pvp' for player vs player, 'pvc' for player vs computer
+            
+            // 创建音频震动对象
+            const gameAudioVibration = {
+                // 音效对象
+                sounds: {},
+                
+                // 初始化音频
+                init: function() {
+                    // 初始化音效（如果需要）
+                },
+                
+                // 播放点击音效
+                playClickSound: function() {
+                    // 使用Web Audio API播放简单的点击音效
+                    try {
+                        if (audioContext) {
+                            const oscillator = audioContext.createOscillator();
+                            const gainNode = audioContext.createGain();
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+                            
+                            oscillator.type = 'square';
+                            oscillator.frequency.value = 440;
+                            gainNode.gain.value = 0.1;
+                            
+                            oscillator.start();
+                            setTimeout(() => {
+                                oscillator.stop();
+                            }, 50);
+                        }
+                    } catch (e) {
+                        // 如果Web Audio不可用，忽略错误
+                    }
+                },
+                
+                // 播放成功音效
+                playSuccessSound: function() {
+                    // 使用Web Audio API播放简单的成功音效
+                    try {
+                        if (audioContext) {
+                            const oscillator = audioContext.createOscillator();
+                            const gainNode = audioContext.createGain();
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+                            
+                            oscillator.type = 'sine';
+                            oscillator.frequency.value = 660;
+                            gainNode.gain.value = 0.1;
+                            
+                            oscillator.start();
+                            setTimeout(() => {
+                                oscillator.stop();
+                            }, 100);
+                        }
+                    } catch (e) {
+                        // 如果Web Audio不可用，忽略错误
+                    }
+                },
+                
+                // 播放胜利音效
+                playWinSound: function() {
+                    // 使用Web Audio API播放简单的胜利音效
+                    try {
+                        if (audioContext) {
+                            const oscillator = audioContext.createOscillator();
+                            const gainNode = audioContext.createGain();
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+                            
+                            oscillator.type = 'sine';
+                            oscillator.frequency.value = 880;
+                            gainNode.gain.value = 0.1;
+                            
+                            oscillator.start();
+                            setTimeout(() => {
+                                oscillator.stop();
+                            }, 300);
+                        }
+                    } catch (e) {
+                        // 如果Web Audio不可用，忽略错误
+                    }
+                },
+                
+                // 短震动
+                vibrateShort: function() {
+                    if (navigator.vibrate) {
+                        navigator.vibrate(50);
+                    }
+                },
+                
+                // 中等震动
+                vibrateMedium: function() {
+                    if (navigator.vibrate) {
+                        navigator.vibrate(100);
+                    }
+                },
+                
+                // 成功震动
+                vibrateSuccess: function() {
+                    if (navigator.vibrate) {
+                        navigator.vibrate([100, 50, 100]);
+                    }
+                }
+            };
             
             // 创建音频上下文 - 移动端需要用户交互后才能播放音频
             let audioContext = null;
@@ -656,6 +768,9 @@
                         // 尝试恢复音频上下文
                         audioContext.resume();
                     }
+                    
+                    // 初始化音频震动对象
+                    gameAudioVibration.init();
                     
                     audioInitialized = true;
                 } catch (e) {
@@ -920,7 +1035,18 @@
             
             // 恢复游戏状态
             function restoreGameState(state) {
-                gameBoard = state.board;
+                // 深拷贝棋盘状态，避免引用问题
+                gameBoard = [];
+                for (let r = 0; r < 8; r++) {
+                    gameBoard[r] = [];
+                    for (let c = 0; c < 8; c++) {
+                        if (state.board[r][c]) {
+                            gameBoard[r][c] = { ...state.board[r][c] }; // 复制棋子对象
+                        } else {
+                            gameBoard[r][c] = null;
+                        }
+                    }
+                }
                 currentPlayer = state.currentPlayer;
                 gameOver = state.gameOver;
                 moveCount = state.moveCount;
@@ -997,8 +1123,13 @@
                     }
                 }
                 
-                // 移动棋子
-                gameBoard[toRow][toCol] = {...piece}; // 复制棋子对象
+                // 移动棋子 - 确保复制整个棋子对象
+                if (piece) {
+                    gameBoard[toRow][toCol] = {
+                        player: piece.player,
+                        isKing: piece.isKing
+                    };
+                }
                 
                 // 检查是否需要升级为王
                 if (!piece.isKing) {
@@ -1337,9 +1468,15 @@
                                 const nextJump = continueJumps[0];
                                 movePiece(toRow, toCol, nextJump[0], nextJump[1]);
                             }, 500);
-                        } else if (gameMode === 'pvp') {
-                            // 在双人模式下，当前玩家可以继续移动
-                            // 保持当前玩家不变
+                        } else {
+                            // 在双人模式下或人机模式下玩家的回合，当前玩家可以继续移动
+                            // 保持当前玩家不变，并高亮显示可继续跳跃的位置
+                            selectedPiece = { row: toRow, col: toCol, piece: gameBoard[toRow][toCol] };
+                            const cell = document.querySelector(`.cell[data-row="${toRow}"][data-col="${toCol}"]`);
+                            if (cell) {
+                                cell.classList.add('selected');
+                                highlightValidMoves(toRow, toCol);
+                            }
                             updateScores();
                             updateMoveCount();
                             return; // 不切换玩家
@@ -1395,12 +1532,15 @@
                             alert('AI获胜！再试一次吧！');
                         } else {
                             // 玩家2获胜
-                            gameStats.player2Wins = (gameStats.player2Wins || 0) + 1;
                             alert('玩家2获胜！');
                         }
-                        // 更新总游戏数并保存统计数据
-                        gameStats.totalGames = (gameStats.totalGames || 0) + 1;
-                        gameDataManager.saveData('checkers', 'stats', gameStats);
+                        // 更新统计数据
+                        if (gameMode === 'pvc') {
+                            scoreManager.recordGameResult('checkers', 'loss', 0); // 玩家失败
+                        } else {
+                            // 在双人对战中，记录玩家2获胜
+                            scoreManager.recordGameResult('checkers', 'win', 1); // 记录玩家2获胜
+                        }
                     }, 100);
                 } else if (p2Count === 0) {
                     gameOver = true;
@@ -1412,12 +1552,15 @@
                             alert('恭喜你获胜！');
                         } else {
                             // 玩家1获胜
-                            gameStats.player1Wins = (gameStats.player1Wins || 0) + 1;
                             alert('玩家1获胜！');
                         }
-                        // 更新总游戏数并保存统计数据
-                        gameStats.totalGames = (gameStats.totalGames || 0) + 1;
-                        gameDataManager.saveData('checkers', 'stats', gameStats);
+                        // 更新统计数据
+                        if (gameMode === 'pvc') {
+                            scoreManager.recordGameResult('checkers', 'win', 1); // 玩家获胜
+                        } else {
+                            // 在双人对战中，记录玩家1获胜
+                            scoreManager.recordGameResult('checkers', 'win', 1); // 记录玩家1获胜
+                        }
                     }, 100);
                 } else if (p1Count !== player1Pieces || p2Count !== player2Pieces) {
                     // 更新计数器
