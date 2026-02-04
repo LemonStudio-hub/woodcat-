@@ -9,7 +9,8 @@
     "build": "vite build",
     "postbuild": "node postbuild.js",
     "preview": "vite preview",
-    "start": "vite preview"
+    "start": "vite preview",
+    "lint": "eslint ."
   },
   "keywords": [
     "games",
@@ -29,6 +30,7 @@
   "devDependencies": {
     "@vue/test-utils": "^2.4.6",
     "cypress": "^15.10.0",
+    "eslint": "^9.39.2",
     "happy-dom": "^20.5.0",
     "terser": "^5.46.0",
     "vite": "^7.3.1",
