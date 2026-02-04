@@ -27,6 +27,11 @@
 </template>
 
 <script setup>
+/**
+ * 木头猫游戏合集 - 主应用组件
+ * 负责协调各个子组件和全局状态管理
+ * 包含：头部导航、英雄区域、游戏列表、排行榜、分数提交模态框
+ */
 import { ref, onMounted, computed } from 'vue';
 import Header from './components/Header.vue';
 import Navigation from './components/Navigation.vue';
@@ -46,30 +51,49 @@ const scoreModalVisible = ref(false);
 const scoreModalScore = ref(0);
 const scoreModalGame = ref('');
 
-// 计算属性
+/**
+ * 计算属性：移动端菜单状态
+ */
 const isMenuOpen = computed(() => appStore.isMenuOpen);
 
-// 方法
+/**
+ * 切换移动端菜单显示状态
+ */
 const toggleMenu = () => {
   appStore.toggleMenu();
 };
 
+/**
+ * 关闭移动端菜单
+ */
 const closeMenu = () => {
   appStore.closeMenu();
 };
 
+/**
+ * 打开分数提交模态框
+ * @param {number} score - 游戏分数
+ * @param {string} game - 游戏名称
+ */
 const openScoreModal = (score, game) => {
   scoreModalScore.value = score;
   scoreModalGame.value = game;
   scoreModalVisible.value = true;
 };
 
+/**
+ * 关闭分数提交模态框
+ */
 const closeScoreModal = () => {
   scoreModalVisible.value = false;
   scoreModalScore.value = 0;
   scoreModalGame.value = '';
 };
 
+/**
+ * 提交分数到排行榜
+ * @param {string} playerName - 玩家名称
+ */
 const submitScore = async (playerName) => {
   try {
     await leaderboardStore.submitScore(
@@ -83,27 +107,40 @@ const submitScore = async (playerName) => {
   }
 };
 
-// 检查URL参数中的分数
+/**
+ * 检查URL参数中的分数
+ * 用于从游戏页面返回时自动打开分数提交对话框
+ */
 const checkForScoreSubmission = () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const score = urlParams.get('score');
-  const game = urlParams.get('game');
-  
-  if (score && game) {
-    openScoreModal(parseInt(score), game);
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const score = urlParams.get('score');
+    const game = urlParams.get('game');
+    
+    if (score && game) {
+      openScoreModal(parseInt(score), game);
+    }
+  } catch (error) {
+    console.error('检查URL参数失败:', error);
   }
 };
 
-// 生命周期
+/**
+ * 组件挂载时初始化
+ */
 onMounted(() => {
-  // 初始化应用
-  appStore.initApp();
-  // 开始网络状态监控
-  appStore.startNetworkMonitoring();
-  // 开始窗口大小变化监控
-  appStore.startResizeMonitoring();
-  // 检查URL参数中的分数
-  checkForScoreSubmission();
+  try {
+    // 初始化应用
+    appStore.initApp();
+    // 开始网络状态监控
+    appStore.startNetworkMonitoring();
+    // 开始窗口大小变化监控
+    appStore.startResizeMonitoring();
+    // 检查URL参数中的分数
+    checkForScoreSubmission();
+  } catch (error) {
+    console.error('组件初始化失败:', error);
+  }
 });
 </script>
 
