@@ -63,6 +63,12 @@
 - ⚡ **流畅动画** - 60FPS平滑游戏体验
 - 🔔 **震动反馈** - 支持设备震动反馈
 
+### 🧪 测试保障
+- ✅ **单元测试** - 使用Vitest进行组件测试
+- 🔄 **集成测试** - 测试组件间的交互
+- 🎯 **E2E测试** - 使用Cypress进行端到端测试
+- 📊 **测试覆盖率** - 确保代码质量
+
 ---
 
 ## 🛠️ 安装
@@ -101,6 +107,16 @@ pnpm build
 
 # 预览构建结果
 pnpm preview
+```
+
+### 运行测试
+
+```bash
+# 运行单元测试
+npx vitest run
+
+# 运行E2E测试
+npx cypress run
 ```
 
 ### 部署到生产环境
@@ -146,7 +162,15 @@ woodcat/
 │   │   ├── Navigation.vue # 导航组件
 │   │   ├── Hero.vue     # 英雄区域组件
 │   │   ├── GamesSection.vue # 游戏列表组件
-│   │   └── GameCard.vue # 游戏卡片组件
+│   │   ├── GameCard.vue # 游戏卡片组件
+│   │   ├── Leaderboard.vue # 排行榜组件
+│   │   ├── ScoreModal.vue # 分数提交模态框
+│   │   ├── ConnectionStatus.vue # 连接状态组件
+│   │   └── FeedbackPage.vue # 反馈页面组件
+│   ├── stores/           # Pinia状态管理
+│   │   ├── AppStore.js # 应用状态管理
+│   │   ├── GameStore.js # 游戏数据管理
+│   │   └── LeaderboardStore.js # 排行榜数据管理
 │   ├── modules/          # ES6模块
 │   │   ├── GameDataManager.js # 数据管理器
 │   │   └── ScoreManager.js # 计分管理器
@@ -214,6 +238,26 @@ woodcat/
 ## 📄 许可证
 
 本项目采用 [MIT 许可证](https://opensource.org/licenses/MIT) - 查看 [LICENSE](./LICENSE) 文件了解详情。
+
+---
+
+## 📚 文档
+
+### 组件文档
+
+详细的Vue组件使用说明和API文档请参考：
+
+- [COMPONENTS_DOCUMENTATION.md](./COMPONENTS_DOCUMENTATION.md) - 包含所有组件的详细文档
+
+### 迁移指南
+
+从旧版本迁移到Vue 3版本的指南：
+
+- [COMPONENTS_DOCUMENTATION.md#7-迁移指南](./COMPONENTS_DOCUMENTATION.md#7-迁移指南)
+
+### 开发文档
+
+- [DEVELOPMENT_PROGRESS.md](./DEVELOPMENT_PROGRESS.md) - 开发进度记录
 
 ---
 
