@@ -1,9 +1,10 @@
 /**
- * 现代化计分管理模块 - 使用ES6模块和async/await
+ * 统一计分管理模块 - ES6模块化版本
  */
-import { dataManager } from './ModernDataManager.js';
 
-export class ModernScoreManager {
+import { dataManager } from './gameDataManager.js';
+
+export class ScoreManager {
   constructor() {
     this.dataManager = dataManager;
     this.gameTypes = new Map([
@@ -19,6 +20,9 @@ export class ModernScoreManager {
     ]);
   }
 
+  /**
+   * 获取最高分
+   */
   async getHighScore(gameName, defaultValue = 0) {
     if (!this.gameTypes.has(gameName)) {
       console.warn(`未知的游戏类型: ${gameName}`);
@@ -36,6 +40,9 @@ export class ModernScoreManager {
     return defaultValue;
   }
 
+  /**
+   * 更新最高分
+   */
   async updateHighScore(gameName, newScore) {
     if (!this.gameTypes.has(gameName)) {
       console.warn(`未知的游戏类型: ${gameName}`);
@@ -58,6 +65,9 @@ export class ModernScoreManager {
     return true;
   }
 
+  /**
+   * 记录游戏结果
+   */
   async recordGameResult(gameName, result, score = null) {
     if (!this.gameTypes.has(gameName)) {
       console.warn(`未知的游戏类型: ${gameName}`);
@@ -112,6 +122,9 @@ export class ModernScoreManager {
     }
   }
 
+  /**
+   * 计算胜率
+   */
   async calculateWinRate(gameName) {
     if (!this.gameTypes.has(gameName)) {
       console.warn(`未知的游戏类型: ${gameName}`);
@@ -131,6 +144,9 @@ export class ModernScoreManager {
     return Math.round((stats.wins / stats.totalGames) * 100);
   }
 
+  /**
+   * 获取游戏统计信息
+   */
   async getGameStats(gameName) {
     if (!this.gameTypes.has(gameName)) {
       console.warn(`未知的游戏类型: ${gameName}`);
@@ -160,6 +176,9 @@ export class ModernScoreManager {
     return stats;
   }
 
+  /**
+   * 获取全局排行榜
+   */
   async getGlobalLeaderboard() {
     const leaderboard = {};
 
@@ -177,6 +196,9 @@ export class ModernScoreManager {
     return leaderboard;
   }
 
+  /**
+   * 比较分数
+   */
   compareScores(gameName, score1, score2) {
     if (!this.gameTypes.has(gameName)) {
       console.warn(`未知的游戏类型: ${gameName}`);
@@ -196,6 +218,9 @@ export class ModernScoreManager {
     }
   }
 
+  /**
+   * 格式化分数显示
+   */
   formatScore(gameName, score) {
     if (!this.gameTypes.has(gameName)) {
       console.warn(`未知的游戏类型: ${gameName}`);
@@ -219,4 +244,4 @@ export class ModernScoreManager {
 }
 
 // 创建全局实例
-export const scoreManager = new ModernScoreManager();
+export const scoreManager = new ScoreManager();
