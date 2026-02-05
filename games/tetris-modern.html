@@ -4,108 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>俄罗斯方块 - 木头猫</title>
-    <link rel="stylesheet" href="../../src/styles/style.css">
-    <link rel="stylesheet" href="../../src/styles/responsive.css">
-    <style>
-        .game-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            padding: 0 10px;
-        }
-        
-        .game-stats {
-            display: flex;
-            gap: 20px;
-        }
-        
-        .stat-box {
-            background: #f0f0f0;
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-        
-        #tetris-canvas {
-            border: 2px solid #333;
-            background: #000;
-            display: block;
-            margin: 0 auto;
-        }
-        
-        .game-controls {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .game-btn {
-            padding: 10px 20px;
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        
-        .game-btn:hover {
-            background: #2980b9;
-        }
-    </style>
+    <script>
+        // 重定向到正常的俄罗斯方块游戏
+        window.location.href = 'tetris.html';
+    </script>
 </head>
 <body>
-    <div class="game-container">
-        <h1>俄罗斯方块</h1>
-        
-        <div class="game-header">
-            <div class="game-stats">
-                <div class="stat-box">分数: <span id="score">0</span></div>
-                <div class="stat-box">等级: <span id="level">1</span></div>
-                <div class="stat-box">行数: <span id="lines">0</span></div>
-            </div>
-        </div>
-        
-        <div id="game-board"></div>
-        
-        <div class="game-controls">
-            <button id="start-btn" class="game-btn">开始</button>
-            <button id="pause-btn" class="game-btn">暂停</button>
-            <button id="reset-btn" class="game-btn">重置</button>
-        </div>
-        
-        <div class="game-instructions">
-            <p><strong>操作说明:</strong></p>
-            <p>← → 移动 | ↑ 旋转 | ↓ 加速下降 | 空格 硬降 | P 暂停</p>
-        </div>
-    </div>
-
-    <script type="module">
-        import { TetrisGame } from '../../src/games/tetris/TetrisGame.js';
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            const gameContainer = document.getElementById('game-board');
-            const game = new TetrisGame(gameContainer);
-            
-            // 绑定控制按钮
-            document.getElementById('start-btn').addEventListener('click', () => {
-                if (!game.isPlaying) {
-                    game.resetGame();
-                    game.start();
-                }
-            });
-            
-            document.getElementById('pause-btn').addEventListener('click', () => {
-                game.togglePause();
-            });
-            
-            document.getElementById('reset-btn').addEventListener('click', () => {
-                clearInterval(game.gameInterval);
-                game.resetGame();
-                game.draw();
-            });
-        });
-    </script>
+    <p>正在跳转到俄罗斯方块游戏...</p>
 </body>
 </html>
