@@ -390,6 +390,7 @@
     <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
     <script src="../js/lib/hammer.min.js"></script>
     <script src="../js/dataManager.js"></script>
+    <script src="../js/audioVibration.js"></script>
     <script>
         // 2048核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
@@ -556,7 +557,6 @@
                 if (gameOver) return false;
                 
                 let moved = false;
-                const oldGrid = JSON.parse(JSON.stringify(grid));
                 
                 // 根据方向移动
                 switch(direction) {
@@ -613,7 +613,7 @@
                     }
                 }
                 
-                return JSON.stringify(grid) !== JSON.stringify(oldGrid);
+                return moved;
             }
             
             // 移动单个方块

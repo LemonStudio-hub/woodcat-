@@ -533,125 +533,265 @@
 
                                 // 初始化画布
 
-                                function initCanvasSize() {
+                                
 
-                                    const gameBoard = document.querySelector('.game-board');
-
-                                    const containerWidth = gameBoard.clientWidth;
-
-                                    const containerHeight = gameBoard.clientHeight;
-
-                                    
-
-                                    canvas.width = containerWidth;
-
-                                    canvas.height = containerHeight;
-
-                                }
+                                                                function initCanvasSize() {
 
                                 
 
-                                initCanvasSize();
+                                                                    const gameBoard = document.querySelector('.game-board');
 
                                 
 
-                                // 添加roundRect方法支持
-
-                                if (CanvasRenderingContext2D.prototype.roundRect === undefined) {
-
-                                    CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
-
-                                        if (width < 2 * radius) radius = width / 2;
-
-                                        if (height < 2 * radius) radius = height / 2;
-
-                                        
-
-                                        this.beginPath();
-
-                                        this.moveTo(x + radius, y);
-
-                                        this.lineTo(x + width - radius, y);
-
-                                        this.quadraticCurveTo(x + width, y, x + width, y + radius);
-
-                                        this.lineTo(x + width, y + height - radius);
-
-                                        this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-
-                                        this.lineTo(x + radius, y + height);
-
-                                        this.quadraticCurveTo(x, y + height, x, y + height - radius);
-
-                                        this.lineTo(x, y + radius);
-
-                                        this.quadraticCurveTo(x, y, x + radius, y);
-
-                                        this.closePath();
-
-                                        return this;
-
-                                    };
-
-                                }
+                                                                    const containerWidth = gameBoard.clientWidth;
 
                                 
 
-                                // 游戏对象
-
-                                const ball = {
-
-                                    x: canvas.width / 2,
-
-                                    y: canvas.height - 50,
-
-                                    radius: 8,
-
-                                    dx: 4,
-
-                                    dy: -4,
-
-                                    speed: 4,
-
-                                    reset: function() {
-
-                                        this.x = canvas.width / 2;
-
-                                        this.y = canvas.height - 50;
-
-                                        this.dx = 4 * (Math.random() > 0.5 ? 1 : -1);
-
-                                        this.dy = -4;
-
-                                    }
-
-                                };
+                                                                    const containerHeight = gameBoard.clientHeight;
 
                                 
 
-                                const paddle = {
+                                
 
-                                    width: Math.min(80, canvas.width * 0.2),
+                                
 
-                                    height: 12,
+                                                                    canvas.width = containerWidth;
 
-                                    x: (canvas.width - Math.min(80, canvas.width * 0.2)) / 2,
+                                
 
-                                    speed: 8,
+                                                                    canvas.height = containerHeight;
 
-                                    moveLeft: function() {
+                                
 
-                                        this.x = Math.max(0, this.x - this.speed);
+                                                                }
 
-                                    },
+                                
 
-                                    moveRight: function() {
+                                
 
-                                        this.x = Math.min(canvas.width - this.width, this.x + this.speed);
+                                
 
-                                    }
+                                                                initCanvasSize();
 
-                                };
+                                
+
+                                
+
+                                
+
+                                                                // 添加roundRect方法支持
+
+                                
+
+                                                                if (CanvasRenderingContext2D.prototype.roundRect === undefined) {
+
+                                
+
+                                                                    CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+
+                                
+
+                                                                        if (width < 2 * radius) radius = width / 2;
+
+                                
+
+                                                                        if (height < 2 * radius) radius = height / 2;
+
+                                
+
+                                
+
+                                
+
+                                                                        this.beginPath();
+
+                                
+
+                                                                        this.moveTo(x + radius, y);
+
+                                
+
+                                                                        this.lineTo(x + width - radius, y);
+
+                                
+
+                                                                        this.quadraticCurveTo(x + width, y, x + width, y + radius);
+
+                                
+
+                                                                        this.lineTo(x + width, y + height - radius);
+
+                                
+
+                                                                        this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+
+                                
+
+                                                                        this.lineTo(x + radius, y + height);
+
+                                
+
+                                                                        this.quadraticCurveTo(x, y + height, x, y + height - radius);
+
+                                
+
+                                                                        this.lineTo(x, y + radius);
+
+                                
+
+                                                                        this.quadraticCurveTo(x, y, x + radius, y);
+
+                                
+
+                                                                        this.closePath();
+
+                                
+
+                                                                        return this;
+
+                                
+
+                                                                    };
+
+                                
+
+                                                                }
+
+                                
+
+                                
+
+                                
+
+                                                                // 游戏对象（在canvas初始化后创建）
+
+                                
+
+                                                                let ball;
+
+                                
+
+                                                                let paddle;
+
+                                
+
+                                
+
+                                
+
+                                                                function initGameObjects() {
+
+                                
+
+                                                                    ball = {
+
+                                
+
+                                                                        x: canvas.width / 2,
+
+                                
+
+                                                                        y: canvas.height - 50,
+
+                                
+
+                                                                        radius: 8,
+
+                                
+
+                                                                        dx: 4,
+
+                                
+
+                                                                        dy: -4,
+
+                                
+
+                                                                        speed: 4,
+
+                                
+
+                                                                        reset: function() {
+
+                                
+
+                                                                            this.x = canvas.width / 2;
+
+                                
+
+                                                                            this.y = canvas.height - 50;
+
+                                
+
+                                                                            this.dx = 4 * (Math.random() > 0.5 ? 1 : -1);
+
+                                
+
+                                                                            this.dy = -4;
+
+                                
+
+                                                                        }
+
+                                
+
+                                                                    };
+
+                                
+
+                                
+
+                                
+
+                                                                    paddle = {
+
+                                
+
+                                                                        width: Math.min(80, canvas.width * 0.2),
+
+                                
+
+                                                                        height: 12,
+
+                                
+
+                                                                        x: (canvas.width - Math.min(80, canvas.width * 0.2)) / 2,
+
+                                
+
+                                                                        speed: 8,
+
+                                
+
+                                                                        moveLeft: function() {
+
+                                
+
+                                                                            this.x = Math.max(0, this.x - this.speed);
+
+                                
+
+                                                                        },
+
+                                
+
+                                                                        moveRight: function() {
+
+                                
+
+                                                                            this.x = Math.min(canvas.width - this.width, this.x + this.speed);
+
+                                
+
+                                                                        }
+
+                                
+
+                                                                    };
+
+                                
+
+                                                                }
 
                                 
 
@@ -1512,27 +1652,35 @@
 
                             initCanvasSize();
 
+                            initGameObjects(); // 重新初始化游戏对象
+
                             initBricks(); // 重新初始化砖块布局
 
-                            
-
-                            // 调整挡板位置
-
-                            paddle.width = Math.min(80, canvas.width * 0.2);
-
-                            paddle.x = Math.max(0, Math.min(paddle.x, canvas.width - paddle.width));
+                            resetBall();
 
                             
 
-                            // 调整球位置
+                            // 重新绘制初始画面
 
-                            if (ball.x > canvas.width) ball.x = canvas.width / 2;
+                            if (!gameRunning) {
+
+                                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                                drawBricks();
+
+                                drawBall();
+
+                                drawPaddle();
+
+                            }
 
                         });
 
                         
 
                         // 初始化游戏
+
+                        initGameObjects();
 
                         initBricks();
 
