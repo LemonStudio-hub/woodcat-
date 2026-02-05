@@ -327,8 +327,14 @@ class I18n {
             }
         };
         
-        // 初始化语言
-        this.initLanguage();
+        // 延迟初始化语言，确保DOM已加载完成
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.initLanguage();
+            });
+        } else {
+            this.initLanguage();
+        }
     }
     
     /**

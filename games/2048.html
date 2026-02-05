@@ -413,9 +413,6 @@
                 document.getElementById('high-score').textContent = highScore;
             });
             
-            // 初始化音频模块
-            gameAudioVibration.initAudio();
-            
             // 创建音频上下文 - 移动端需要用户交互后才能播放音频
             let audioContext = null;
             let audioInitialized = false;
@@ -450,36 +447,36 @@
             
             // 移动音效
             function playMoveSound() {
-                if (gameAudioVibration) {
-                    gameAudioVibration.playClickSound(); // 使用新的音频模块
+                if (window.gameAudioVibration) {
+                    window.gameAudioVibration.playClickSound(); // 使用新的音频模块
                 }
             }
             
             // 合并音效
             function playMergeSound() {
-                if (gameAudioVibration) {
-                    gameAudioVibration.playSuccessSound(); // 使用新的音频模块
+                if (window.gameAudioVibration) {
+                    window.gameAudioVibration.playSuccessSound(); // 使用新的音频模块
                 }
             }
             
             // 游戏结束音效
             function playGameOverSound() {
-                if (gameAudioVibration) {
-                    gameAudioVibration.playLoseSound(); // 使用新的音频模块
+                if (window.gameAudioVibration) {
+                    window.gameAudioVibration.playLoseSound(); // 使用新的音频模块
                 }
             }
             
             // 获胜音效
             function playWinSound() {
-                if (gameAudioVibration) {
-                    gameAudioVibration.playWinSound(); // 使用新的音频模块
+                if (window.gameAudioVibration) {
+                    window.gameAudioVibration.playWinSound(); // 使用新的音频模块
                 }
             }
             
             // 新方块出现音效
             function playNewTileSound() {
-                if (gameAudioVibration) {
-                    gameAudioVibration.playClickSound(); // 使用新的音频模块
+                if (window.gameAudioVibration) {
+                    window.gameAudioVibration.playClickSound(); // 使用新的音频模块
                 }
             }
             
@@ -543,10 +540,15 @@
                             // 设置位置
                             tile.style.top = `${y * 25}%`;
                             tile.style.left = `${x * 25}%`;
+                            // 确保方块大小正确
                             tile.style.width = `calc(25% - 6px)`;
                             tile.style.height = `calc(25% - 6px)`;
-                            // 添加内边距以匹配网格布局
-                            tile.style.padding = '3px';
+                            // 确保方块有足够的z-index
+                            tile.style.zIndex = '10';
+                            // 确保方块内容居中
+                            tile.style.display = 'flex';
+                            tile.style.alignItems = 'center';
+                            tile.style.justifyContent = 'center';
                             boardElement.appendChild(tile);
                             
                             // 动画结束后移除 new 类

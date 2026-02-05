@@ -39,12 +39,12 @@ export const useLeaderboardStore = defineStore('leaderboard', {
           .limit(1);
 
         if (error) {
-          console.error('Supabase连接验证失败:', error);
+          Logger.error('Supabase连接验证失败:', error);
           return false;
         }
         return true;
       } catch (err) {
-        console.error('Supabase连接验证异常:', err);
+        Logger.error('Supabase连接验证异常:', err);
         return false;
       }
     },
@@ -90,7 +90,7 @@ export const useLeaderboardStore = defineStore('leaderboard', {
                   const { data, error } = response;
 
                   if (error) {
-                    console.error(`云端加载排行榜失败 (尝试 ${attempts + 1}/${maxAttempts}):`, error);
+                    Logger.error(`云端加载排行榜失败 (尝试 ${attempts + 1}/${maxAttempts}):`, error);
                     attempts++;
                     if (attempts < maxAttempts) {
                       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -98,11 +98,11 @@ export const useLeaderboardStore = defineStore('leaderboard', {
                     }
                   } else {
                     cloudData = data || [];
-                    console.log(`从云端加载了 ${cloudData.length} 条排行榜数据`);
+                    Logger.info(`从云端加载了 ${cloudData.length} 条排行榜数据`);
                     break;
                   }
                 } catch (timeoutError) {
-                  console.warn(`云端排行榜加载超时 (尝试 ${attempts + 1}/${maxAttempts}):`, timeoutError.message);
+                  Logger.warn(`云端排行榜加载超时 (尝试 ${attempts + 1}/${maxAttempts}):`, timeoutError.message);
                   attempts++;
                   if (attempts < maxAttempts) {
                     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -111,7 +111,7 @@ export const useLeaderboardStore = defineStore('leaderboard', {
               }
             }
           } catch (connectionError) {
-            console.error('云端加载异常:', connectionError);
+            Logger.error('云端加载异常:', connectionError);
           }
         }
 
@@ -122,7 +122,7 @@ export const useLeaderboardStore = defineStore('leaderboard', {
           // 暂时返回空数组，后续会集成data-manager.js
           localLeaderboardEntries = [];
         } catch (localError) {
-          console.error('本地数据加载失败:', localError);
+          Logger.error('本地数据加载失败:', localError);
         }
 
         // 合并云端和本地数据
@@ -159,7 +159,7 @@ export const useLeaderboardStore = defineStore('leaderboard', {
 
         return allData;
       } catch (err) {
-        console.error('加载排行榜时发生错误:', err);
+        Logger.error('加载排行榜时发生错误:', err);
         this.error = err.message;
         this.loading = false;
         return [];
@@ -187,7 +187,7 @@ export const useLeaderboardStore = defineStore('leaderboard', {
           // 暂时返回true，后续会集成data-manager.js
           localSuccess = true;
         } catch (localError) {
-          console.warn('本地存储失败:', localError);
+          Logger.warn('本地存储失败:', localError);
         }
 
         // 尝试提交到云端
@@ -206,7 +206,7 @@ export const useLeaderboardStore = defineStore('leaderboard', {
                     .insert([insertData]);
 
                   if (error) {
-                    console.error(`云端提交分数失败 (尝试 ${attempts + 1}/${maxAttempts}):`, error);
+                    Logger.error(`云端提交分数失败 (尝试 ${attempts + 1}/${maxAttempts}):`, error);
                     attempts++;
                     if (attempts < maxAttempts) {
                       await new Promise(resolve => setTimeout(resolve, 1500));
@@ -214,11 +214,11 @@ export const useLeaderboardStore = defineStore('leaderboard', {
                     }
                   } else {
                     cloudSuccess = true;
-                    console.log('云端提交成功:', data);
+                    Logger.info('云端提交成功:', data);
                     break;
                   }
                 } catch (err) {
-                  console.error(`云端提交异常 (尝试 ${attempts + 1}/${maxAttempts}):`, err);
+                  Logger.error(`云端提交异常 (尝试 ${attempts + 1}/${maxAttempts}):`, err);
                   attempts++;
                   if (attempts < maxAttempts) {
                     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -227,7 +227,7 @@ export const useLeaderboardStore = defineStore('leaderboard', {
               }
             }
           } catch (err) {
-            console.error('云端提交时发生异常:', err);
+            Logger.error('云端提交时发生异常:', err);
           }
         }
 
@@ -240,7 +240,7 @@ export const useLeaderboardStore = defineStore('leaderboard', {
           cloudSuccess
         };
       } catch (err) {
-        console.error('提交分数时发生错误:', err);
+        Logger.error('提交分数时发生错误:', err);
         throw err;
       }
     },

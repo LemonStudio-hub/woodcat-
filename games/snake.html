@@ -94,6 +94,9 @@
             -webkit-tap-highlight-color: transparent; /* 移除点击高亮 */
             -webkit-touch-callout: none; /* 防止长按弹出菜单 */
             -webkit-user-select: none; /* 防止选择文本 */
+            -moz-user-select: none; /* 防止选择文本 - Firefox */
+            -ms-user-select: none; /* 防止选择文本 - IE/Edge */
+            user-select: none; /* 防止选择文本 - 标准属性 */
             -webkit-user-drag: none; /* 防止拖拽 */
         }
         
@@ -259,136 +262,9 @@
                 font-size: 20px;
             }
         }
-
-        /* 维护公告样式 */
-        .maintenance-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            animation: fadeInModal 0.3s ease-out;
-            backdrop-filter: blur(5px);
-        }
-
-        .maintenance-content {
-            background: white;
-            border-radius: 16px;
-            padding: 40px;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: slideUpModal 0.4s ease-out;
-            transform-origin: center;
-        }
-
-        .maintenance-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 24px;
-            animation: pulseIcon 2s infinite;
-        }
-
-        .maintenance-icon svg {
-            width: 40px;
-            height: 40px;
-            fill: white;
-        }
-
-        .maintenance-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 16px;
-        }
-
-        .maintenance-message {
-            color: #7f8c8d;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            margin-bottom: 32px;
-        }
-
-        .maintenance-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 14px 40px;
-            border-radius: 25px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .maintenance-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-        }
-
-        .maintenance-btn:active {
-            transform: translateY(0);
-        }
-
-        @keyframes fadeInModal {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideUpModal {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        @keyframes pulseIcon {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-            }
-        }
     </style>
 </head>
 <body>
-    <!-- 维护公告模态框 -->
-    <div class="maintenance-modal" id="maintenanceModal">
-        <div class="maintenance-content">
-            <div class="maintenance-icon">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-                </svg>
-            </div>
-            <h2 class="maintenance-title">游戏维护中</h2>
-            <p class="maintenance-message">
-                贪吃蛇游戏正在进行系统优化和功能升级，为了给您提供更好的游戏体验，我们正在努力改进中。<br><br>
-                请返回首页体验其他精彩游戏，感谢您的理解与支持！
-            </p>
-            <button class="maintenance-btn" onclick="window.location.href='../index.html'">返回首页</button>
-        </div>
-    </div>
 
     <a class="back-home" href="../index.html">←</a>
     <div class="game-container">
@@ -677,16 +553,21 @@
                         function toggleGame() {
                             if (!gameStarted || gameOver) {
                                 // 如果游戏尚未开始或游戏已结束，则开始游戏
-                                gameInterval = setInterval(moveSnake, 150);
-                                document.getElementById('startBtn').textContent = '重新开始';
-                                gameStarted = true; // 游戏真正开始
+                                gameStarted = true; // 先设置游戏开始状态
                                 gameOver = false; // 确保游戏结束状态被重置
-
+                                document.getElementById('startBtn').textContent = '重新开始';
+                                
                                 // 初始化音频
                                 initAudio();
-
-                                // 立即移动蛇，让游戏立即开始
+                                
+                                // 立即执行一次移动，使蛇立即开始移动
                                 moveSnake();
+                                
+                                // 启动游戏循环
+                                gameInterval = setInterval(moveSnake, 150);
+                            } else {
+                                // 如果游戏已经开始，则重置游戏
+                                resetGame();
                             }
                             // 如果游戏已经开始，则不执行任何操作
                         }
@@ -770,8 +651,8 @@
                                     (direction === 'down' && newDirection !== 'up') ||
                                     (direction === 'left' && newDirection !== 'right') || 
                                     (direction === 'right' && newDirection !== 'left')) {
-                                    nextDirection = newDirection;
-                                    lastDirectionChange = Date.now();
+                                        nextDirection = newDirection;
+                                        lastDirectionChange = Date.now();
                                 }
                             }
                         }
@@ -858,23 +739,9 @@
                         }
 
 
-                        // 自动弹出维护公告
-                        function showMaintenanceNotice() {
-                            const maintenanceModal = document.getElementById('maintenanceModal');
-                            if (maintenanceModal) {
-                                // 添加淡入效果
-                                setTimeout(() => {
-                                    maintenanceModal.style.display = 'flex';
-                                }, 300);
-                            }
-                        }
-
                         // 初始化并开始游戏
                         initGame();
                         enableAudioOnMobile(); // 启用移动端音频
-
-                        // 显示维护公告
-                        showMaintenanceNotice();
 
                         // 确保高分显示正确设置
                         document.getElementById('high-score').textContent = highScore;

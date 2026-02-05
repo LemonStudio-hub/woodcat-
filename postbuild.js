@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+/* eslint-disable no-console */
+
 /**
  * 构建后处理脚本 - 自动修复HTML文件中的脚本标签
  */
@@ -17,7 +19,7 @@ function fixHtmlScriptTags() {
     fixSingleHtmlFile(file);
   });
   
-  console.log(`已处理 ${htmlFiles.length} 个HTML文件`);
+console.log(`已处理 ${htmlFiles.length} 个HTML文件`);
 }
 
 // 查找所有HTML文件

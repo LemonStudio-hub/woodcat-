@@ -3,6 +3,14 @@
  * 统一管理所有游戏的计分规则、排行榜和数据存储
  */
 
+// 确保Logger对象存在，如果window.Logger未定义则创建一个简单的替代
+const Logger = window.Logger || {
+  info: console.log.bind(console),
+  error: console.error.bind(console),
+  warn: console.warn.bind(console),
+  debug: console.debug.bind(console)
+};
+
 class ScoreManager {
     constructor() {
         this.dataManager = window.gameDataManager || this._createLocalDataManager();
@@ -28,7 +36,7 @@ class ScoreManager {
                     const data = localStorage.getItem(key);
                     return data ? JSON.parse(data) : defaultValue;
                 } catch (e) {
-                    console.error('读取本地数据失败:', e);
+                    Logger.error('读取本地数据失败:', e);
                     return defaultValue;
                 }
             },
@@ -38,7 +46,7 @@ class ScoreManager {
                     localStorage.setItem(key, JSON.stringify(data));
                     return true;
                 } catch (e) {
-                    console.error('保存本地数据失败:', e);
+                    Logger.error('保存本地数据失败:', e);
                     return false;
                 }
             }
@@ -53,7 +61,7 @@ class ScoreManager {
      */
     async getHighScore(gameName, defaultValue = 0) {
         if (!this.gameTypes[gameName]) {
-            console.warn(`未知的游戏类型: ${gameName}`);
+            Logger.warn(`未知的游戏类型: ${gameName}`);
             return defaultValue;
         }
         
@@ -77,7 +85,7 @@ class ScoreManager {
      */
     async updateHighScore(gameName, newScore) {
         if (!this.gameTypes[gameName]) {
-            console.warn(`未知的游戏类型: ${gameName}`);
+            Logger.warn(`未知的游戏类型: ${gameName}`);
             return false;
         }
         
@@ -108,7 +116,7 @@ class ScoreManager {
      */
     async recordGameResult(gameName, result, score = null) {
         if (!this.gameTypes[gameName]) {
-            console.warn(`未知的游戏类型: ${gameName}`);
+            Logger.warn(`未知的游戏类型: ${gameName}`);
             return false;
         }
 
@@ -162,7 +170,7 @@ class ScoreManager {
             
             return saveSuccess;
         } catch (error) {
-            console.error('记录游戏结果失败:', error);
+            Logger.error('记录游戏结果失败:', error);
             return false;
         }
     }
@@ -174,7 +182,7 @@ class ScoreManager {
      */
     async calculateWinRate(gameName) {
         if (!this.gameTypes[gameName]) {
-            console.warn(`未知的游戏类型: ${gameName}`);
+            Logger.warn(`未知的游戏类型: ${gameName}`);
             return 0;
         }
         
@@ -198,7 +206,7 @@ class ScoreManager {
      */
     async getGameStats(gameName) {
         if (!this.gameTypes[gameName]) {
-            console.warn(`未知的游戏类型: ${gameName}`);
+            Logger.warn(`未知的游戏类型: ${gameName}`);
             return {
                 wins: 0,
                 losses: 0,
@@ -254,7 +262,7 @@ class ScoreManager {
      */
     async resetGameStats(gameName) {
         if (!this.gameTypes[gameName]) {
-            console.warn(`未知的游戏类型: ${gameName}`);
+            Logger.warn(`未知的游戏类型: ${gameName}`);
             return false;
         }
 
@@ -275,7 +283,7 @@ class ScoreManager {
             
             return true;
         } catch (error) {
-            console.error('重置游戏统计数据失败:', error);
+            Logger.error('重置游戏统计数据失败:', error);
             return false;
         }
     }
@@ -289,7 +297,7 @@ class ScoreManager {
      */
     compareScores(gameName, score1, score2) {
         if (!this.gameTypes[gameName]) {
-            console.warn(`未知的游戏类型: ${gameName}`);
+            Logger.warn(`未知的游戏类型: ${gameName}`);
             return 0;
         }
 
@@ -316,7 +324,7 @@ class ScoreManager {
      */
     formatScore(gameName, score) {
         if (!this.gameTypes[gameName]) {
-            console.warn(`未知的游戏类型: ${gameName}`);
+            Logger.warn(`未知的游戏类型: ${gameName}`);
             return score.toString();
         }
 

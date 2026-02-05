@@ -26,7 +26,7 @@ class MobileOptimizedDataManager {
       const request = indexedDB.open(this.dbName, 1);
 
       request.onerror = (event) => {
-        console.error('IndexedDB打开失败:', event.target.error);
+        Logger.error('IndexedDB打开失败:', event.target.error);
         reject(event.target.error);
       };
 
@@ -168,7 +168,7 @@ class MobileOptimizedDataManager {
           this._saveQueue.delete(key);
         }
       } catch (error) {
-        console.error(`保存数据失败 ${key}:`, error);
+        Logger.error(`保存数据失败 ${key}:`, error);
       } finally {
         this._saveTimeouts.delete(key);
       }
@@ -194,7 +194,7 @@ class MobileOptimizedDataManager {
       
       return true;
     } catch (error) {
-      console.error('保存游戏数据失败:', error);
+      Logger.error('保存游戏数据失败:', error);
       return false;
     }
   }
@@ -234,7 +234,7 @@ class MobileOptimizedDataManager {
       
       return true;
     } catch (error) {
-      console.error('立即保存游戏数据失败:', error);
+      Logger.error('立即保存游戏数据失败:', error);
       return false;
     }
   }
@@ -257,7 +257,7 @@ class MobileOptimizedDataManager {
       
       await this._waitForDB();
       
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const transaction = this.db.transaction([this.storeName], 'readonly');
         const store = transaction.objectStore(this.storeName);
         const request = store.get(key);
@@ -274,18 +274,18 @@ class MobileOptimizedDataManager {
         };
 
         request.onerror = (event) => {
-          console.error('读取数据失败:', event.target.error);
+          Logger.error('读取数据失败:', event.target.error);
           resolve(defaultValue);
         };
         
         // 为事务添加错误处理
         transaction.onerror = (event) => {
-          console.error('事务执行失败:', event.target.error);
+          Logger.error('事务执行失败:', event.target.error);
           resolve(defaultValue);
         };
       });
     } catch (error) {
-      console.error('读取游戏数据失败:', error);
+      Logger.error('读取游戏数据失败:', error);
       return defaultValue;
     }
   }
@@ -297,7 +297,7 @@ class MobileOptimizedDataManager {
     try {
       await this._waitForDB();
       
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const transaction = this.db.transaction([this.storeName], 'readonly');
         const store = transaction.objectStore(this.storeName);
         const request = store.getAll();
@@ -319,18 +319,18 @@ class MobileOptimizedDataManager {
         };
 
         request.onerror = (event) => {
-          console.error('获取所有数据失败:', event.target.error);
+          Logger.error('获取所有数据失败:', event.target.error);
           resolve({});
         };
         
         // 为事务添加错误处理
         transaction.onerror = (event) => {
-          console.error('事务执行失败:', event.target.error);
+          Logger.error('事务执行失败:', event.target.error);
           resolve({});
         };
       });
     } catch (error) {
-      console.error('获取所有游戏数据失败:', error);
+      Logger.error('获取所有游戏数据失败:', error);
       return {};
     }
   }
@@ -379,12 +379,12 @@ class MobileOptimizedDataManager {
         };
 
         request.onerror = (event) => {
-          console.error('获取存储信息失败:', event.target.error);
+          Logger.error('获取存储信息失败:', event.target.error);
           reject(event.target.error);
         };
       });
     } catch (error) {
-      console.error('获取存储使用情况失败:', error);
+      Logger.error('获取存储使用情况失败:', error);
       return {
         totalSize: 0,
         gameSizes: {},
@@ -403,7 +403,7 @@ window.addEventListener('pagehide', async () => {
     try {
       await mobileOptimizedDataManager.flushAllSaves();
     } catch (e) {
-      console.error('保存待处理数据失败:', e);
+      Logger.error('保存待处理数据失败:', e);
     }
   }
 });

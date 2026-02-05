@@ -25,7 +25,7 @@ export class ScoreManager {
    */
   async getHighScore(gameName, defaultValue = 0) {
     if (!this.gameTypes.has(gameName)) {
-      console.warn(`未知的游戏类型: ${gameName}`);
+      Logger.warn(`未知的游戏类型: ${gameName}`);
       return defaultValue;
     }
 
@@ -45,7 +45,7 @@ export class ScoreManager {
    */
   async updateHighScore(gameName, newScore) {
     if (!this.gameTypes.has(gameName)) {
-      console.warn(`未知的游戏类型: ${gameName}`);
+      Logger.warn(`未知的游戏类型: ${gameName}`);
       return false;
     }
 
@@ -70,7 +70,7 @@ export class ScoreManager {
    */
   async recordGameResult(gameName, result, score = null) {
     if (!this.gameTypes.has(gameName)) {
-      console.warn(`未知的游戏类型: ${gameName}`);
+      Logger.warn(`未知的游戏类型: ${gameName}`);
       return false;
     }
 
@@ -117,7 +117,7 @@ export class ScoreManager {
 
       return saveSuccess;
     } catch (error) {
-      console.error('记录游戏结果失败:', error);
+      Logger.error('记录游戏结果失败:', error);
       return false;
     }
   }
@@ -127,7 +127,7 @@ export class ScoreManager {
    */
   async calculateWinRate(gameName) {
     if (!this.gameTypes.has(gameName)) {
-      console.warn(`未知的游戏类型: ${gameName}`);
+      Logger.warn(`未知的游戏类型: ${gameName}`);
       return 0;
     }
 
@@ -149,7 +149,7 @@ export class ScoreManager {
    */
   async getGameStats(gameName) {
     if (!this.gameTypes.has(gameName)) {
-      console.warn(`未知的游戏类型: ${gameName}`);
+      Logger.warn(`未知的游戏类型: ${gameName}`);
       return {
         wins: 0,
         losses: 0,
@@ -201,7 +201,7 @@ export class ScoreManager {
    */
   compareScores(gameName, score1, score2) {
     if (!this.gameTypes.has(gameName)) {
-      console.warn(`未知的游戏类型: ${gameName}`);
+      Logger.warn(`未知的游戏类型: ${gameName}`);
       return 0;
     }
 
@@ -223,7 +223,7 @@ export class ScoreManager {
    */
   formatScore(gameName, score) {
     if (!this.gameTypes.has(gameName)) {
-      console.warn(`未知的游戏类型: ${gameName}`);
+      Logger.warn(`未知的游戏类型: ${gameName}`);
       return score.toString();
     }
 
