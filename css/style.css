@@ -779,3 +779,176 @@ body {
     margin: 0;
     min-width: 80px;
 }
+
+/* 俄语公告模态框样式 */
+.russian-notice-modal {
+    z-index: 10000;
+}
+
+.russian-notice-content {
+    max-width: 500px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: noticeSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes noticeSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.russian-notice-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px 25px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.russian-notice-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.russian-notice-header .modal-close {
+    color: white;
+    font-size: 1.8rem;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.russian-notice-header .modal-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+.russian-notice-body {
+    padding: 30px 25px;
+    text-align: center;
+}
+
+.notice-icon {
+    font-size: 3.5rem;
+    margin-bottom: 20px;
+    animation: noticeBounce 1s ease infinite;
+}
+
+@keyframes noticeBounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.notice-text {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+.notice-highlight {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    color: #8b4513;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: inline-block;
+    border: 2px solid #deb887;
+}
+
+.russian-notice-footer {
+    padding: 20px 25px;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: center;
+}
+
+.russian-notice-footer .btn-primary {
+    padding: 12px 30px;
+    font-size: 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.russian-notice-footer .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.russian-notice-footer .btn-primary:active {
+    transform: translateY(0);
+}
+
+/* 移动端优化 */
+@media (max-width: 480px) {
+    .russian-notice-content {
+        max-width: 95%;
+        margin: 20px;
+    }
+
+    .russian-notice-header {
+        padding: 15px 20px;
+    }
+
+    .russian-notice-header h3 {
+        font-size: 1.1rem;
+    }
+
+    .russian-notice-header .modal-close {
+        width: 30px;
+        height: 30px;
+        font-size: 1.5rem;
+    }
+
+    .russian-notice-body {
+        padding: 20px;
+    }
+
+    .notice-icon {
+        font-size: 2.8rem;
+        margin-bottom: 15px;
+    }
+
+    .notice-text {
+        font-size: 0.95rem;
+    }
+
+    .notice-highlight {
+        font-size: 0.85rem;
+        padding: 10px 15px;
+    }
+
+    .russian-notice-footer {
+        padding: 15px 20px;
+    }
+
+    .russian-notice-footer .btn-primary {
+        padding: 10px 25px;
+        font-size: 0.9rem;
+    }
+}

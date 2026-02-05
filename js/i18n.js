@@ -158,7 +158,13 @@ class I18n {
                 'minesweeper.timeSpent': '用时',
 
                 // 版权
-                'copyright': '© 2026 木头猫 - 保留所有权利'
+                'copyright': '© 2026 木头猫 - 保留所有权利',
+
+                // 俄语公告
+                'russianNotice.title': '重要公告',
+                'russianNotice.content': '本网站与 woodcat.io 无任何关联。我们是一个独立的小游戏合集网站，与其他任何使用类似名称的网站无关。',
+                'russianNotice.highlight': '请勿混淆',
+                'russianNotice.confirm': '我明白了'
             },
             'ru': {
                 // 网站通用文本
@@ -311,7 +317,13 @@ class I18n {
                 'minesweeper.timeSpent': 'Время',
 
                 // 版权
-                'copyright': '© 2026 Деревянная Кошка - Все права защищены'
+                'copyright': '© 2026 Деревянная Кошка - Все права защищены',
+
+                // 俄语公告
+                'russianNotice.title': 'Важное уведомление',
+                'russianNotice.content': 'Этот веб-сайт не связан с woodcat.io. Мы являемся независимым веб-сайтом с коллекцией мини-игр и не связаны ни с каким другим веб-сайтом, использующим похожее название.',
+                'russianNotice.highlight': 'Не путайте',
+                'russianNotice.confirm': 'Я понял'
             }
         };
         
@@ -370,6 +382,65 @@ class I18n {
             
             // 触发语言切换事件
             document.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang } }));
+
+            // 如果切换到俄语且未显示过公告，则显示公告
+            if (lang === 'ru' && !this.hasShownRussianNotice()) {
+                this.showRussianNotice();
+            }
+        }
+    }
+
+    /**
+     * 检查是否已显示过俄语公告
+     * @returns {boolean}
+     */
+    hasShownRussianNotice() {
+        return localStorage.getItem('woodcat_russian_notice_shown') === 'true';
+    }
+
+    /**
+     * 显示俄语公告
+     */
+    showRussianNotice() {
+        const modal = document.getElementById('russian-notice-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+            
+            // 标记已显示过
+            localStorage.setItem('woodcat_russian_notice_shown', 'true');
+            
+            // 绑定关闭事件
+            const closeBtn = document.getElementById('russian-notice-close');
+            const confirmBtn = document.getElementById('russian-notice-confirm');
+            
+            const closeModal = () => {
+                modal.style.display = 'none';
+            };
+            
+            // 移除旧的事件监听器（避免重复绑定）
+            const newCloseBtn = closeBtn.cloneNode(true);
+            closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+            newCloseBtn.addEventListener('click', closeModal);
+            
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            newConfirmBtn.addEventListener('click', closeModal);
+            
+            // 点击遮罩层关闭
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+            
+            // ESC键关闭
+            const handleEsc = (e) => {
+                if (e.key === 'Escape') {
+                    closeModal();
+                    document.removeEventListener('keydown', handleEsc);
+                }
+            };
+            document.addEventListener('keydown', handleEsc);
         }
     }
     
