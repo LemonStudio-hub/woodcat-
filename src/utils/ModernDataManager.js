@@ -17,13 +17,13 @@ export class ModernDataManager {
       const request = indexedDB.open(this.dbName, this.version);
 
       request.onerror = (event) => {
-        console.error('IndexedDB打开失败:', event.target.error);
+        Logger.error('IndexedDB打开失败:', event.target.error);
         reject(event.target.error);
       };
 
       request.onsuccess = (event) => {
         this.db = event.target.result;
-        console.log('IndexedDB初始化成功');
+        Logger.info('IndexedDB初始化成功');
         resolve(this.db);
       };
 
@@ -33,7 +33,7 @@ export class ModernDataManager {
           const store = db.createObjectStore(this.storeName, { keyPath: 'key' });
           store.createIndex('gameName', 'gameName', { unique: false });
           store.createIndex('timestamp', 'timestamp', { unique: false });
-          console.log('IndexedDB对象存储创建成功');
+          Logger.info('IndexedDB对象存储创建成功');
         }
       };
     });
@@ -89,12 +89,12 @@ export class ModernDataManager {
         };
 
         request.onerror = (event) => {
-          console.error('保存数据失败:', event.target.error);
+          Logger.error('保存数据失败:', event.target.error);
           reject(event.target.error);
         };
       });
     } catch (error) {
-      console.error('保存游戏数据失败:', error);
+      Logger.error('保存游戏数据失败:', error);
       return false;
     }
   }
@@ -112,7 +112,7 @@ export class ModernDataManager {
         await this.init();
       }
 
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const transaction = this.db.transaction([this.storeName], 'readonly');
         const store = transaction.objectStore(this.storeName);
         const request = store.get(key);
@@ -128,12 +128,12 @@ export class ModernDataManager {
         };
 
         request.onerror = (event) => {
-          console.error('读取数据失败:', event.target.error);
+          Logger.error('读取数据失败:', event.target.error);
           resolve(defaultValue);
         };
       });
     } catch (error) {
-      console.error('读取游戏数据失败:', error);
+      Logger.error('读取游戏数据失败:', error);
       return defaultValue;
     }
   }
@@ -144,7 +144,7 @@ export class ModernDataManager {
         await this.init();
       }
 
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const transaction = this.db.transaction([this.storeName], 'readonly');
         const store = transaction.objectStore(this.storeName);
         const request = store.getAll();
@@ -164,12 +164,12 @@ export class ModernDataManager {
         };
 
         request.onerror = (event) => {
-          console.error('获取所有数据失败:', event.target.error);
+          Logger.error('获取所有数据失败:', event.target.error);
           resolve({});
         };
       });
     } catch (error) {
-      console.error('获取所有游戏数据失败:', error);
+      Logger.error('获取所有游戏数据失败:', error);
       return {};
     }
   }

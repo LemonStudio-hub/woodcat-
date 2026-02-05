@@ -33,7 +33,7 @@ class GameAudioVibrationModule {
      */
     initAudio() {
         if (typeof Howl === 'undefined') {
-            console.warn('Howler.js 未加载，音频功能将不可用');
+            Logger.warn('Howler.js 未加载，音频功能将不可用');
             return;
         }
         
@@ -58,7 +58,7 @@ class GameAudioVibrationModule {
      */
     createToneSound(frequency, duration, waveform = 'sine', volume = 0.1) {
         if (typeof Howl === 'undefined') {
-            console.warn('Howler.js 未加载，无法创建音效');
+            Logger.warn('Howler.js 未加载，无法创建音效');
             return null;
         }
         
@@ -83,13 +83,53 @@ class GameAudioVibrationModule {
                     // 生成不同频率的音调，应用包络（fade-out）
                     const freq = frequency[j];
                     const envelope = Math.exp(-5 * t / durationSec); // 指数衰减
-                    value += Math.sin(2 * Math.PI * freq * t) * envelope;
+                    
+                    // 根据波形类型生成不同的波形
+                    let waveValue;
+                    const phase = 2 * Math.PI * freq * t;
+                    switch (waveform) {
+                        case 'square':
+                            waveValue = Math.sign(Math.sin(phase));
+                            break;
+                        case 'sawtooth':
+                            waveValue = 2 * (t * freq % 1) - 1;
+                            break;
+                        case 'triangle':
+                            waveValue = 2 * Math.abs(2 * (t * freq % 1) - 1) - 1;
+                            break;
+                        case 'sine':
+                        default:
+                            waveValue = Math.sin(phase);
+                            break;
+                    }
+                    
+                    value += waveValue * envelope;
                 }
                 value /= frequency.length; // 平均化多个频率
             } else {
                 // 单个频率
                 const envelope = Math.exp(-5 * t / durationSec); // 指数衰减
-                value = Math.sin(2 * Math.PI * frequency * t) * envelope;
+                
+                // 根据波形类型生成不同的波形
+                let waveValue;
+                const phase = 2 * Math.PI * frequency * t;
+                switch (waveform) {
+                    case 'square':
+                        waveValue = Math.sign(Math.sin(phase));
+                        break;
+                    case 'sawtooth':
+                        waveValue = 2 * (t * frequency % 1) - 1;
+                        break;
+                    case 'triangle':
+                        waveValue = 2 * Math.abs(2 * (t * frequency % 1) - 1) - 1;
+                        break;
+                    case 'sine':
+                    default:
+                        waveValue = Math.sin(phase);
+                        break;
+                }
+                
+                value = waveValue * envelope;
             }
             
             data[i] = value * volume;
@@ -108,7 +148,7 @@ class GameAudioVibrationModule {
                 // console.log('音效加载完成');
             },
             onloaderror: function(id, msg) {
-                console.error(`音效加载失败: ${msg}`);
+                Logger.error(`音效加载失败: ${msg}`);
             }
         });
     }
@@ -412,7 +452,7 @@ function initAudioVibrationModule() {
     if (typeof Howl !== 'undefined') {
         gameAudioVibration = new GameAudioVibrationModule();
     } else {
-        console.warn('Howler.js 未加载，音频功能将不可用');
+        Logger.warn('Howler.js 未加载，音频功能将不可用');
     }
 }
 

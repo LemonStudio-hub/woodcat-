@@ -121,13 +121,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 initializeLeaderboard();
             };
             supabaseScript.onerror = function() {
-                console.warn('Supabase库加载失败，仅初始化基本功能');
+                Logger.warn('Supabase库加载失败，仅初始化基本功能');
                 initializeNonLeaderboardFeatures();
             };
             document.head.appendChild(supabaseScript);
         };
         configScript.onerror = function() {
-            console.warn('配置文件加载失败，仅初始化基本功能');
+            Logger.warn('配置文件加载失败，仅初始化基本功能');
             initializeNonLeaderboardFeatures();
         };
         document.head.appendChild(configScript);
@@ -142,13 +142,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 初始化Supabase客户端
                 globalSupabaseClient = window.supabase.createClient(window.AppConfig.supabase.url, window.AppConfig.supabase.key);
                 
-                console.log('Supabase客户端初始化成功');
+                Logger.info('Supabase客户端初始化成功');
             } catch (error) {
-                console.error('Supabase客户端初始化失败:', error);
+                Logger.error('Supabase客户端初始化失败:', error);
                 globalSupabaseClient = null;
             }
         } else {
-            console.warn('Supabase配置未找到');
+            Logger.warn('Supabase配置未找到');
         }
                 
         // 排行榜相关元素
@@ -175,12 +175,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     .limit(1);
                 
                 if (error) {
-                    console.error('Supabase连接验证失败:', error);
+                    Logger.error('Supabase连接验证失败:', error);
                     return false;
                 }
                 return true;
             } catch (err) {
-                console.error('Supabase连接验证异常:', err);
+                Logger.error('Supabase连接验证异常:', err);
                 return false;
             }
         }
@@ -204,14 +204,13 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 // 首先尝试从云端加载（如果可用）
                 let cloudData = [];
-                let cloudError = null;
                 
                 if (globalSupabaseClient) {
                     try {
                         // 验证连接是否仍然有效
                         const isConnected = await validateSupabaseConnection();
                         if (!isConnected) {
-                            console.warn('Supabase连接无效，跳过云端请求');
+                            Logger.warn('Supabase连接无效，跳过云端请求');
                             globalSupabaseClient = null; // 标记为无效连接
                         } else {
                             // 设置更合理的超时时间并实现重试机制
@@ -238,8 +237,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     const { data, error } = response;
                                     
                                     if (error) {
-                                        console.error(`云端加载排行榜失败 (尝试 ${attempts + 1}/${maxAttempts}):`, error);
-                                        cloudError = error;
+                                        Logger.error(`云端加载排行榜失败 (尝试 ${attempts + 1}/${maxAttempts}):`, error);
                                         attempts++;
                                         
                                         if (attempts >= maxAttempts) {
@@ -251,15 +249,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                         continue;
                                     } else {
                                         cloudData = data || [];
-                                        console.log(`从云端加载了 ${cloudData.length} 条排行榜数据`);
+                                        Logger.info(`从云端加载了 ${cloudData.length} 条排行榜数据`);
                                         break; // 成功则跳出循环
                                     }
                                 } catch (timeoutError) {
-                                    console.warn(`云端排行榜加载超时 (尝试 ${attempts + 1}/${maxAttempts}):`, timeoutError.message);
+                                    Logger.warn(`云端排行榜加载超时 (尝试 ${attempts + 1}/${maxAttempts}):`, timeoutError.message);
                                     attempts++;
                                     
                                     if (attempts >= maxAttempts) {
-                                        cloudError = timeoutError;
                                         break;
                                     }
                                     
@@ -269,8 +266,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                         }
                     } catch (connectionError) {
-                        console.error('云端加载异常:', connectionError);
-                        cloudError = connectionError;
+                        Logger.error('云端加载异常:', connectionError);
                     }
                 }
                 
@@ -284,9 +280,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         .sort((a, b) => b.score - a.score) // 按分数降序排列
                         .slice(0, 20); // 只取前20条
                     
-                    console.log(`从本地加载了 ${localLeaderboardEntries.length} 条排行榜数据`);
+                    Logger.info(`从本地加载了 ${localLeaderboardEntries.length} 条排行榜数据`);
                 } catch (localError) {
-                    console.error('本地数据加载失败:', localError);
+                    Logger.error('本地数据加载失败:', localError);
                 }
                 
                 // 合并云端和本地数据，去重并按分数排序
@@ -330,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 显示排行榜数据
                 displayLeaderboardData(allData);
             } catch (err) {
-                console.error('加载排行榜时发生错误:', err);
+                Logger.error('加载排行榜时发生错误:', err);
                 leaderboardLoading.style.display = 'none';
                 
                 // 即使出错也要尝试从本地获取数据作为降级方案
@@ -344,12 +340,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     if (localLeaderboardEntries.length > 0) {
                         displayLeaderboardData(localLeaderboardEntries);
-                        console.log('使用本地数据成功显示排行榜');
+                        Logger.info('使用本地数据成功显示排行榜');
                     } else {
                         leaderboardEmpty.style.display = 'block';
                     }
                 } catch (localErr) {
-                    console.error('使用本地数据也失败:', localErr);
+                    Logger.error('使用本地数据也失败:', localErr);
                     leaderboardEmpty.style.display = 'block';
                 }
             }
@@ -585,7 +581,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             created_at: new Date().toISOString()
                         };
                         
-                        console.log('准备插入的数据:', insertData);
+                        Logger.info('准备插入的数据:', insertData);
                         
                         // 首先尝试本地存储，确保数据不会丢失
                         const localSuccess = await gameDataManager.saveData(
@@ -595,7 +591,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         );
                         
                         if (!localSuccess) {
-                            console.warn('本地存储失败，但继续尝试云端存储');
+                            Logger.warn('本地存储失败，但继续尝试云端存储');
                         }
                         
                         // 尝试提交到云端（Supabase）
@@ -607,7 +603,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 // 验证连接是否仍然有效
                                 const isConnected = await validateSupabaseConnection();
                                 if (!isConnected) {
-                                    console.warn('Supabase连接无效，跳过云端提交');
+                                    Logger.warn('Supabase连接无效，跳过云端提交');
                                     globalSupabaseClient = null; // 标记为无效连接
                                 } else {
                                     // 实现重试机制
@@ -621,7 +617,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                                 .insert([insertData]);
                                                 
                                             if (error) {
-                                                console.error(`云端提交分数失败 (尝试 ${attempts + 1}/${maxAttempts}):`, error);
+                                                Logger.error(`云端提交分数失败 (尝试 ${attempts + 1}/${maxAttempts}):`, error);
                                                 cloudError = error;
                                                 attempts++;
                                                 
@@ -634,11 +630,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                                 continue;
                                             } else {
                                                 cloudSuccess = true;
-                                                console.log('云端提交成功:', data);
+                                                Logger.info('云端提交成功:', data);
                                                 break; // 成功则跳出循环
                                             }
                                         } catch (err) {
-                                            console.error(`云端提交异常 (尝试 ${attempts + 1}/${maxAttempts}):`, err);
+                                            Logger.error(`云端提交异常 (尝试 ${attempts + 1}/${maxAttempts}):`, err);
                                             attempts++;
                                             
                                             if (attempts >= maxAttempts) {
@@ -652,11 +648,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                     }
                                 }
                             } catch (err) {
-                                console.error('云端提交时发生异常:', err);
+                                Logger.error('云端提交时发生异常:', err);
                                 cloudError = err;
                             }
                         } else {
-                            console.warn('Supabase客户端未初始化或连接无效，跳过云端提交');
+                            Logger.warn('Supabase客户端未初始化或连接无效，跳过云端提交');
                         }
                         
                         // 根据结果决定显示什么信息
@@ -692,7 +688,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         scoreModal.style.display = 'none';
                         playerNameInput.value = '';
                     } catch (err) {
-                        console.error('提交分数时发生错误:', err);
+                        Logger.error('提交分数时发生错误:', err);
                         // 即使发生错误，也提供选项让用户关闭对话框
                         if (confirm('提交分数时发生错误，请稍后重试\n\n是否仍要关闭提交窗口？')) {
                             scoreModal.style.display = 'none';

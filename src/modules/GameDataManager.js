@@ -26,13 +26,13 @@ export class GameDataManager {
       const request = indexedDB.open(this.dbName, 1);
 
       request.onerror = (event) => {
-        console.error('IndexedDB打开失败:', event.target.error);
+        Logger.error('IndexedDB打开失败:', event.target.error);
         reject(event.target.error);
       };
 
       request.onsuccess = (event) => {
         this.db = event.target.result;
-        console.log('IndexedDB初始化成功');
+        Logger.info('IndexedDB初始化成功');
         resolve(this.db);
       };
 
@@ -42,7 +42,7 @@ export class GameDataManager {
           const store = db.createObjectStore(this.storeName, { keyPath: 'key' });
           store.createIndex('gameName', 'gameName', { unique: false });
           store.createIndex('timestamp', 'timestamp', { unique: false });
-          console.log('IndexedDB对象存储创建成功');
+          Logger.info('IndexedDB对象存储创建成功');
         }
       };
     });
@@ -121,7 +121,7 @@ export class GameDataManager {
           this._saveQueue.delete(key);
         }
       } catch (error) {
-        console.error(`保存数据失败 ${key}:`, error);
+        Logger.error(`保存数据失败 ${key}:`, error);
       } finally {
         this._saveTimeouts.delete(key);
       }
@@ -144,7 +144,7 @@ export class GameDataManager {
 
       return true;
     } catch (error) {
-      console.error('保存游戏数据失败:', error);
+      Logger.error('保存游戏数据失败:', error);
       return false;
     }
   }
@@ -181,7 +181,7 @@ export class GameDataManager {
 
       return true;
     } catch (error) {
-      console.error('立即保存游戏数据失败:', error);
+      Logger.error('立即保存游戏数据失败:', error);
       return false;
     }
   }
@@ -200,7 +200,7 @@ export class GameDataManager {
 
       await this._initPromise;
 
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const transaction = this.db.transaction([this.storeName], 'readonly');
         const store = transaction.objectStore(this.storeName);
         const request = store.get(key);
@@ -217,18 +217,18 @@ export class GameDataManager {
         };
 
         request.onerror = (event) => {
-          console.error('读取数据失败:', event.target.error);
+          Logger.error('读取数据失败:', event.target.error);
           resolve(defaultValue);
         };
 
         // 为事务添加错误处理
         transaction.onerror = (event) => {
-          console.error('事务执行失败:', event.target.error);
+          Logger.error('事务执行失败:', event.target.error);
           resolve(defaultValue);
         };
       });
     } catch (error) {
-      console.error('读取游戏数据失败:', error);
+      Logger.error('读取游戏数据失败:', error);
       return defaultValue;
     }
   }
@@ -240,7 +240,7 @@ export class GameDataManager {
     try {
       await this._initPromise;
 
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const transaction = this.db.transaction([this.storeName], 'readonly');
         const store = transaction.objectStore(this.storeName);
         const request = store.getAll();
@@ -262,18 +262,18 @@ export class GameDataManager {
         };
 
         request.onerror = (event) => {
-          console.error('获取所有数据失败:', event.target.error);
+          Logger.error('获取所有数据失败:', event.target.error);
           resolve({});
         };
 
         // 为事务添加错误处理
         transaction.onerror = (event) => {
-          console.error('事务执行失败:', event.target.error);
+          Logger.error('事务执行失败:', event.target.error);
           resolve({});
         };
       });
     } catch (error) {
-      console.error('获取所有游戏数据失败:', error);
+      Logger.error('获取所有游戏数据失败:', error);
       return {};
     }
   }
@@ -301,12 +301,12 @@ export class GameDataManager {
         };
 
         request.onerror = (event) => {
-          console.error('清除游戏数据失败:', event.target.error);
+          Logger.error('清除游戏数据失败:', event.target.error);
           reject(event.target.error);
         };
       });
     } catch (error) {
-      console.error('清除游戏数据失败:', error);
+      Logger.error('清除游戏数据失败:', error);
       return false;
     }
   }

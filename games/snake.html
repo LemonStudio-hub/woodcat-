@@ -94,6 +94,9 @@
             -webkit-tap-highlight-color: transparent; /* 移除点击高亮 */
             -webkit-touch-callout: none; /* 防止长按弹出菜单 */
             -webkit-user-select: none; /* 防止选择文本 */
+            -moz-user-select: none; /* 防止选择文本 - Firefox */
+            -ms-user-select: none; /* 防止选择文本 - IE/Edge */
+            user-select: none; /* 防止选择文本 - 标准属性 */
             -webkit-user-drag: none; /* 防止拖拽 */
         }
         
@@ -547,13 +550,18 @@
                         function toggleGame() {
                             if (!gameStarted || gameOver) {
                                 // 如果游戏尚未开始或游戏已结束，则开始游戏
-                                gameInterval = setInterval(moveSnake, 150);
-                                document.getElementById('startBtn').textContent = '重新开始';
-                                gameStarted = true; // 游戏真正开始
+                                gameStarted = true; // 先设置游戏开始状态
                                 gameOver = false; // 确保游戏结束状态被重置
+                                document.getElementById('startBtn').textContent = '重新开始';
                                 
                                 // 初始化音频
                                 initAudio();
+                                
+                                // 立即执行一次移动，使蛇立即开始移动
+                                moveSnake();
+                                
+                                // 启动游戏循环
+                                gameInterval = setInterval(moveSnake, 150);
                             } else {
                                 // 如果游戏已经开始，则重置游戏
                                 resetGame();
