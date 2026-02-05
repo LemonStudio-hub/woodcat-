@@ -564,10 +564,11 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
-    <script src="../js/data-manager.js"></script>
-    <script src="../js/score-manager.js"></script>
-    <script>
-        // 国际象棋核心游戏逻辑
+    <script src="../js/dataManager.js"></script>
+    <script src="../js/scoreManager.js"></script>
+    <script src="../js/modal.js"></script>
+    <script src="../js/audioVibration.js"></script>
+    <script>        // 国际象棋核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
             // 初始化游戏数据管理器
             let gameStats = scoreManager.getGameStats('chess');
@@ -1614,7 +1615,14 @@
                                                     scoreManager.recordGameResult('chess', 'win', 1); // 黑方获胜
                                                 }
                                             }                        
-                        alert(`${winner}吃掉了对方的国王！`);
+                        gameModal.show({
+                            title: '游戏结束',
+                            message: `${winner}吃掉了对方的国王！`,
+                            confirmText: '再来一局',
+                            onConfirm: () => {
+                                initGame();
+                            }
+                        });
                         
                         // 为获胜方的国王添加胜利动画
                         const kingCells = document.querySelectorAll('.cell');

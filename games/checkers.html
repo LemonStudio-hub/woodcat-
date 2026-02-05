@@ -614,10 +614,11 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
-    <script src="../js/data-manager.js"></script>
-    <script src="../js/score-manager.js"></script>
-    <script>
-        // 跳棋核心游戏逻辑
+    <script src="../js/dataManager.js"></script>
+    <script src="../js/scoreManager.js"></script>
+    <script src="../js/modal.js"></script>
+    <script src="../js/audioVibration.js"></script>
+    <script>        // 跳棋核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
             // 初始化游戏数据管理器
             let gameStats = scoreManager.getGameStats('checkers');
@@ -1529,10 +1530,24 @@
                         if (gameMode === 'pvc') {
                             // AI获胜
                             gameStats.aiWins++;
-                            alert('AI获胜！再试一次吧！');
+                            gameModal.show({
+                                title: '游戏结束',
+                                message: 'AI获胜！再试一次吧！',
+                                confirmText: '再来一局',
+                                onConfirm: () => {
+                                    initGame();
+                                }
+                            });
                         } else {
                             // 玩家2获胜
-                            alert('玩家2获胜！');
+                            gameModal.show({
+                                title: '游戏结束',
+                                message: '玩家2获胜！',
+                                confirmText: '再来一局',
+                                onConfirm: () => {
+                                    initGame();
+                                }
+                            });
                         }
                         // 更新统计数据
                         if (gameMode === 'pvc') {
@@ -1549,10 +1564,24 @@
                         if (gameMode === 'pvc') {
                             // 玩家获胜
                             gameStats.playerWins = (gameStats.playerWins || 0) + 1;
-                            alert('恭喜你获胜！');
+                            gameModal.show({
+                                title: '游戏结束',
+                                message: '恭喜你获胜！',
+                                confirmText: '再来一局',
+                                onConfirm: () => {
+                                    initGame();
+                                }
+                            });
                         } else {
                             // 玩家1获胜
-                            alert('玩家1获胜！');
+                            gameModal.show({
+                                title: '游戏结束',
+                                message: '玩家1获胜！',
+                                confirmText: '再来一局',
+                                onConfirm: () => {
+                                    initGame();
+                                }
+                            });
                         }
                         // 更新统计数据
                         if (gameMode === 'pvc') {

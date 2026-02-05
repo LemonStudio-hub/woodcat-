@@ -92,9 +92,6 @@
         }
         
         .game-board {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(4, 1fr);
             width: 100%;
             aspect-ratio: 1/1;
             background: #bbada0;
@@ -104,9 +101,11 @@
             position: relative;
             touch-action: none; /* 禁用默认触摸行为 */
             overflow: hidden;
+            box-sizing: border-box;
         }
         
         .cell {
+            position: absolute;
             background: rgba(238, 228, 218, 0.35);
             border-radius: 6px;
             display: flex;
@@ -115,6 +114,8 @@
             font-weight: bold;
             font-size: 20px;
             transition: all 0.15s ease;
+            width: calc(25% - 6px);
+            height: calc(25% - 6px);
         }
         
         .tile {
@@ -368,30 +369,37 @@
                 <p id="score">0</p>
             </div>
             <div class="score-box">
-                <h3>最高分</h3>
+                <h3 data-i18n="game.highScore">最高分</h3>
                 <p id="high-score">0</p>
             </div>
         </div>
         <div class="game-intro">
-            <p>滑动或使用方向键合并相同数字的方块</p>
+            <p data-i18n="game2048.intro">滑动或使用方向键合并相同数字的方块</p>
         </div>
         <div class="game-board" id="board"></div>
         <div class="controls">
             <div class="buttons">
-                <button id="new-game">新游戏</button>
+                <button id="new-game" data-i18n="btn.newGame">新游戏</button>
             </div>
         </div>
         <div class="instructions">
-            <p>向上滑动↑ 向下滑动↓ 向左滑动← 向右滑动→</p>
+            <p data-i18n="game2048.instructions">向上滑动↑ 向下滑动↓ 向左滑动← 向右滑动→</p>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
     <script src="../js/lib/hammer.min.js"></script>
-    <script src="../js/data-manager.js"></script>
+    <script src="../js/dataManager.js"></script>
+    <script src="../js/audioVibration.js"></script>
+    <script src="../js/i18n.js"></script>
     <script>
         // 2048核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
+            // 应用国际化翻译
+            if (typeof i18n !== 'undefined') {
+                i18n.applyTranslations();
+            }
+
             const GRID_SIZE = 4;
             let grid = [];
             let score = 0;
@@ -519,6 +527,8 @@
                     for (let x = 0; x < GRID_SIZE; x++) {
                         const cell = document.createElement('div');
                         cell.className = 'cell';
+                        cell.style.top = `${y * 25}%`;
+                        cell.style.left = `${x * 25}%`;
                         boardElement.appendChild(cell);
                     }
                 }
@@ -531,10 +541,12 @@
                             tile.className = `tile tile-${grid[y][x]} new`;
                             tile.textContent = grid[y][x];
                             // 设置位置
-                            tile.style.top = `${y * (100/GRID_SIZE)}%`;
-                            tile.style.left = `${x * (100/GRID_SIZE)}%`;
-                            tile.style.width = `calc(${100/GRID_SIZE}% - 6px)`;
-                            tile.style.height = `calc(${100/GRID_SIZE}% - 6px)`;
+                            tile.style.top = `${y * 25}%`;
+                            tile.style.left = `${x * 25}%`;
+                            tile.style.width = `calc(25% - 6px)`;
+                            tile.style.height = `calc(25% - 6px)`;
+                            // 添加内边距以匹配网格布局
+                            tile.style.padding = '3px';
                             boardElement.appendChild(tile);
                             
                             // 动画结束后移除 new 类
@@ -551,7 +563,6 @@
                 if (gameOver) return false;
                 
                 let moved = false;
-                const oldGrid = JSON.parse(JSON.stringify(grid));
                 
                 // 根据方向移动
                 switch(direction) {
@@ -603,12 +614,12 @@
                         gameOver = true;
                         playGameOverSound(); // 播放游戏结束音效
                         setTimeout(() => {
-                            alert('游戏结束!');
+                            alert(typeof i18n !== 'undefined' ? i18n.t('game2048.gameOver') : '游戏结束!');
                         }, 100);
                     }
                 }
                 
-                return JSON.stringify(grid) !== JSON.stringify(oldGrid);
+                return moved;
             }
             
             // 移动单个方块
@@ -644,12 +655,11 @@
                         
                         // 检查是否达到2048
                         if (grid[nextY][nextX] === 2048 && !gameWon) {
-                            gameWon = true;
-                            playWinSound(); // 播放获胜音效
-                            setTimeout(() => {
-                                alert('恭喜！你达到了2048!');
-                            }, 100);
-                        }
+                                                gameWon = true;
+                                                playWinSound(); // 播放获胜音效
+                                                setTimeout(() => {
+                                                    alert(typeof i18n !== 'undefined' ? i18n.t('game2048.youWin') : '恭喜！你达到了2048!');
+                                                }, 100);                        }
                         
                         break;
                     } 

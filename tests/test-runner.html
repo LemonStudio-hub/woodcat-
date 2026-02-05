@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试运行器 - 木头猫</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .test-controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .test-results {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-summary {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .test-summary .passed {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .test-summary .failed {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .test-item {
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid #ccc;
+            background: #f9f9f9;
+            border-radius: 2px;
+        }
+        
+        .test-item.pass {
+            border-left-color: #27ae60;
+            background: #e8f8f5;
+        }
+        
+        .test-item.fail {
+            border-left-color: #e74c3c;
+            background: #fdedec;
+        }
+        
+        .test-item .name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .test-item .details {
+            font-size: 14px;
+            color: #666;
+            margin-left: 10px;
+        }
+        
+        .test-item .error {
+            color: #e74c3c;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 木头猫游戏网站测试套件</h1>
+        
+        <div class="test-controls">
+            <button id="run-all-tests">运行所有测试</button>
+            <button id="clear-results">清除结果</button>
+        </div>
+        
+        <div class="test-results">
+            <div id="test-output">
+                <p style="text-align: center; color: #7f8c8d;">点击"运行所有测试"开始测试</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/i18n.js"></script>
+    <script src="test-games.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const runAllBtn = document.getElementById('run-all-tests');
+            const clearBtn = document.getElementById('clear-results');
+            const output = document.getElementById('test-output');
+            
+            runAllBtn.addEventListener('click', function() {
+                runAllTests();
+            });
+            
+            clearBtn.addEventListener('click', function() {
+                output.innerHTML = '<p style="text-align: center; color: #7f8c8d;">点击"运行所有测试"开始测试</p>';
+            });
+            
+            function runAllTests() {
+                output.innerHTML = '<div class="loading">正在运行测试...</div>';
+                
+                // 延迟执行以允许UI更新
+                setTimeout(function() {
+                    const results = TestSuite.run();
+                    displayResults(results);
+                }, 100);
+            }
+            
+            function displayResults(results) {
+                let html = `
+                    <div class="test-summary">
+                        <div>
+                            <strong>测试结果:</strong>
+                            <span class="passed">通过 ${results.passed}</span> / 
+                            <span class="failed">失败 ${results.failed}</span> / 
+                            总计 ${results.total}
+                        </div>
+                        <div>
+                            <strong>成功率:</strong> ${((results.passed / results.total) * 100).toFixed(1)}%
+                        </div>
+                    </div>
+                `;
+                
+                // 获取测试输出
+                const testOutput = document.getElementById('test-output');
+                const originalContent = testOutput.innerHTML;
+                
+                html += '<div class="test-list">';
+                html += originalContent.replace('<div class="loading">正在运行测试...</div>', '');
+                html += '</div>';
+                
+                output.innerHTML = html;
+                
+                // 添加样式类
+                const items = output.querySelectorAll('.test-item');
+                items.forEach(item => {
+                    const text = item.textContent.trim();
+                    if (text.startsWith('✓')) {
+                        item.classList.add('pass');
+                    } else if (text.startsWith('✗')) {
+                        item.classList.add('fail');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
