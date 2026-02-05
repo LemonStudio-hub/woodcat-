@@ -369,21 +369,21 @@
                 <p id="score">0</p>
             </div>
             <div class="score-box">
-                <h3>最高分</h3>
+                <h3 data-i18n="game.highScore">最高分</h3>
                 <p id="high-score">0</p>
             </div>
         </div>
         <div class="game-intro">
-            <p>滑动或使用方向键合并相同数字的方块</p>
+            <p data-i18n="game2048.intro">滑动或使用方向键合并相同数字的方块</p>
         </div>
         <div class="game-board" id="board"></div>
         <div class="controls">
             <div class="buttons">
-                <button id="new-game">新游戏</button>
+                <button id="new-game" data-i18n="btn.newGame">新游戏</button>
             </div>
         </div>
         <div class="instructions">
-            <p>向上滑动↑ 向下滑动↓ 向左滑动← 向右滑动→</p>
+            <p data-i18n="game2048.instructions">向上滑动↑ 向下滑动↓ 向左滑动← 向右滑动→</p>
         </div>
     </div>
 
@@ -391,9 +391,15 @@
     <script src="../js/lib/hammer.min.js"></script>
     <script src="../js/dataManager.js"></script>
     <script src="../js/audioVibration.js"></script>
+    <script src="../js/i18n.js"></script>
     <script>
         // 2048核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
+            // 应用国际化翻译
+            if (typeof i18n !== 'undefined') {
+                i18n.applyTranslations();
+            }
+
             const GRID_SIZE = 4;
             let grid = [];
             let score = 0;
@@ -608,7 +614,7 @@
                         gameOver = true;
                         playGameOverSound(); // 播放游戏结束音效
                         setTimeout(() => {
-                            alert('游戏结束!');
+                            alert(typeof i18n !== 'undefined' ? i18n.t('game2048.gameOver') : '游戏结束!');
                         }, 100);
                     }
                 }
@@ -649,12 +655,11 @@
                         
                         // 检查是否达到2048
                         if (grid[nextY][nextX] === 2048 && !gameWon) {
-                            gameWon = true;
-                            playWinSound(); // 播放获胜音效
-                            setTimeout(() => {
-                                alert('恭喜！你达到了2048!');
-                            }, 100);
-                        }
+                                                gameWon = true;
+                                                playWinSound(); // 播放获胜音效
+                                                setTimeout(() => {
+                                                    alert(typeof i18n !== 'undefined' ? i18n.t('game2048.youWin') : '恭喜！你达到了2048!');
+                                                }, 100);                        }
                         
                         break;
                     } 
