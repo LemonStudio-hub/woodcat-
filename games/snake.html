@@ -544,7 +544,7 @@
                             drawBoard();
                         }
                         
-                        // 开始/暂停游戏
+                        // 开始游戏
                         function toggleGame() {
                             if (!gameStarted || gameOver) {
                                 // 如果游戏尚未开始或游戏已结束，则开始游戏
@@ -552,13 +552,14 @@
                                 document.getElementById('startBtn').textContent = '重新开始';
                                 gameStarted = true; // 游戏真正开始
                                 gameOver = false; // 确保游戏结束状态被重置
-                                
+
                                 // 初始化音频
                                 initAudio();
-                            } else {
-                                // 如果游戏已经开始，则重置游戏
-                                resetGame();
+
+                                // 立即移动蛇，让游戏立即开始
+                                moveSnake();
                             }
+                            // 如果游戏已经开始，则不执行任何操作
                         }
                         
                         function togglePause() {
