@@ -3,6 +3,7 @@
  * 提供可配置的日志功能，在生产环境中可以禁用日志
  */
 
+// 定义一个简单的Logger对象，在浏览器环境中能够正常工作
 const Logger = {
   // 日志级别: 'debug', 'info', 'warn', 'error'
   level: 'info',
@@ -26,36 +27,28 @@ const Logger = {
   // 调试日志
   debug(...args) {
     if (this._shouldLog('debug')) {
-      /* eslint-disable no-console */
       console.debug(...args);
-      /* eslint-enable no-console */
     }
   },
   
   // 信息日志
   info(...args) {
     if (this._shouldLog('info')) {
-      /* eslint-disable no-console */
       console.info(...args);
-      /* eslint-enable no-console */
     }
   },
   
   // 警告日志
   warn(...args) {
     if (this._shouldLog('warn')) {
-      /* eslint-disable no-console */
       console.warn(...args);
-      /* eslint-enable no-console */
     }
   },
   
   // 错误日志
   error(...args) {
     if (this._shouldLog('error')) {
-      /* eslint-disable no-console */
       console.error(...args);
-      /* eslint-enable no-console */
     }
   },
   
@@ -73,12 +66,8 @@ const Logger = {
   
   // 初始化日志工具，根据环境设置合适的日志级别
   init() {
-    // 在生产环境中禁用调试日志
-    if (process.env.NODE_ENV === 'production') {
-      this.setLevel('warn');
-    } else {
-      this.setLevel('debug');
-    }
+    // 在浏览器环境中，默认为debug级别
+    this.setLevel('debug');
   }
 };
 

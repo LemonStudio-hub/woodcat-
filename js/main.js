@@ -149,19 +149,26 @@ document.addEventListener('DOMContentLoaded', function() {
         const configScript = document.createElement('script');
         configScript.src = 'js/config.js';
         configScript.onload = function() {
-            // 配置加载完成后，创建Supabase库的script标签
-            const supabaseScript = document.createElement('script');
-            supabaseScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-            supabaseScript.onload = function() {
-                // 库加载完成后，初始化所有功能
+            // 配置加载完成后，检查是否启用了排行榜功能
+            if (window.AppConfig && window.AppConfig.game && window.AppConfig.game.enableLeaderboard) {
+                // 创建Supabase库的script标签
+                const supabaseScript = document.createElement('script');
+                supabaseScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+                supabaseScript.onload = function() {
+                    // 库加载完成后，初始化所有功能
+                    initializeNonLeaderboardFeatures();
+                    initializeLeaderboard();
+                };
+                supabaseScript.onerror = function() {
+                    Logger.warn('Supabase库加载失败，仅初始化基本功能');
+                    initializeNonLeaderboardFeatures();
+                };
+                document.head.appendChild(supabaseScript);
+            } else {
+                // 排行榜功能已禁用，直接初始化非排行榜功能
+                Logger.info('排行榜功能已禁用，跳过Supabase库加载');
                 initializeNonLeaderboardFeatures();
-                initializeLeaderboard();
-            };
-            supabaseScript.onerror = function() {
-                Logger.warn('Supabase库加载失败，仅初始化基本功能');
-                initializeNonLeaderboardFeatures();
-            };
-            document.head.appendChild(supabaseScript);
+            }
         };
         configScript.onerror = function() {
             Logger.warn('配置文件加载失败，仅初始化基本功能');
