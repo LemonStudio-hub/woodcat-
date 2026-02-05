@@ -82,15 +82,17 @@
             grid-template-rows: repeat(10, 1fr);
             aspect-ratio: 1/1;
             width: 100%;
-            max-width: 300px;
+            max-width: 380px;
+            min-width: 280px;
             border: 2px solid #7f8c8d;
             background: #7f8c8d;
             margin-bottom: 15px;
             padding: 4px;
             position: relative;
             overflow: hidden;
+            touch-action: none;
         }
-        
+
         .cell {
             width: 100%;
             height: 100%;
@@ -107,6 +109,8 @@
             position: relative;
             transition: all 0.2s ease;
             transform-style: preserve-3d;
+            min-width: 0;
+            min-height: 0;
         }
         
         .cell.revealed {
@@ -158,7 +162,39 @@
             justify-content: center;
             flex-wrap: wrap;
         }
-        
+
+        .difficulty-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-btn {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            background: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .difficulty-btn:hover {
+            background: #7f8c8d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .difficulty-btn.active {
+            background: #3498db;
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4);
+        }
+
         button {
             padding: 10px 16px;
             font-size: 0.9rem;
@@ -171,13 +207,13 @@
             transition: all 0.2s ease;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
-        
+
         button:hover {
             background: #95a5a6;
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
-        
+
         button:active {
             transform: translateY(0);
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
@@ -262,35 +298,185 @@
         }
         
         /* 移动端优化 */
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 1.5rem;
-                margin: 8px 0 12px;
-            }
-            
+        @media (max-width: 768px) {
             .game-container {
-                padding: 15px;
+                padding: 20px;
+                max-width: 95%;
+                margin: 10px auto;
             }
-            
+
             .game-board {
-                max-width: 280px;
+                max-width: 360px;
+                width: 100%;
             }
-            
+
+            .difficulty-btn {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+
+            .stats {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .stat-box {
+                flex: 1 1 40%;
+                min-width: 80px;
+            }
+        }
+
+        /* 小屏手机优化 */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+                margin: 6px 0 12px;
+            }
+
+            .game-container {
+                padding: 12px;
+                max-width: 100%;
+                margin: 5px auto;
+            }
+
+            .game-board {
+                max-width: 340px;
+                min-width: 260px;
+                padding: 3px;
+            }
+
             .cell {
-                font-size: 12px;
+                font-size: 11px;
+                border-width: 1px;
             }
-            
-            .stat-box .label {
+
+            .cell.flagged::before,
+            .cell.marked-as-mine::before {
+                font-size: 14px;
+            }
+
+            .difficulty-selector {
+                gap: 6px;
+            }
+
+            .difficulty-btn {
+                padding: 6px 10px;
                 font-size: 0.75rem;
+                border-radius: 4px;
             }
-            
+
+            .stat-box .label {
+                font-size: 0.7rem;
+            }
+
             .stat-box .value {
-                font-size: 1rem;
+                font-size: 0.95rem;
             }
-            
+
             button {
                 padding: 8px 14px;
                 font-size: 0.85rem;
+            }
+
+            .back-home {
+                width: 28px;
+                height: 28px;
+                font-size: 14px;
+            }
+        }
+
+        /* 超小屏幕优化 */
+        @media (max-width: 360px) {
+            h1 {
+                font-size: 1.2rem;
+                margin: 5px 0 10px;
+            }
+
+            .game-container {
+                padding: 10px;
+            }
+
+            .game-board {
+                max-width: 300px;
+                min-width: 240px;
+            }
+
+            .cell {
+                font-size: 10px;
+            }
+
+            .cell.flagged::before,
+            .cell.marked-as-mine::before {
+                font-size: 12px;
+            }
+
+            .difficulty-btn {
+                padding: 5px 8px;
+                font-size: 0.7rem;
+            }
+
+            .stat-box {
+                flex: 1 1 30%;
+                min-width: 60px;
+            }
+
+            .stat-box .label {
+                font-size: 0.65rem;
+            }
+
+            .stat-box .value {
+                font-size: 0.85rem;
+            }
+
+            button {
+                padding: 7px 12px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* 平板设备优化 */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .game-container {
+                max-width: 500px;
+            }
+
+            .game-board {
+                max-width: 450px;
+            }
+        }
+
+        /* 桌面端优化 */
+        @media (min-width: 1025px) {
+            .game-container {
+                max-width: 550px;
+            }
+
+            .game-board {
+                max-width: 500px;
+            }
+        }
+
+        /* 横屏模式优化 */
+        @media (max-height: 500px) and (orientation: landscape) {
+            body {
+                flex-direction: row;
+                padding: 10px;
+            }
+
+            .game-container {
+                flex-direction: row;
+                max-width: 100%;
+                margin: 0;
+            }
+
+            .game-board {
+                max-width: 300px;
+                margin-right: 20px;
+                margin-bottom: 0;
             }
         }
     </style>
@@ -319,6 +505,11 @@
         </div>
         <div class="game-board" id="board"></div>
         <div class="controls">
+            <div class="difficulty-selector">
+                <button class="difficulty-btn active" data-difficulty="easy">简单 (10×10)</button>
+                <button class="difficulty-btn" data-difficulty="medium">中等 (15×15)</button>
+                <button class="difficulty-btn" data-difficulty="hard">困难 (20×20)</button>
+            </div>
             <div class="buttons">
                 <button id="resetBtn">新游戏</button>
             </div>
@@ -331,9 +522,14 @@
     <script>
         // 扫雷核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
-            // 游戏配置
-            const DIFFICULTY = { rows: 10, cols: 10, mines: 15 };
-            
+            // 游戏难度配置
+            const DIFFICULTY_LEVELS = {
+                easy: { rows: 10, cols: 10, mines: 15, name: '简单' },
+                medium: { rows: 15, cols: 15, mines: 40, name: '中等' },
+                hard: { rows: 20, cols: 20, mines: 80, name: '困难' }
+            };
+
+            let currentDifficulty = 'easy';
             let rows, cols, mines;
             let board = [];
             let revealed = 0;
@@ -343,13 +539,46 @@
             let seconds = 0;
             let flags = 0; // 已标记的旗子数量
             let correctFlags = 0; // 正确标记的雷数
-            
+
+            // 设置难度
+            function setDifficulty(difficulty) {
+                currentDifficulty = difficulty;
+                const config = DIFFICULTY_LEVELS[difficulty];
+                rows = config.rows;
+                cols = config.cols;
+                mines = config.mines;
+
+                // 更新难度按钮状态
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.difficulty === difficulty) {
+                        btn.classList.add('active');
+                    }
+                });
+
+                // 重新初始化游戏
+                initGame();
+
+                // 加载当前难度的最佳时间
+                loadBestTime();
+            }
+
+            // 加载当前难度的最佳时间
+            function loadBestTime() {
+                const key = `minesweeper_${currentDifficulty}`;
+                scoreManager.getHighScore(key, Infinity).then(loadedBestTime => {
+                    bestTime = loadedBestTime;
+                    document.getElementById('best-time').textContent = bestTime === Infinity ? '-' : bestTime;
+                });
+            }
+
             // 初始化游戏
             function initGame() {
-                rows = DIFFICULTY.rows;
-                cols = DIFFICULTY.cols;
-                mines = DIFFICULTY.mines;
-                
+                const config = DIFFICULTY_LEVELS[currentDifficulty];
+                rows = config.rows;
+                cols = config.cols;
+                mines = config.mines;
+
                 // 重置游戏状态
                 board = [];
                 revealed = 0;
@@ -358,16 +587,16 @@
                 seconds = 0;
                 flags = 0; // 重置标记数
                 correctFlags = 0; // 重置正确标记数
-                
+
                 // 清除计时器
                 if (timerInterval) {
                     clearInterval(timerInterval);
                     timerInterval = null;
                 }
-                
+
                 // 创建游戏板
                 createBoard();
-                
+
                 // 更新UI
                 document.getElementById('mines-count').textContent = mines;
                 document.getElementById('flags-count').textContent = flags;
@@ -380,9 +609,12 @@
                 boardElement.innerHTML = '';
                 boardElement.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
                 boardElement.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-                
+
+                // 根据难度和屏幕尺寸动态调整游戏板大小
+                adjustBoardSize();
+
                 // 初始化二维数组
-                board = Array.from({ length: rows }, () => 
+                board = Array.from({ length: rows }, () =>
                     Array.from({ length: cols }, () => ({
                         isMine: false,
                         isRevealed: false,
@@ -390,7 +622,7 @@
                         neighborCount: 0
                     }))
                 );
-                
+
                 // 创建格子元素
                 for (let y = 0; y < rows; y++) {
                     for (let x = 0; x < cols; x++) {
@@ -398,11 +630,11 @@
                         cell.className = 'cell';
                         cell.dataset.x = x;
                         cell.dataset.y = y;
-                        
+
                         // 触摸开始事件 - 用于检测长按
                         let longPressTimer = null;
                         let isLongPress = false;
-                        
+
                         cell.addEventListener('touchstart', (e) => {
                             isLongPress = false; // 重置长按状态
                             longPressTimer = setTimeout(() => {
@@ -411,20 +643,20 @@
                                 longPressTimer = null;
                             }, 500); // 500ms 长按
                         });
-                        
+
                         cell.addEventListener('touchmove', () => {
                             if (longPressTimer) {
                                 clearTimeout(longPressTimer);
                                 longPressTimer = null;
                             }
                         });
-                        
+
                         // 触摸结束事件 - 处理短按（点击）
                         cell.addEventListener('touchend', (e) => {
                             if (longPressTimer) {
                                 clearTimeout(longPressTimer);
                                 longPressTimer = null;
-                                
+
                                 // 只有在不是长按的情况下才处理点击
                                 if (!isLongPress) {
                                     setTimeout(() => {
@@ -433,27 +665,77 @@
                                 }
                             }
                         });
-                        
+
                         // 防止触摸时的默认行为（如滚动）
                         cell.addEventListener('touchstart', (e) => {
                             e.preventDefault();
                         }, { passive: false });
-                        
+
                         // PC端事件
                         cell.addEventListener('click', (e) => {
                             e.preventDefault();
                             handleCellClick(x, y);
                         });
-                        
+
                         // 右键点击事件（PC端标记）
                         cell.addEventListener('contextmenu', (e) => {
                             e.preventDefault();
                             handleRightClick(x, y);
                         });
-                        
+
                         boardElement.appendChild(cell);
                     }
                 }
+            }
+
+            // 根据难度和屏幕尺寸动态调整游戏板大小
+            function adjustBoardSize() {
+                const boardElement = document.getElementById('board');
+                const containerElement = document.querySelector('.game-container');
+                const screenWidth = window.innerWidth;
+
+                // 计算合适的大小
+                let maxWidth, cellSize;
+
+                if (screenWidth <= 360) {
+                    // 超小屏幕
+                    cellSize = Math.floor((screenWidth - 40) / cols);
+                    maxWidth = Math.min(cellSize * cols, 300);
+                } else if (screenWidth <= 480) {
+                    // 小屏手机
+                    cellSize = Math.floor((screenWidth - 50) / cols);
+                    maxWidth = Math.min(cellSize * cols, 340);
+                } else if (screenWidth <= 768) {
+                    // 平板竖屏
+                    cellSize = Math.floor((screenWidth - 60) / cols);
+                    maxWidth = Math.min(cellSize * cols, 360);
+                } else if (screenWidth <= 1024) {
+                    // 平板横屏
+                    cellSize = Math.floor((screenWidth - 80) / cols);
+                    maxWidth = Math.min(cellSize * cols, 450);
+                } else {
+                    // 桌面端
+                    cellSize = Math.floor((screenWidth - 100) / cols);
+                    maxWidth = Math.min(cellSize * cols, 500);
+                }
+
+                // 确保最小单元格大小
+                const minCellSize = currentDifficulty === 'hard' ? 14 : 16;
+                const adjustedMaxWidth = Math.max(minCellSize * cols, maxWidth);
+
+                boardElement.style.maxWidth = `${adjustedMaxWidth}px`;
+
+                // 动态调整字体大小
+                const cells = document.querySelectorAll('.cell');
+                cells.forEach(cell => {
+                    if (cols >= 20) {
+                        cell.style.fontSize = `${Math.max(10, minCellSize - 4)}px`;
+                    } else if (cols >= 15) {
+                        cell.style.fontSize = `${Math.max(11, minCellSize - 3)}px`;
+                    } else {
+                        cell.style.fontSize = `${Math.max(12, minCellSize - 2)}px`;
+                    }
+                });
             }
             
             // 放置地雷
@@ -529,27 +811,29 @@
                         }
                     }
                 }
-                
+
                 // 如果已揭开的格子数等于非雷格子数，则胜利
                 if (revealedCount === rows * cols - mines) {
                     gameOver = true;
                     clearInterval(timerInterval);
-                    
-                    // 检查并更新最佳时间记录
+
+                    // 检查并更新最佳时间记录（使用难度区分的key）
+                    const key = `minesweeper_${currentDifficulty}`;
                     if (seconds < bestTime) {
                         bestTime = seconds;
                         document.getElementById('best-time').textContent = bestTime;
+                        scoreManager.updateHighScore(key, bestTime);
                     }
-                    
+
                     // 使用记分管理模块记录游戏结果
                     scoreManager.recordGameResult('minesweeper', 'win', seconds);
-                    
+
                     // 为所有格子添加获胜动画
                     const cells = document.querySelectorAll('.cell');
                     cells.forEach(cell => {
                         cell.classList.add('win-glow');
                     });
-                    
+
                     setTimeout(() => {
                         alert('恭喜！你成功清除了所有地雷！用时: ' + seconds + '秒');
                     }, 100);
@@ -682,22 +966,51 @@
             
             // 记录最佳时间
             let bestTime = Infinity; // 初始化为无穷大
-            // 异步加载最佳时间
-            scoreManager.getHighScore('minesweeper', Infinity).then(loadedBestTime => {
-                bestTime = loadedBestTime;
-                // 显示最佳时间，如果为Infinity则显示"-"
-                document.getElementById('best-time').textContent = bestTime === Infinity ? '-' : bestTime;
-            });
-            
+
+            // 加载当前难度的最佳时间
+            function loadBestTime() {
+                const key = `minesweeper_${currentDifficulty}`;
+                scoreManager.getHighScore(key, Infinity).then(loadedBestTime => {
+                    bestTime = loadedBestTime;
+                    document.getElementById('best-time').textContent = bestTime === Infinity ? '-' : bestTime;
+                });
+            }
+
             // 重置游戏
             document.getElementById('resetBtn').addEventListener('click', initGame);
-            
+
+            // 难度选择按钮事件
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    setDifficulty(btn.dataset.difficulty);
+                });
+            });
+
+            // 监听窗口大小变化，动态调整游戏板大小
+            window.addEventListener('resize', () => {
+                if (!gameStarted || gameOver) {
+                    adjustBoardSize();
+                }
+            });
+
+            // 监听设备方向变化
+            window.addEventListener('orientationchange', () => {
+                setTimeout(() => {
+                    adjustBoardSize();
+                }, 100);
+            });
+
+            // 初始化游戏
+            initGame();
+            // 加载最佳时间
+            loadBestTime();
+
             // 重写返回主页按钮的逻辑，添加提交分数选项
             const backHomeButton = document.querySelector('.back-home');
             if (backHomeButton) {
                 backHomeButton.addEventListener('click', function(e) {
                     e.preventDefault();
-                    
+
                     // 如果游戏正在进行中，询问是否保存
                     if (gameStarted && !gameOver) {
                         const shouldSave = confirm(`当前用时: ${seconds}秒\n是否将当前进度添加到排行榜？`);
@@ -722,9 +1035,6 @@
                     }
                 });
             }
-            
-            // 初始化游戏
-            initGame();
         });
     </script>
 </body>
