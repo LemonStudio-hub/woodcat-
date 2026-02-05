@@ -3,6 +3,14 @@
  * 提供统一的音效和振动反馈功能
  */
 
+// 确保Logger对象存在，如果window.Logger未定义则创建一个简单的替代
+const Logger = window.Logger || {
+  info: console.log.bind(console),
+  error: console.error.bind(console),
+  warn: console.warn.bind(console),
+  debug: console.debug.bind(console)
+};
+
 class GameAudioVibrationModule {
     constructor() {
         this.vibrationEnabled = true;
