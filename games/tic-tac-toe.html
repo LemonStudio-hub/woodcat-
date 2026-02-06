@@ -608,16 +608,16 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
+
     <script src="../js/modal.js"></script>
     <script src="../js/dataManager.js"></script>
     <script src="../js/scoreManager.js"></script>
     <script src="../js/audioVibration.js"></script>
     <script src="../js/i18n.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             // 初始化游戏数据管理器
-            let gameStats = scoreManager.getGameStats('tic-tac-toe');
+            let gameStats = await scoreManager.getGameStats('tic-tac-toe');
             if (!gameStats || typeof gameStats !== 'object') {
                 gameStats = {
                     wins: 0,

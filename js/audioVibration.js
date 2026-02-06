@@ -3,7 +3,18 @@
  * 提供统一的音效和振动反馈功能
  */
 
-// 使用全局Logger对象（由logger.js提供）
+// 使用全局Logger对象（如果不存在则创建一个简单的替代实现）
+let Logger;
+if (typeof window.Logger !== 'undefined') {
+    Logger = window.Logger;
+} else {
+    Logger = {
+        info: function(...args) { console.info(...args); },
+        warn: function(...args) { console.warn(...args); },
+        error: function(...args) { console.error(...args); }
+    };
+    window.Logger = Logger;
+}
 
 class GameAudioVibrationModule {
     constructor() {

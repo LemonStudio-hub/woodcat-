@@ -359,8 +359,9 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
+
     <script src="../js/lib/hammer.min.js"></script>
+    <script src="../js/logger.js"></script>
     <script src="../js/dataManager.js"></script>
     <script src="../js/scoreManager.js"></script>
     <script>
@@ -383,10 +384,10 @@
             const dropInterval = 600; // 调整初始下落间隔
             
             // 异步加载高分
-                                    scoreManager.getHighScore('tetris', 0).then(loadedHighScore => {
-                                        highScore = loadedHighScore;
-                                        document.getElementById('high-score').textContent = highScore;
-                                    });            
+            scoreManager.getHighScore('tetris', 0).then(loadedHighScore => {
+                highScore = loadedHighScore;
+                document.getElementById('high-score').textContent = highScore;
+            });            
             // 当前方块
             let currentPiece = {
                 shape: [],
@@ -679,7 +680,8 @@
                                                 const gameOverElement = document.getElementById('game-over');
                                                 gameOverElement.classList.add('show');
                                                 return false;
-                                            }                    drawBoard(); // 更新显示
+                                            }
+                    drawBoard(); // 更新显示
                     return false;
                 }
                 

@@ -516,7 +516,8 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
+
+    <script src="../js/logger.js"></script>
     <script src="../js/dataManager.js"></script>
     <script src="../js/scoreManager.js"></script>
     <script src="../js/i18n.js"></script>
@@ -785,6 +786,7 @@
                 if (board[y][x].isMine) {
                     // 游戏结束
                     gameOver = true;
+                    const cell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"]`);
                     cell.classList.add('explosion'); // 添加爆炸动画
                     revealAllMines();
                     clearInterval(timerInterval);

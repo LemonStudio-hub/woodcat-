@@ -408,55 +408,9 @@
     </div>
 
 
-    <script>
-        // 定义一个简单的Logger对象，在浏览器环境中能够正常工作
-        window.Logger = {
-            level: 'info',
-            enabled: true,
-            levels: {
-                debug: 0,
-                info: 1,
-                warn: 2,
-                error: 3
-            },
-            _shouldLog(level) {
-                return this.enabled && this.levels[level] >= this.levels[this.level];
-            },
-            debug(...args) {
-                if (this._shouldLog('debug')) {
-                    console.debug(...args);
-                }
-            },
-            info(...args) {
-                if (this._shouldLog('info')) {
-                    console.info(...args);
-                }
-            },
-            warn(...args) {
-                if (this._shouldLog('warn')) {
-                    console.warn(...args);
-                }
-            },
-            error(...args) {
-                if (this._shouldLog('error')) {
-                    console.error(...args);
-                }
-            },
-            setLevel(level) {
-                if (this.levels[level] !== undefined) {
-                    this.level = level;
-                }
-            },
-            setEnabled(enabled) {
-                this.enabled = enabled;
-            },
-            init() {
-                this.setLevel('debug');
-            }
-        };
-        window.Logger.init();
-    </script>
+
     <script src="../js/lib/hammer.min.js"></script>
+    <script src="../js/logger.js"></script>
     <script src="../js/dataManager.js"></script>
     <script src="../js/scoreManager.js"></script>
     <script src="../js/audioVibration.js"></script>
