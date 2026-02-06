@@ -5,7 +5,6 @@
 
 class I18n {
     constructor() {
-        this.currentLang = this.detectLanguage();
         this.translations = {
             'zh-CN': {
                 // 网站通用文本
@@ -330,6 +329,9 @@ class I18n {
                 'russianNotice.confirm': 'Я понял'
             }
         };
+        
+        // 初始化当前语言
+        this.currentLang = this.detectLanguage();
         
         // 延迟初始化语言，确保DOM已加载完成
         if (document.readyState === 'loading') {

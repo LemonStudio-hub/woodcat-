@@ -3,7 +3,8 @@
  * 统一管理所有游戏的计分规则、排行榜和数据存储
  */
 
-// 使用全局Logger对象（由logger.js提供）
+// 使用全局Logger对象
+const Logger = window.Logger;
 
 class ScoreManager {
     constructor() {

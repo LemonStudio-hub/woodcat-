@@ -233,7 +233,6 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
     <script src="js/logger.js"></script>
     <script src="js/lib/hammer.min.js"></script>
     <script src="js/audioVibration.js"></script>
@@ -250,7 +249,7 @@
             // 更新语言按钮显示
             function updateLangButton() {
                 if (window.i18n) {
-                    const currentLang = i18n.getCurrentLanguage();
+                    const currentLang = window.i18n.getCurrentLanguage();
                     langText.textContent = currentLang === 'zh-CN' ? 'RU' : '中文';
                 }
             }
@@ -264,10 +263,10 @@
                 // 添加新的事件监听器
                 newLangToggle.addEventListener('click', function() {
                     if (window.i18n) {
-                        const currentLang = i18n.getCurrentLanguage();
+                        const currentLang = window.i18n.getCurrentLanguage();
                         const newLang = currentLang === 'zh-CN' ? 'ru' : 'zh-CN';
                         console.log('切换语言:', currentLang, '->', newLang);
-                        i18n.setLanguage(newLang);
+                        window.i18n.setLanguage(newLang);
                         updateLangButton();
                     }
                 });
