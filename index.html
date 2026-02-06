@@ -130,6 +130,15 @@
                             <span class="players" data-i18n="players.1">1人</span>
                         </div>
                     </div>
+                    <div class="game-card" data-game="spider-solitaire" role="button" tabindex="0">
+                        <div class="game-icon">🕷️</div>
+                        <h4 data-i18n="game.spider-solitaire">蜘蛛卡牌</h4>
+                        <p data-i18n="game.spider-solitaire.desc">经典纸牌游戏</p>
+                        <div class="game-meta">
+                            <span class="difficulty hard" data-i18n="difficulty.hard">困难</span>
+                            <span class="players" data-i18n="players.1">1人</span>
+                        </div>
+                    </div>
                 </div>
                                 </section>
 
@@ -224,39 +233,111 @@
         </div>
     </div>
 
+    <script>
+        // 定义一个简单的Logger对象，在浏览器环境中能够正常工作
+        if (!window.Logger) {
+            window.Logger = {
+                level: 'info',
+                enabled: true,
+                levels: {
+                    debug: 0,
+                    info: 1,
+                    warn: 2,
+                    error: 3
+                },
+                _shouldLog(level) {
+                    return this.enabled && this.levels[level] >= this.levels[this.level];
+                },
+                debug(...args) {
+                    if (this._shouldLog('debug')) {
+                        console.debug(...args);
+                    }
+                },
+                info(...args) {
+                    if (this._shouldLog('info')) {
+                        console.info(...args);
+                    }
+                },
+                warn(...args) {
+                    if (this._shouldLog('warn')) {
+                        console.warn(...args);
+                    }
+                },
+                error(...args) {
+                    if (this._shouldLog('error')) {
+                        console.error(...args);
+                    }
+                },
+                setLevel(level) {
+                    if (this.levels[level] !== undefined) {
+                        this.level = level;
+                    }
+                },
+                setEnabled(enabled) {
+                    this.enabled = enabled;
+                },
+                init() {
+                    this.setLevel('debug');
+                }
+            };
+            window.Logger.init();
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
     <script src="js/lib/hammer.min.js"></script>
-    <script src="js/logger.js"></script>
     <script src="js/audioVibration.js"></script>
     <script src="js/dataManager.js"></script>
     <script src="js/scoreManager.js"></script>
     <script src="js/modal.js"></script>
     <script src="js/i18n.js"></script>
-    <script src="js/main.js"></script>
     <script>
         // 语言切换功能
-        document.addEventListener('DOMContentLoaded', function() {
+        function initLanguageSwitcher() {
             const langToggle = document.getElementById('langToggle');
             const langText = document.getElementById('langText');
 
             // 更新语言按钮显示
             function updateLangButton() {
-                const currentLang = i18n.getCurrentLanguage();
-                langText.textContent = currentLang === 'zh-CN' ? 'RU' : '中文';
+                if (window.i18n) {
+                    const currentLang = i18n.getCurrentLanguage();
+                    langText.textContent = currentLang === 'zh-CN' ? 'RU' : '中文';
+                }
             }
 
             // 语言切换事件
-            langToggle.addEventListener('click', function() {
-                const currentLang = i18n.getCurrentLanguage();
-                const newLang = currentLang === 'zh-CN' ? 'ru' : 'zh-CN';
-                i18n.setLanguage(newLang);
-                updateLangButton();
-            });
+            if (langToggle) {
+                // 移除可能存在的旧事件监听器
+                const newLangToggle = langToggle.cloneNode(true);
+                langToggle.parentNode.replaceChild(newLangToggle, langToggle);
+                
+                // 添加新的事件监听器
+                newLangToggle.addEventListener('click', function() {
+                    if (window.i18n) {
+                        const currentLang = i18n.getCurrentLanguage();
+                        const newLang = currentLang === 'zh-CN' ? 'ru' : 'zh-CN';
+                        console.log('切换语言:', currentLang, '->', newLang);
+                        i18n.setLanguage(newLang);
+                        updateLangButton();
+                    }
+                });
+            }
 
             // 初始化语言按钮
             updateLangButton();
-        });
+        }
+
+        // 确保在DOM加载完成后初始化语言切换器
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                // 等待i18n对象初始化完成
+                setTimeout(initLanguageSwitcher, 100);
+            });
+        } else {
+            // 立即初始化语言切换器
+            setTimeout(initLanguageSwitcher, 100);
+        }
     </script>
+    <script src="js/main.js"></script>
     <!-- 排行榜相关脚本（动态加载） -->
     <!-- js/main.js会根据需要动态加载配置和Supabase库 -->
 

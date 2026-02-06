@@ -71,6 +71,7 @@ class I18n {
                 'game.tic-tac-toe': '井字棋',
                 'game.memory-card': '记忆卡牌',
                 'game.arkanoid': '打砖块',
+                'game.spider-solitaire': '蜘蛛卡牌',
                 
                 // 游戏描述
                 'game.tetris.desc': '经典益智游戏',
@@ -82,6 +83,7 @@ class I18n {
                 'game.tic-tac-toe.desc': '经典策略游戏',
                 'game.memory-card.desc': '考验记忆能力',
                 'game.arkanoid.desc': '经典街机游戏',
+                'game.spider-solitaire.desc': '经典纸牌游戏',
                 
                 // 游戏状态
                 'game.score': '分数',
@@ -230,6 +232,7 @@ class I18n {
                 'game.tic-tac-toe': 'Крестики-нолики',
                 'game.memory-card': 'Карточная память',
                 'game.arkanoid': 'Арканоид',
+                'game.spider-solitaire': 'Пасьянс Паутина',
                 
                 // 游戏描述
                 'game.tetris.desc': 'Классическая головоломка',
@@ -241,6 +244,7 @@ class I18n {
                 'game.tic-tac-toe.desc': 'Классическая стратегическая игра',
                 'game.memory-card.desc': 'Проверьте память',
                 'game.arkanoid.desc': 'Классическая аркадная игра',
+                'game.spider-solitaire.desc': 'Классическая карточная игра',
                 
                 // 游戏状态
                 'game.score': 'Счёт',
@@ -380,19 +384,28 @@ class I18n {
      * @param {string} lang - 语言代码
      */
     setLanguage(lang) {
+        console.log('i18n.setLanguage called with:', lang);
         if (this.translations[lang]) {
             this.currentLang = lang;
+            console.log('Current language updated to:', this.currentLang);
             localStorage.setItem('woodcat_lang', lang);
+            console.log('Language saved to localStorage:', lang);
             document.documentElement.lang = lang;
+            console.log('HTML lang attribute updated:', lang);
             this.applyTranslations();
+            console.log('Translations applied');
             
             // 触发语言切换事件
             document.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang } }));
+            console.log('Language changed event dispatched');
 
             // 如果切换到俄语且未显示过公告，则显示公告
             if (lang === 'ru' && !this.hasShownRussianNotice()) {
                 this.showRussianNotice();
+                console.log('Russian notice shown');
             }
+        } else {
+            console.log('Language not found:', lang);
         }
     }
 
@@ -514,5 +527,10 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = { I18n, i18n };
 } else {
     window.I18n = I18n;
+    window.i18n = i18n;
+}
+
+// 确保i18n对象在全局可用
+if (typeof window !== 'undefined') {
     window.i18n = i18n;
 }

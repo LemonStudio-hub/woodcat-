@@ -61,6 +61,11 @@ document.addEventListener('DOMContentLoaded', function() {
             title: '打砖块',
             description: '经典街机游戏，控制挡板反弹球打碎砖块',
             url: 'games/arkanoid.html'
+        },
+        'spider-solitaire': {
+            title: '蜘蛛卡牌',
+            description: '经典纸牌游戏，通过排序将卡牌按花色顺序排列',
+            url: 'games/spider-solitaire.html'
         }
     };
     
