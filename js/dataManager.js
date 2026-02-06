@@ -3,13 +3,7 @@
  * 使用IndexedDB管理所有游戏的本地存储功能
  */
 
-// 确保Logger对象存在，如果window.Logger未定义则创建一个简单的替代
-const Logger = window.Logger || {
-  info: console.log.bind(console),
-  error: console.error.bind(console),
-  warn: console.warn.bind(console),
-  debug: console.debug.bind(console)
-};
+// 使用全局Logger对象（由logger.js提供）
 
 class GameDataManager {
     constructor() {

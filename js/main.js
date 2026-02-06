@@ -1,12 +1,6 @@
 // 木头猫游戏合集 - JavaScript功能
 
-// 确保Logger对象存在，如果window.Logger未定义则创建一个简单的替代
-const Logger = window.Logger || {
-  info: console.log.bind(console),
-  error: console.error.bind(console),
-  warn: console.warn.bind(console),
-  debug: console.debug.bind(console)
-};
+// 使用全局Logger对象（由logger.js提供）
 
 document.addEventListener('DOMContentLoaded', function() {
     // 定义全局变量用于存储supabase客户端
@@ -435,6 +429,48 @@ document.addEventListener('DOMContentLoaded', function() {
         loadLeaderboard();
     }
     
+    // 验证Supabase连接的函数
+    async function validateSupabaseConnection() {
+        if (!globalSupabaseClient) {
+            return false;
+        }
+        
+        try {
+            // 尝试执行一个简单的查询来验证连接
+            const { error } = await globalSupabaseClient
+                .from('leaderboard')
+                .select('id')
+                .limit(1);
+            
+            if (error) {
+                Logger.error('Supabase连接验证失败:', error);
+                return false;
+            }
+            return true;
+        } catch (err) {
+            Logger.error('Supabase连接验证异常:', err);
+            return false;
+        }
+    }
+
+    // 监控Supabase连接状态
+    async function monitorSupabaseConnection() {
+        return await validateSupabaseConnection();
+    }
+
+    // 开始连接监控
+    function startConnectionMonitoring() {
+        // 每30秒检查一次连接状态
+        setInterval(async () => {
+            const isConnected = await monitorSupabaseConnection();
+            const statusElement = document.getElementById('connection-status');
+            if (statusElement) {
+                statusElement.textContent = isConnected ? '在线' : '离线';
+                statusElement.style.color = isConnected ? 'green' : 'red';
+            }
+        }, 30000);
+    }
+
     // 初始化非排行榜相关功能（如菜单等）
     function initializeNonLeaderboardFeatures() {
         // 确保桌面端导航栏在小屏幕时隐藏，大屏幕时显示
