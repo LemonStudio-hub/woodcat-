@@ -84,6 +84,22 @@ class I18n {
                 'game.arkanoid.desc': '经典街机游戏',
                 'game.spider-solitaire.desc': '经典纸牌游戏',
                 
+                // 蜘蛛卡牌游戏
+                'spiderSolitaire.title': '蜘蛛卡牌',
+                'spiderSolitaire.score': '得分',
+                'spiderSolitaire.time': '时间',
+                'spiderSolitaire.moves': '移动',
+                'spiderSolitaire.newGame': '新游戏',
+                'spiderSolitaire.undo': '撤销',
+                'spiderSolitaire.hint': '提示',
+                'spiderSolitaire.stockPile': '发牌',
+                'spiderSolitaire.gameOver': '游戏结束!',
+                'spiderSolitaire.finalScore': '最终得分: ',
+                'spiderSolitaire.totalTime': '总时间: ',
+                'spiderSolitaire.totalMoves': '总移动: ',
+                'spiderSolitaire.playAgain': '再玩一次',
+                'spiderSolitaire.backToMenu': '返回菜单',
+                
                 // 游戏状态
                 'game.score': '分数',
                 'game.highScore': '最高分',
@@ -244,6 +260,22 @@ class I18n {
                 'game.memory-card.desc': 'Проверьте память',
                 'game.arkanoid.desc': 'Классическая аркадная игра',
                 'game.spider-solitaire.desc': 'Классическая карточная игра',
+                
+                // 蜘蛛卡牌游戏
+                'spiderSolitaire.title': 'Пасьянс Паутина',
+                'spiderSolitaire.score': 'Счёт',
+                'spiderSolitaire.time': 'Время',
+                'spiderSolitaire.moves': 'Ходы',
+                'spiderSolitaire.newGame': 'Новая игра',
+                'spiderSolitaire.undo': 'Отменить',
+                'spiderSolitaire.hint': 'Подсказка',
+                'spiderSolitaire.stockPile': 'Раздать карты',
+                'spiderSolitaire.gameOver': 'Игра окончена!',
+                'spiderSolitaire.finalScore': 'Финальный счёт: ',
+                'spiderSolitaire.totalTime': 'Общее время: ',
+                'spiderSolitaire.totalMoves': 'Всего ходов: ',
+                'spiderSolitaire.playAgain': 'Сыграть снова',
+                'spiderSolitaire.backToMenu': 'Вернуться в меню',
                 
                 // 游戏状态
                 'game.score': 'Счёт',
