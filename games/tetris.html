@@ -32,13 +32,13 @@
             border-radius: 12px;
             padding: 15px;
             width: 100%;
-            max-width: 350px;
+            max-width: 400px;
             height: 100vh;
-            max-height: 600px;
+            max-height: none;
             position: relative;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             box-sizing: border-box;
-            overflow: hidden;
+            overflow-y: auto;
         }
         
         h1 {
@@ -85,10 +85,12 @@
             grid-template-columns: repeat(10, 1fr);
             grid-template-rows: repeat(20, 1fr); /* 20行，符合10x20网格 */
             width: 100%;
-            max-width: 300px; /* 设置最大宽度，确保在大屏幕上也能显示为正方形 */
+            aspect-ratio: 0.5; /* 保持2:1的比例（宽:高） */
+            max-height: min(45vh, 400px); /* 最大高度限制 */
+            min-height: 250px; /* 最小高度保证 */
             border: 2px solid #3498db;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             padding: 2px;
             border-radius: 8px;
             position: relative;
@@ -154,7 +156,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
             width: 100%;
             flex-shrink: 0;
             animation: slideIn 0.5s ease-out 0.2s both;
@@ -162,25 +164,28 @@
         
         .buttons {
             display: flex;
-            gap: 6px;
+            gap: 10px;
             width: 100%;
             justify-content: center;
             flex-wrap: wrap;
         }
         
         button {
-            padding: 8px 10px;
-            font-size: 0.8rem;
+            padding: 12px 16px;
+            font-size: 0.9rem;
             background: #3498db;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
             transition: all 0.2s ease;
             flex: 1;
-            min-width: 65px;
+            min-width: 75px;
+            min-height: 44px; /* 符合触摸目标最小尺寸 */
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            touch-action: manipulation; /* 优化触摸响应 */
+            -webkit-tap-highlight-color: transparent; /* 移除触摸高亮 */
         }
         
         button:hover {
@@ -331,12 +336,12 @@
         /* 平板设备优化 */
         @media (min-width: 481px) and (max-width: 768px) {
             .game-container {
-                max-width: 400px;
-                max-height: 650px;
+                max-width: 420px;
+                max-height: none;
             }
             
             .game-board {
-                height: 450px;
+                max-height: min(42vh, 380px);
             }
             
             h1 {
@@ -348,38 +353,52 @@
             }
             
             button {
-                padding: 9px 12px;
-                font-size: 0.85rem;
-                min-width: 70px;
+                padding: 10px 14px;
+                font-size: 0.9rem;
+                min-width: 75px;
+            }
+            
+            /* 显示虚拟控制 */
+            .virtual-controls {
+                display: block;
             }
         }
         
         /* 移动端优化 */
         @media (max-width: 480px) {
+            body {
+                overflow-x: hidden;
+            }
+            
             .game-container {
                 padding: 10px;
                 height: 100vh;
                 max-height: 100vh;
                 border-radius: 0;
                 padding-top: 50px; /* 为返回按钮留出空间 */
+                padding-bottom: 10px;
             }
             
             .game-board {
-                height: 350px;
+                max-height: min(38vh, 320px);
+                min-height: 220px;
             }
             
             h1 {
                 font-size: 1.3rem;
-                margin: 5px 0 8px;
+                margin: 8px 0 10px;
             }
             
             .stats {
                 flex-wrap: wrap;
-                gap: 5px;
+                gap: 8px;
+                padding: 8px;
+                margin-bottom: 10px;
             }
             
             .stat-box {
-                flex: 1 1 45%;
+                flex: 1 1 40%;
+                min-width: 80px;
             }
             
             .stat-box .label {
@@ -387,14 +406,14 @@
             }
             
             .stat-box .value {
-                font-size: 0.9rem;
+                font-size: 0.95rem;
             }
             
             .difficulty-selector {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                gap: 5px;
+                gap: 8px;
             }
             
             .difficulty-selector label {
@@ -406,31 +425,56 @@
                 max-width: 200px;
             }
             
+            .difficulty-selector > div > button {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+            }
+            
             button {
-                padding: 7px 8px;
-                font-size: 0.75rem;
-                min-width: 60px;
+                padding: 10px 14px;
+                font-size: 0.85rem;
+                min-width: 70px;
             }
             
             .buttons {
                 flex-wrap: wrap;
+                gap: 8px;
             }
             
             .buttons button {
-                flex: 1 1 45%;
+                flex: 1 1 40%;
                 margin-bottom: 5px;
+            }
+            
+            /* 显示虚拟控制 */
+            .virtual-controls {
+                display: block;
+            }
+            
+            /* 优化返回按钮 */
+            .back-home {
+                width: 38px;
+                height: 38px;
+                font-size: 18px;
+            }
+            
+            /* 游戏结束提示优化 */
+            .game-over {
+                width: 90%;
+                max-width: 320px;
+                padding: 20px;
             }
         }
         
         /* 桌面设备优化 */
         @media (min-width: 769px) {
             .game-container {
-                max-width: 450px;
-                max-height: 700px;
+                max-width: 480px;
+                max-height: none;
             }
             
             .game-board {
-                height: 500px;
+                max-height: min(45vh, 420px);
             }
             
             h1 {
@@ -442,9 +486,58 @@
             }
             
             button {
-                padding: 10px 15px;
-                font-size: 0.9rem;
-                min-width: 80px;
+                padding: 11px 18px;
+                font-size: 0.95rem;
+                min-width: 85px;
+            }
+        }
+        
+        /* 横屏模式优化 */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .game-container {
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: flex-start;
+                padding: 10px;
+                padding-top: 45px;
+            }
+            
+            h1 {
+                width: 100%;
+                font-size: 1.2rem;
+                margin: 5px 0;
+            }
+            
+            .stats {
+                width: auto;
+                margin-bottom: 8px;
+                flex-wrap: nowrap;
+            }
+            
+            .game-board {
+                max-height: min(70vh, 380px);
+                margin-bottom: 8px;
+            }
+            
+            .controls {
+                flex-direction: row;
+                gap: 15px;
+                flex: 1;
+            }
+            
+            .virtual-controls {
+                max-width: 180px;
+                margin-top: 0;
+            }
+            
+            .virtual-controls button {
+                padding: 10px;
+                font-size: 1.3rem;
+                min-height: 50px;
+            }
+            
+            .difficulty-selector {
+                max-width: 200px;
             }
         }
         
@@ -638,19 +731,19 @@
             </div>
             
             <!-- 移动端虚拟方向键 -->
-            <div class="virtual-controls" style="display: none; margin-top: 15px; width: 100%; max-width: 250px;">
+            <div class="virtual-controls" style="display: none; margin-top: 15px; width: 100%; max-width: 280px;">
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px;">
                     <div></div>
-                    <button class="control-btn" data-action="rotate" style="grid-column: 2; padding: 10px; background: #3498db; color: white; border: none; border-radius: 8px; font-size: 1.2rem;">↑</button>
+                    <button class="control-btn" data-action="rotate" style="grid-column: 2; padding: 12px; background: #e74c3c; color: white; border: none; border-radius: 8px; font-size: 1.5rem; min-height: 55px; touch-action: manipulation; -webkit-tap-highlight-color: transparent;">↻</button>
                     <div></div>
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-                    <button class="control-btn" data-action="left" style="padding: 10px; background: #3498db; color: white; border: none; border-radius: 8px; font-size: 1.2rem;">←</button>
-                    <button class="control-btn" data-action="down" style="padding: 10px; background: #3498db; color: white; border: none; border-radius: 8px; font-size: 1.2rem;">↓</button>
-                    <button class="control-btn" data-action="right" style="padding: 10px; background: #3498db; color: white; border: none; border-radius: 8px; font-size: 1.2rem;">→</button>
+                    <button class="control-btn" data-action="left" style="padding: 12px; background: #3498db; color: white; border: none; border-radius: 8px; font-size: 1.5rem; min-height: 55px; touch-action: manipulation; -webkit-tap-highlight-color: transparent;">←</button>
+                    <button class="control-btn" data-action="down" style="padding: 12px; background: #3498db; color: white; border: none; border-radius: 8px; font-size: 1.5rem; min-height: 55px; touch-action: manipulation; -webkit-tap-highlight-color: transparent;">↓</button>
+                    <button class="control-btn" data-action="right" style="padding: 12px; background: #3498db; color: white; border: none; border-radius: 8px; font-size: 1.5rem; min-height: 55px; touch-action: manipulation; -webkit-tap-highlight-color: transparent;">→</button>
                 </div>
                 <div style="margin-top: 8px;">
-                    <button class="control-btn" data-action="hardDrop" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 8px; font-size: 0.9rem;">快速下落</button>
+                    <button class="control-btn" data-action="hardDrop" style="width: 100%; padding: 12px; background: #9b59b6; color: white; border: none; border-radius: 8px; font-size: 1rem; min-height: 44px; touch-action: manipulation; -webkit-tap-highlight-color: transparent;">快速下落</button>
                 </div>
             </div>
         </div>
