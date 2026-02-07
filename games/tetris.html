@@ -34,7 +34,7 @@
             width: 100%;
             max-width: 350px;
             height: 100vh;
-            max-height: 500px;
+            max-height: 600px;
             position: relative;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             box-sizing: border-box;
@@ -83,16 +83,32 @@
         .game-board {
             display: grid;
             grid-template-columns: repeat(10, 1fr);
-            grid-template-rows: repeat(10, 1fr); /* 10行，符合10x10网格 */
+            grid-template-rows: repeat(20, 1fr); /* 20行，符合10x20网格 */
             width: 100%;
-            height: 300px; /* 设置合适高度以适应10x10网格 */
-            border: 2px solid #ddd;
-            background: #ecf0f1;
+            max-width: 300px; /* 设置最大宽度，确保在大屏幕上也能显示为正方形 */
+            border: 2px solid #3498db;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             margin-bottom: 8px;
             padding: 2px;
-            border-radius: 4px;
+            border-radius: 8px;
             position: relative;
             overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .game-board::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(52, 152, 219, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(52, 152, 219, 0.1) 1px, transparent 1px);
+            background-size: 10% 5%;
+            pointer-events: none;
+            z-index: 0;
         }
         
         .cell {
@@ -112,6 +128,26 @@
         /* 添加方块移动和旋转动画 */
         .cell.new-piece {
             animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .cell.moving {
+            animation: movePiece 0.1s ease-out;
+        }
+        
+        .cell.rotating {
+            animation: rotatePiece 0.2s ease-out;
+        }
+        
+        @keyframes movePiece {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes rotatePiece {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(90deg) scale(1.1); }
+            100% { transform: rotate(180deg) scale(1); }
         }
         
         .controls {
@@ -292,6 +328,32 @@
             animation: glow 1.5s infinite;
         }
         
+        /* 平板设备优化 */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .game-container {
+                max-width: 400px;
+                max-height: 650px;
+            }
+            
+            .game-board {
+                height: 450px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .stat-box .value {
+                font-size: 1.1rem;
+            }
+            
+            button {
+                padding: 9px 12px;
+                font-size: 0.85rem;
+                min-width: 70px;
+            }
+        }
+        
         /* 移动端优化 */
         @media (max-width: 480px) {
             .game-container {
@@ -299,6 +361,11 @@
                 height: 100vh;
                 max-height: 100vh;
                 border-radius: 0;
+                padding-top: 50px; /* 为返回按钮留出空间 */
+            }
+            
+            .game-board {
+                height: 350px;
             }
             
             h1 {
@@ -306,18 +373,78 @@
                 margin: 5px 0 8px;
             }
             
+            .stats {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            
+            .stat-box {
+                flex: 1 1 45%;
+            }
+            
             .stat-box .label {
                 font-size: 0.7rem;
             }
             
             .stat-box .value {
-                font-size: 0.95rem;
+                font-size: 0.9rem;
+            }
+            
+            .difficulty-selector {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 5px;
+            }
+            
+            .difficulty-selector label {
+                margin-right: 0;
+            }
+            
+            .difficulty-selector select {
+                width: 100%;
+                max-width: 200px;
             }
             
             button {
                 padding: 7px 8px;
                 font-size: 0.75rem;
                 min-width: 60px;
+            }
+            
+            .buttons {
+                flex-wrap: wrap;
+            }
+            
+            .buttons button {
+                flex: 1 1 45%;
+                margin-bottom: 5px;
+            }
+        }
+        
+        /* 桌面设备优化 */
+        @media (min-width: 769px) {
+            .game-container {
+                max-width: 450px;
+                max-height: 700px;
+            }
+            
+            .game-board {
+                height: 500px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .stat-box .value {
+                font-size: 1.2rem;
+            }
+            
+            button {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+                min-width: 80px;
             }
         }
         
@@ -479,11 +606,37 @@
         </div>
         <div class="game-board" id="board"></div>
         <div class="controls">
+            <div class="difficulty-selector" style="margin-bottom: 15px; width: 100%; max-width: 300px;">
+                <div style="text-align: center; margin-bottom: 8px; font-weight: 500; color: #2c3e50;">难度选择</div>
+                <div style="display: flex; gap: 8px; justify-content: center;">
+                    <button class="difficulty-btn" data-difficulty="easy" style="flex: 1; padding: 8px 12px; border: 2px solid #ddd; border-radius: 8px; background: #f8f9fa; color: #2c3e50; font-weight: 500; transition: all 0.2s ease;">初级</button>
+                    <button class="difficulty-btn active" data-difficulty="medium" style="flex: 1; padding: 8px 12px; border: 2px solid #3498db; border-radius: 8px; background: #3498db; color: white; font-weight: 500; transition: all 0.2s ease;">中级</button>
+                    <button class="difficulty-btn" data-difficulty="hard" style="flex: 1; padding: 8px 12px; border: 2px solid #ddd; border-radius: 8px; background: #f8f9fa; color: #2c3e50; font-weight: 500; transition: all 0.2s ease;">高级</button>
+                </div>
+                <input type="hidden" id="difficultySelect" value="medium">
+            </div>
             <div class="buttons">
                 <button id="startBtn">开始</button>
                 <button id="pauseBtn">暂停</button>
                 <button id="resetBtn">重置</button>
                 <button id="tutorial-btn">玩法教程</button>
+            </div>
+            
+            <!-- 移动端虚拟方向键 -->
+            <div class="virtual-controls" style="display: none; margin-top: 15px; width: 100%; max-width: 250px;">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px;">
+                    <div></div>
+                    <button class="control-btn" data-action="rotate" style="grid-column: 2; padding: 10px; background: #3498db; color: white; border: none; border-radius: 8px; font-size: 1.2rem;">↑</button>
+                    <div></div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                    <button class="control-btn" data-action="left" style="padding: 10px; background: #3498db; color: white; border: none; border-radius: 8px; font-size: 1.2rem;">←</button>
+                    <button class="control-btn" data-action="down" style="padding: 10px; background: #3498db; color: white; border: none; border-radius: 8px; font-size: 1.2rem;">↓</button>
+                    <button class="control-btn" data-action="right" style="padding: 10px; background: #3498db; color: white; border: none; border-radius: 8px; font-size: 1.2rem;">→</button>
+                </div>
+                <div style="margin-top: 8px;">
+                    <button class="control-btn" data-action="hardDrop" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 8px; font-size: 0.9rem;">快速下落</button>
+                </div>
             </div>
         </div>
         <div class="game-over" id="game-over">
@@ -555,21 +708,44 @@
     <script>
         // 俄罗斯方块核心游戏逻辑
         document.addEventListener('DOMContentLoaded', () => {
-            // 游戏常量
-            const COLS = 10;
-            const ROWS = 10;  // 使用10x10网格
+            // ==========================================
+            // 游戏常量和状态
+            // ==========================================
             
-            // 游戏状态
-            let board = [];
-            let score = 0;
-            let highScore = 0; // 初始化为0
-            let level = 1;
-            let lines = 0;
-            let gameOver = false;
-            let isPaused = false;
-            let gameInterval;
-            let dropCounter = 0;
-            const dropInterval = 600; // 调整初始下落间隔
+            // 游戏网格尺寸 - 标准10列×20行
+            const COLS = 10;
+            const ROWS = 20;
+            
+            // 游戏状态变量
+            let board = [];           // 游戏板数据
+            let score = 0;            // 当前得分
+            let highScore = 0;        // 最高分
+            let level = 1;            // 当前等级
+            let lines = 0;            // 已消除行数
+            let gameOver = false;     // 游戏是否结束
+            let isPaused = false;      // 游戏是否暂停
+            let gameInterval;          // 游戏循环ID
+            let dropCounter = 0;       // 下落计数器
+            let currentDifficulty = 'medium'; // 当前难度级别
+            
+            // 难度配置 - 不同级别对应不同的下落速度参数
+            const difficultySettings = {
+                easy: {
+                    initialDropInterval: 800, // 初始下落间隔（毫秒）
+                    minDropInterval: 200,    // 最小下落间隔（毫秒）
+                    speedIncrease: 30        // 每级速度增加（毫秒）
+                },
+                medium: {
+                    initialDropInterval: 600, // 初始下落间隔（毫秒）
+                    minDropInterval: 150,    // 最小下落间隔（毫秒）
+                    speedIncrease: 40        // 每级速度增加（毫秒）
+                },
+                hard: {
+                    initialDropInterval: 400, // 初始下落间隔（毫秒）
+                    minDropInterval: 100,    // 最小下落间隔（毫秒）
+                    speedIncrease: 50        // 每级速度增加（毫秒）
+                }
+            };
             
             // 异步加载高分
             scoreManager.getHighScore('tetris', 0).then(loadedHighScore => {
@@ -584,15 +760,15 @@
                 color: ''
             };
             
-            // 方块类型
+            // 方块类型 - 使用更现代的颜色方案
             const SHAPES = [
-                { shape: [[1, 1, 1, 1]], color: '#3498db' }, // I - 青色
-                { shape: [[1, 1], [1, 1]], color: '#e74c3c' }, // O - 红色
-                { shape: [[0, 1, 0], [1, 1, 1]], color: '#9b59b6' }, // T - 紫色
-                { shape: [[1, 1, 0], [0, 1, 1]], color: '#2ecc71' }, // S - 绿色
-                { shape: [[0, 1, 1], [1, 1, 0]], color: '#f1c40f' }, // Z - 黄色
-                { shape: [[1, 0, 0], [1, 1, 1]], color: '#e67e22' }, // J - 橙色
-                { shape: [[0, 0, 1], [1, 1, 1]], color: '#1abc9c' }  // L - 青绿色
+                { shape: [[1, 1, 1, 1]], color: '#00f0ff' }, // I - 青色
+                { shape: [[1, 1], [1, 1]], color: '#ffeb3b' }, // O - 黄色
+                { shape: [[0, 1, 0], [1, 1, 1]], color: '#9c27b0' }, // T - 紫色
+                { shape: [[1, 1, 0], [0, 1, 1]], color: '#4caf50' }, // S - 绿色
+                { shape: [[0, 1, 1], [1, 1, 0]], color: '#f44336' }, // Z - 红色
+                { shape: [[1, 0, 0], [1, 1, 1]], color: '#ff9800' }, // J - 橙色
+                { shape: [[0, 0, 1], [1, 1, 1]], color: '#2196f3' }  // L - 蓝色
             ];
             
             // 初始化游戏板
@@ -736,38 +912,70 @@
                 return linesCleared;
             }
             
-            // 绘制游戏板
+            // 绘制游戏板 - 性能优化版
             function drawBoard() {
                 const boardElement = document.getElementById('board');
                 
                 // 保存当前正在播放动画的单元格的信息
-                const animatingCells = new Set();
+                const animatingCells = new Map(); // 使用Map存储动画类型
                 for (let y = 0; y < ROWS; y++) {
                     for (let x = 0; x < COLS; x++) {
                         const cellIndex = y * COLS + x;
                         const cellElement = boardElement.children[cellIndex];
-                        if (cellElement && 
-                            (cellElement.classList.contains('clearing') || 
-                             cellElement.classList.contains('clearing-horizontal') || 
-                             cellElement.classList.contains('clearing-vertical'))) {
-                            animatingCells.add(cellIndex);
+                        if (cellElement) {
+                            if (cellElement.classList.contains('clearing')) {
+                                animatingCells.set(cellIndex, 'clearing');
+                            } else if (cellElement.classList.contains('clearing-horizontal')) {
+                                animatingCells.set(cellIndex, 'clearing-horizontal');
+                            } else if (cellElement.classList.contains('clearing-vertical')) {
+                                animatingCells.set(cellIndex, 'clearing-vertical');
+                            }
                         }
                     }
                 }
                 
-                // 清空游戏板
-                boardElement.innerHTML = '';
-                
-                // 绘制已固定的方块
-                for (let y = 0; y < ROWS; y++) {
-                    for (let x = 0; x < COLS; x++) {
-                        const cell = document.createElement('div');
-                        cell.className = 'cell';
-                        if (board[y][x].filled) {
-                            cell.classList.add('filled');
-                            cell.style.backgroundColor = board[y][x].color;
+                // 优化：仅在必要时重绘整个游戏板
+                if (boardElement.children.length !== ROWS * COLS) {
+                    // 清空游戏板
+                    boardElement.innerHTML = '';
+                    
+                    // 批量创建单元格元素
+                    const fragment = document.createDocumentFragment();
+                    
+                    // 绘制已固定的方块
+                    for (let y = 0; y < ROWS; y++) {
+                        for (let x = 0; x < COLS; x++) {
+                            const cell = document.createElement('div');
+                            cell.className = 'cell';
+                            if (board[y][x].filled) {
+                                cell.classList.add('filled');
+                                cell.style.backgroundColor = board[y][x].color;
+                            }
+                            fragment.appendChild(cell);
                         }
-                        boardElement.appendChild(cell);
+                    }
+                    
+                    boardElement.appendChild(fragment);
+                } else {
+                    // 优化：仅更新需要变化的单元格
+                    for (let y = 0; y < ROWS; y++) {
+                        for (let x = 0; x < COLS; x++) {
+                            const cellIndex = y * COLS + x;
+                            const cell = boardElement.children[cellIndex];
+                            if (cell) {
+                                if (board[y][x].filled) {
+                                    if (!cell.classList.contains('filled') || cell.style.backgroundColor !== board[y][x].color) {
+                                        cell.classList.add('filled');
+                                        cell.style.backgroundColor = board[y][x].color;
+                                    }
+                                } else {
+                                    if (cell.classList.contains('filled')) {
+                                        cell.classList.remove('filled');
+                                        cell.style.backgroundColor = '';
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 
@@ -791,17 +999,13 @@
                 }
                 
                 // 恢复动画类到对应的单元格
-                animatingCells.forEach(index => {
+                animatingCells.forEach((animationType, index) => {
                     const cellElement = boardElement.children[index];
                     if (cellElement) {
-                        // 检查原始动画状态并重新应用
                         const row = Math.floor(index / COLS);
                         const col = index % COLS;
                         if (board[row][col].filled) {
-                            // 使用随机动画类型，因为原始动画信息已丢失
-                            const animationTypes = ['clearing', 'clearing-horizontal', 'clearing-vertical'];
-                            const randomAnimation = animationTypes[Math.floor(Math.random() * animationTypes.length)];
-                            cellElement.classList.add(randomAnimation);
+                            cellElement.classList.add(animationType);
                         }
                     }
                 });
@@ -833,6 +1037,24 @@
                     return false; // 旋转失败
                 }
                 
+                // 添加旋转动画
+                for (let y = 0; y < currentPiece.shape.length; y++) {
+                    for (let x = 0; x < currentPiece.shape[y].length; x++) {
+                        if (currentPiece.shape[y][x]) {
+                            const boardY = currentPiece.y + y;
+                            const boardX = currentPiece.x + x;
+                            if (boardY >= 0 && boardY < ROWS && boardX >= 0 && boardX < COLS) {
+                                const index = boardY * COLS + boardX;
+                                const cell = document.querySelector(`#board > div:nth-child(${index + 1})`);
+                                if (cell) {
+                                    cell.classList.add('rotating');
+                                    setTimeout(() => cell.classList.remove('rotating'), 200);
+                                }
+                            }
+                        }
+                    }
+                }
+                
                 drawBoard(); // 旋转后立即更新显示
                 return true; // 旋转成功
             }
@@ -844,6 +1066,25 @@
                 if (!isCollision(currentPiece, dx, dy)) {
                     currentPiece.x += dx;
                     currentPiece.y += dy;
+                    
+                    // 添加移动动画
+                    for (let y = 0; y < currentPiece.shape.length; y++) {
+                        for (let x = 0; x < currentPiece.shape[y].length; x++) {
+                            if (currentPiece.shape[y][x]) {
+                                const boardY = currentPiece.y + y;
+                                const boardX = currentPiece.x + x;
+                                if (boardY >= 0 && boardY < ROWS && boardX >= 0 && boardX < COLS) {
+                                    const index = boardY * COLS + boardX;
+                                    const cell = document.querySelector(`#board > div:nth-child(${index + 1})`);
+                                    if (cell) {
+                                        cell.classList.add('moving');
+                                        setTimeout(() => cell.classList.remove('moving'), 100);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
                     drawBoard(); // 移动后立即更新显示
                     return true;
                 } else if (dy > 0) {
@@ -889,7 +1130,7 @@
                 drawBoard();
             }
             
-            // 游戏主循环
+            // 游戏主循环 - 性能优化版
             function gameLoop(timestamp) {
                 if (gameOver) {
                     if (gameInterval) {
@@ -900,8 +1141,18 @@
                 }
                 
                 if (!isPaused) {
-                    // 根据等级调整下落速度
-                    const currentDropInterval = Math.max(100, dropInterval - (level - 1) * 50);
+                    // 优化：缓存难度设置，避免重复查找
+                    const difficulty = difficultySettings[currentDifficulty];
+                    
+                    // 优化：仅在等级变化时重新计算下落速度
+                    if (!window.lastLevel || window.lastLevel !== level || window.lastDifficulty !== currentDifficulty) {
+                        window.currentDropInterval = Math.max(
+                            difficulty.minDropInterval,
+                            difficulty.initialDropInterval - (level - 1) * difficulty.speedIncrease
+                        );
+                        window.lastLevel = level;
+                        window.lastDifficulty = currentDifficulty;
+                    }
                     
                     // 计算时间差
                     const now = timestamp;
@@ -909,7 +1160,7 @@
                     const delta = now - dropCounter;
                     
                     // 根据等级调整下落速度
-                    if (delta > currentDropInterval) {
+                    if (delta > window.currentDropInterval) {
                         movePiece(0, 1);
                         dropCounter = now;
                     }
@@ -1010,7 +1261,14 @@
             // 修复手势控制器，确保在正确的时间初始化
             setTimeout(() => {
                 hammerManager = new Hammer.Manager(gameBoardElement);
-                hammerManager.add(new Hammer.Swipe({ direction: Hammer.DIRECTION_ALL, threshold: 15, velocity: 0.3 }));
+                hammerManager.add(new Hammer.Swipe({ 
+                    direction: Hammer.DIRECTION_ALL, 
+                    threshold: 10, // 降低阈值，提高灵敏度
+                    velocity: 0.2 // 降低速度要求，提高灵敏度
+                }));
+                
+                // 添加Tap事件支持
+                hammerManager.add(new Hammer.Tap({ event: 'doubletap', taps: 2 }));
                 
                 hammerManager.on('swipeleft', (e) => {
                     if (!isPaused && !gameOver) {
@@ -1040,6 +1298,14 @@
                     e.preventDefault();
                 });
                 
+                // 添加双击事件处理（快速下落）
+                hammerManager.on('doubletap', (e) => {
+                    if (!isPaused && !gameOver) {
+                        hardDrop();
+                    }
+                    e.preventDefault();
+                });
+                
                 // 保存控制器实例以便在游戏状态变化时能访问
                 window.hammerManager = hammerManager;
             }, 100); // 延迟初始化，确保DOM完全加载
@@ -1051,6 +1317,68 @@
             document.getElementById('play-again').addEventListener('click', () => {
                 document.getElementById('game-over').classList.remove('show');
                 resetGame();
+            });
+            
+            // 难度选择按钮事件处理
+            const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+            const difficultySelect = document.getElementById('difficultySelect');
+            
+            difficultyBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const newDifficulty = this.getAttribute('data-difficulty');
+                    
+                    // 更新按钮状态
+                    difficultyBtns.forEach(b => {
+                        b.classList.remove('active');
+                        b.style.borderColor = '#ddd';
+                        b.style.background = '#f8f9fa';
+                        b.style.color = '#2c3e50';
+                    });
+                    this.classList.add('active');
+                    this.style.borderColor = '#3498db';
+                    this.style.background = '#3498db';
+                    this.style.color = 'white';
+                    
+                    // 更新隐藏输入值
+                    difficultySelect.value = newDifficulty;
+                    
+                    // 更新当前难度
+                    const oldDifficulty = currentDifficulty;
+                    currentDifficulty = newDifficulty;
+                    console.log(`难度已更改为: ${currentDifficulty}`);
+                    
+                    // 如果游戏未开始，不需要重置
+                    if (gameOver || !gameInterval) {
+                        return;
+                    }
+                    
+                    // 如果游戏正在进行，询问是否重置游戏以应用新难度
+                    if (!isPaused && !gameOver) {
+                        const shouldReset = confirm('更改难度将重置游戏，是否继续？');
+                        if (shouldReset) {
+                            resetGame();
+                        } else {
+                            // 恢复原来的难度选择
+                            currentDifficulty = oldDifficulty;
+                            difficultySelect.value = oldDifficulty;
+                            
+                            // 恢复按钮状态
+                            difficultyBtns.forEach(b => {
+                                if (b.getAttribute('data-difficulty') === oldDifficulty) {
+                                    b.classList.add('active');
+                                    b.style.borderColor = '#3498db';
+                                    b.style.background = '#3498db';
+                                    b.style.color = 'white';
+                                } else {
+                                    b.classList.remove('active');
+                                    b.style.borderColor = '#ddd';
+                                    b.style.background = '#f8f9fa';
+                                    b.style.color = '#2c3e50';
+                                }
+                            });
+                        }
+                    }
+                });
             });
             
             // 重写返回主页按钮的逻辑，添加提交分数选项
@@ -1084,10 +1412,77 @@
                 });
             }
             
+            // 检测设备类型并显示/隐藏虚拟方向键
+            function checkDeviceType() {
+                const virtualControls = document.querySelector('.virtual-controls');
+                if (virtualControls) {
+                    if (window.innerWidth <= 480 || ('ontouchstart' in window)) {
+                        // 移动端或触摸设备
+                        virtualControls.style.display = 'block';
+                    } else {
+                        // 桌面设备
+                        virtualControls.style.display = 'none';
+                    }
+                }
+            }
+            
+            // 为虚拟方向键添加事件监听器
+            function initVirtualControls() {
+                const controlButtons = document.querySelectorAll('.control-btn');
+                controlButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const action = this.getAttribute('data-action');
+                        if (gameOver || isPaused) return;
+                        
+                        switch (action) {
+                            case 'left':
+                                movePiece(-1, 0);
+                                break;
+                            case 'right':
+                                movePiece(1, 0);
+                                break;
+                            case 'down':
+                                movePiece(0, 1);
+                                break;
+                            case 'rotate':
+                                rotatePiece();
+                                break;
+                            case 'hardDrop':
+                                hardDrop();
+                                break;
+                        }
+                    });
+                });
+            }
+            
+            // 设置游戏板高度，确保网格单元为正方形
+            function setGameBoardHeight() {
+                const gameBoard = document.getElementById('board');
+                if (gameBoard) {
+                    const width = gameBoard.offsetWidth;
+                    // 10列×20行，所以高度应该是宽度的2倍
+                    gameBoard.style.height = `${width * 2}px`;
+                }
+            }
+            
             // 初始化游戏
             initBoard();
             currentPiece = createNewPiece();
+            
+            // 设置游戏板高度
+            setGameBoardHeight();
+            
+            // 窗口大小改变时重新设置游戏板高度
+            window.addEventListener('resize', function() {
+                setGameBoardHeight();
+                checkDeviceType();
+            });
+            
             drawBoard();
+            
+            // 初始化虚拟方向键
+            checkDeviceType();
+            initVirtualControls();
             
             // 开始游戏循环
             gameInterval = requestAnimationFrame(gameLoop);
