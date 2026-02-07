@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game Cards Test</title>
+    <style>
+        .game-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #eee;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin: 10px;
+            width: 200px;
+            float: left;
+        }
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-color: #3498db;
+        }
+        .game-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .game-card h4 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+        .game-card p {
+            color: #7f8c8d;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>Game Cards Test</h1>
+    <div id="test-results"></div>
+    
+    <div class="games-grid">
+        <div class="game-card" data-game="tetris" role="button" tabindex="0">
+            <div class="game-icon">🧩</div>
+            <h4>俄罗斯方块</h4>
+            <p>经典益智游戏</p>
+        </div>
+        <div class="game-card" data-game="snake" role="button" tabindex="0">
+            <div class="game-icon">🐍</div>
+            <h4>贪吃蛇</h4>
+            <p>怀旧经典玩法</p>
+        </div>
+        <div class="game-card" data-game="minesweeper" role="button" tabindex="0">
+            <div class="game-icon">💣</div>
+            <h4>扫雷</h4>
+            <p>挑战逻辑思维</p>
+        </div>
+    </div>
+    
+    <script>
+        // 游戏数据
+        const games = {
+            tetris: {
+                title: '俄罗斯方块',
+                url: 'games/tetris.html'
+            },
+            snake: {
+                title: '贪吃蛇',
+                url: 'games/snake.html'
+            },
+            minesweeper: {
+                title: '扫雷',
+                url: 'games/minesweeper.html'
+            }
+        };
+        
+        function logResult(message) {
+            const div = document.getElementById('test-results');
+            div.innerHTML += '<p>' + message + '</p>';
+            console.log(message);
+        }
+        
+        // 初始化游戏卡片事件
+        function initGameCards() {
+            const gameCards = document.querySelectorAll('.game-card');
+            logResult('Found ' + gameCards.length + ' game cards');
+            
+            gameCards.forEach((card, index) => {
+                logResult('Initializing game card ' + (index + 1) + ': ' + card.getAttribute('data-game'));
+                
+                // 添加点击事件
+                card.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const gameId = this.getAttribute('data-game');
+                    logResult('Clicked game card: ' + gameId);
+                    
+                    const game = games[gameId];
+                    if (game && game.url) {
+                        logResult('Redirecting to: ' + game.url);
+                        // 注释掉实际跳转，便于测试
+                        // window.location.href = game.url;
+                    } else {
+                        logResult('Game not found or no URL: ' + gameId);
+                    }
+                });
+                
+                // 添加键盘支持
+                card.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const gameId = this.getAttribute('data-game');
+                        logResult('Enter key pressed on game card: ' + gameId);
+                        
+                        const game = games[gameId];
+                        if (game && game.url) {
+                            logResult('Redirecting to: ' + game.url);
+                            // 注释掉实际跳转，便于测试
+                            // window.location.href = game.url;
+                        }
+                    }
+                });
+            });
+            
+            logResult('Game cards initialization completed');
+        }
+        
+        // 当DOM加载完成后执行
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initGameCards);
+        } else {
+            initGameCards();
+        }
+    </script>
+</body>
+</html>

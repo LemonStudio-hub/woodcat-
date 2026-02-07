@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Logger Test</title>
+</head>
+<body>
+    <h1>Simple Logger Test</h1>
+    <div id="test-results"></div>
+    
+    <script>
+        function logResult(message) {
+            const div = document.getElementById('test-results');
+            div.innerHTML += '<p>' + message + '</p>';
+            console.log(message);
+        }
+        
+        logResult('Before loading logger.js');
+    </script>
+    
+    <script src="js/logger.js"></script>
+    <script>
+        logResult('After loading logger.js: Logger exists - ' + (window.Logger ? 'Yes' : 'No'));
+    </script>
+    
+    <script>
+        // Test direct Logger usage
+        try {
+            window.Logger.info('Direct Logger info test');
+            logResult('Direct Logger usage successful');
+        } catch (error) {
+            logResult('Direct Logger usage error: ' + error.message);
+        }
+    </script>
+    
+    <script>
+        // Test Logger declaration
+        try {
+            var Logger = window.Logger;
+            logResult('var Logger declaration successful');
+            Logger.info('var Logger usage test');
+        } catch (error) {
+            logResult('var Logger declaration error: ' + error.message);
+        }
+    </script>
+    
+    <script>
+        // Test let Logger declaration
+        try {
+            let Logger = window.Logger;
+            logResult('let Logger declaration successful');
+            Logger.info('let Logger usage test');
+        } catch (error) {
+            logResult('let Logger declaration error: ' + error.message);
+        }
+    </script>
+    
+    <script>
+        // Test const Logger declaration
+        try {
+            const Logger = window.Logger;
+            logResult('const Logger declaration successful');
+            Logger.info('const Logger usage test');
+        } catch (error) {
+            logResult('const Logger declaration error: ' + error.message);
+        }
+    </script>
+</body>
+</html>

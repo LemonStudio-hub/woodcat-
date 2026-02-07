@@ -59,85 +59,76 @@ const games = {
     }
 };
 
-// 确保DOM完全加载后执行游戏卡片初始化
-function initGameCardsWithRetry() {
-    let attempts = 0;
-    const maxAttempts = 5;
-    const interval = 500;
-
-    function tryInit() {
-        attempts++;
-        const gameCards = document.querySelectorAll('.game-card');
-        
-        if (gameCards.length > 0) {
-            initGameCards(gameCards);
-        } else if (attempts < maxAttempts) {
-            console.log(`尝试初始化游戏卡片 (${attempts}/${maxAttempts})...`);
-            setTimeout(tryInit, interval);
-        } else {
-            console.error('无法找到游戏卡片元素，初始化失败');
-        }
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', tryInit);
-    } else {
-        tryInit();
-    }
+// 当DOM加载完成后执行
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGameCards);
+} else {
+    initGameCards();
 }
 
 // 初始化游戏卡片事件
-function initGameCards(gameCards) {
-    console.log(`开始初始化 ${gameCards.length} 个游戏卡片...`);
+function initGameCards() {
+    // 获取DOM元素
+    const gameCards = document.querySelectorAll('.game-card');
     
-    // 为每个游戏卡片添加事件 - 统一处理，提高效率
-    gameCards.forEach((card, index) => {
-        console.log(`初始化游戏卡片 ${index + 1}: ${card.getAttribute('data-game')}`);
-        
-        // 确保卡片有完整的可点击区域
-        card.style.cursor = 'pointer';
-        card.style.pointerEvents = 'auto';
-        card.style.zIndex = '1';
-        
+    // 为每个游戏卡片添加点击事件 - 这是关键部分，必须优先执行
+    gameCards.forEach(card => {
         // 添加触摸事件支持（移动端优化）
         card.addEventListener('touchstart', function(e) {
-            // 记录触摸开始时间和位置，用于区分点击和滑动
+            // 记录触摸开始时间，用于区分点击和滑动
             this.touchStartTime = Date.now();
-            this.touchStartX = e.touches[0].clientX;
             this.touchStartY = e.touches[0].clientY;
         }, { passive: true });
 
         // 添加触摸结束事件
         card.addEventListener('touchend', function(e) {
-            // 确保触摸开始数据存在
-            if (!this.touchStartTime) return;
-            
             // 如果触摸时间小于300ms且移动距离小于10px，则认为是点击
             const touchDuration = Date.now() - this.touchStartTime;
-            const touchEndX = e.changedTouches[0].clientX;
             const touchEndY = e.changedTouches[0].clientY;
-            const touchDistanceX = Math.abs(touchEndX - this.touchStartX);
-            const touchDistanceY = Math.abs(touchEndY - this.touchStartY);
-            const touchDistance = Math.sqrt(touchDistanceX * touchDistanceX + touchDistanceY * touchDistanceY);
+            const touchDistance = Math.abs(touchEndY - this.touchStartY);
 
             if (touchDuration < 300 && touchDistance < 10) {
-                handleGameCardClick(this, e);
+                // 阻止默认行为和事件冒泡
+                e.preventDefault();
+                e.stopPropagation();
+
+                const gameId = this.getAttribute('data-game');
+                const game = games[gameId];
+                if (game && game.url) {
+                    // 直接跳转到游戏页面
+                    window.location.href = game.url;
+                }
             }
         }, { passive: false });
 
         // 保留原有的点击事件（桌面端）
         card.addEventListener('click', function(e) {
-            handleGameCardClick(this, e);
-        });
-
-        // 添加键盘支持（回车键）
-        card.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                handleGameCardClick(this, e);
+            e.preventDefault(); // 防止默认行为
+            const gameId = this.getAttribute('data-game');
+            const game = games[gameId];
+            if (game && game.url) {
+                // 直接跳转到游戏页面
+                window.location.href = game.url;
             }
         });
-
-        // 添加游戏卡片悬停效果增强
+    });
+    
+    // 为游戏卡片添加键盘支持（回车键）
+    gameCards.forEach(card => {
+        card.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // 防止默认行为
+                const gameId = this.getAttribute('data-game');
+                const game = games[gameId];
+                if (game && game.url) {
+                    window.location.href = game.url;
+                }
+            }
+        });
+    });
+    
+    // 添加游戏卡片悬停效果增强
+    gameCards.forEach(card => {
         card.addEventListener('mouseenter', function() {
             this.style.transform = 'translateY(-8px)';
         });
@@ -146,64 +137,22 @@ function initGameCards(gameCards) {
             this.style.transform = 'translateY(0)';
         });
     });
-    
-    console.log('游戏卡片初始化完成');
 }
-
-// 统一处理游戏卡片点击事件
-function handleGameCardClick(card, e) {
-    try {
-        // 阻止事件冒泡，避免触发父元素事件
-        e.stopPropagation();
-        
-        const gameId = card.getAttribute('data-game');
-        console.log(`点击游戏卡片: ${gameId}`);
-        
-        // 验证游戏数据
-        if (!gameId) {
-            console.error('游戏卡片缺少data-game属性');
-            return;
-        }
-        
-        const game = games[gameId];
-        if (!game) {
-            console.error(`游戏数据不存在: ${gameId}`);
-            alert('游戏数据加载失败，请刷新页面重试');
-            return;
-        }
-        
-        if (!game.url) {
-            console.error(`游戏URL不存在: ${gameId}`);
-            alert('游戏链接无效，请联系管理员');
-            return;
-        }
-        
-        console.log(`跳转到游戏: ${game.title} (${game.url})`);
-        // 直接跳转到游戏页面
-        window.location.href = game.url;
-    } catch (error) {
-        console.error('处理游戏卡片点击时出错:', error);
-        alert('操作失败，请刷新页面重试');
-    }
-}
-
-// 启动初始化
-initGameCardsWithRetry();
 
 // 动态加载Supabase库和配置（如果需要）
 // 首先检查配置是否已存在
 if (typeof window.AppConfig === 'undefined' || !window.AppConfig || !window.AppConfig.supabase) {
     // 如果配置不存在，尝试动态加载
-    window.loadConfigAndSupabase();
+    loadConfigAndSupabase();
 } else {
     // 配置已存在，直接初始化非排行榜功能，确保菜单等正常工作
-    window.initializeNonLeaderboardFeatures();
+    initializeNonLeaderboardFeatures();
     // 然后尝试初始化排行榜功能
-    window.initializeLeaderboard();
+    initializeLeaderboard();
 }
 
 // 动态加载配置和Supabase库
-window.loadConfigAndSupabase = function() {
+function loadConfigAndSupabase() {
     // 创建script标签加载配置文件
     const configScript = document.createElement('script');
     configScript.src = 'js/config.js';
@@ -215,71 +164,29 @@ window.loadConfigAndSupabase = function() {
             supabaseScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
             supabaseScript.onload = function() {
                 // 库加载完成后，初始化所有功能
-                window.initializeNonLeaderboardFeatures();
-                window.initializeLeaderboard();
+                initializeNonLeaderboardFeatures();
+                initializeLeaderboard();
             };
             supabaseScript.onerror = function() {
                 Logger.warn('Supabase库加载失败，仅初始化基本功能');
-                window.initializeNonLeaderboardFeatures();
+                initializeNonLeaderboardFeatures();
             };
             document.head.appendChild(supabaseScript);
         } else {
             // 排行榜功能已禁用，直接初始化非排行榜功能
             Logger.info('排行榜功能已禁用，跳过Supabase库加载');
-            window.initializeNonLeaderboardFeatures();
+            initializeNonLeaderboardFeatures();
         }
     };
     configScript.onerror = function() {
         Logger.warn('配置文件加载失败，仅初始化基本功能');
-        window.initializeNonLeaderboardFeatures();
+        initializeNonLeaderboardFeatures();
     };
     document.head.appendChild(configScript);
-};
-
-// 验证Supabase连接的函数
-window.validateSupabaseConnection = async function() {
-    if (!globalSupabaseClient) {
-        return false;
-    }
-    
-    try {
-        // 尝试执行一个简单的查询来验证连接
-        const { error } = await globalSupabaseClient
-            .from('leaderboard')
-            .select('id')
-            .limit(1);
-        
-        if (error) {
-            Logger.error('Supabase连接验证失败:', error);
-            return false;
-        }
-        return true;
-    } catch (err) {
-        Logger.error('Supabase连接验证异常:', err);
-        return false;
-    }
-};
-
-// 监控Supabase连接状态
-window.monitorSupabaseConnection = async function() {
-    return await window.validateSupabaseConnection();
-};
-
-// 开始连接监控
-window.startConnectionMonitoring = function() {
-    // 每30秒检查一次连接状态
-    setInterval(async () => {
-        const isConnected = await window.monitorSupabaseConnection();
-        const statusElement = document.getElementById('connection-status');
-        if (statusElement) {
-            statusElement.textContent = isConnected ? '在线' : '离线';
-            statusElement.style.color = isConnected ? 'green' : 'red';
-        }
-    }, 30000);
-};
+}
 
 // 初始化排行榜功能
-window.initializeLeaderboard = function() {
+function initializeLeaderboard() {
     globalSupabaseClient = null;
     
     if (window.AppConfig && window.AppConfig.supabase) {
@@ -306,6 +213,30 @@ window.initializeLeaderboard = function() {
     let cacheTimestamp = 0;
     const CACHE_DURATION = 5 * 60 * 1000; // 5分钟缓存
     
+    // 验证Supabase连接的函数
+    async function validateSupabaseConnection() {
+        if (!globalSupabaseClient) {
+            return false;
+        }
+        
+        try {
+            // 尝试执行一个简单的查询来验证连接
+            const { error } = await globalSupabaseClient
+                .from('leaderboard')
+                .select('id')
+                .limit(1);
+            
+            if (error) {
+                Logger.error('Supabase连接验证失败:', error);
+                return false;
+            }
+            return true;
+        } catch (err) {
+            Logger.error('Supabase连接验证异常:', err);
+            return false;
+        }
+    }
+    
     // 加载排行榜数据
     async function loadLeaderboard() {
         // 检查是否有有效缓存
@@ -329,7 +260,7 @@ window.initializeLeaderboard = function() {
             if (globalSupabaseClient) {
                 try {
                     // 验证连接是否仍然有效
-                    const isConnected = await window.validateSupabaseConnection();
+                    const isConnected = await validateSupabaseConnection();
                     if (!isConnected) {
                         Logger.warn('Supabase连接无效，跳过云端请求');
                         globalSupabaseClient = null; // 标记为无效连接
@@ -505,19 +436,57 @@ window.initializeLeaderboard = function() {
     
     // 加载排行榜
     loadLeaderboard();
-};
+}
+
+// 验证Supabase连接的函数
+async function validateSupabaseConnection() {
+    if (!globalSupabaseClient) {
+        return false;
+    }
+    
+    try {
+        // 尝试执行一个简单的查询来验证连接
+        const { error } = await globalSupabaseClient
+            .from('leaderboard')
+            .select('id')
+            .limit(1);
+        
+        if (error) {
+            Logger.error('Supabase连接验证失败:', error);
+            return false;
+        }
+        return true;
+    } catch (err) {
+        Logger.error('Supabase连接验证异常:', err);
+        return false;
+    }
+}
+
+// 监控Supabase连接状态
+async function monitorSupabaseConnection() {
+    return await validateSupabaseConnection();
+}
+
+// 开始连接监控
+function startConnectionMonitoring() {
+    // 每30秒检查一次连接状态
+    setInterval(async () => {
+        const isConnected = await monitorSupabaseConnection();
+        const statusElement = document.getElementById('connection-status');
+        if (statusElement) {
+            statusElement.textContent = isConnected ? '在线' : '离线';
+            statusElement.style.color = isConnected ? 'green' : 'red';
+        }
+    }, 30000);
+}
 
 // 初始化非排行榜相关功能（如菜单等）
-window.initializeNonLeaderboardFeatures = function() {
+function initializeNonLeaderboardFeatures() {
     // 确保桌面端导航栏在小屏幕时隐藏，大屏幕时显示
     function updateNavDisplay() {
         const nav = document.querySelector('.nav');
-        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-        
-        if (!nav) return; // 确保nav元素存在
-        
         const navList = nav.querySelector('ul');
-        if (!navList) return; // 确保navList元素存在
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
         
         if (window.innerWidth > 768) {
             // 桌面端：始终显示导航，隐藏反馈项（如果存在）
@@ -772,7 +741,7 @@ function checkForScoreSubmission() {
                     if (globalSupabaseClient) {
                         try {
                             // 验证连接是否仍然有效
-                            const isConnected = await window.validateSupabaseConnection();
+                            const isConnected = await validateSupabaseConnection();
                             if (!isConnected) {
                                 Logger.warn('Supabase连接无效，跳过云端提交');
                                 globalSupabaseClient = null; // 标记为无效连接

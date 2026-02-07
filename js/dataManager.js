@@ -13,7 +13,9 @@ if (!window.Logger) {
 }
 
 // 本地引用全局Logger
-const Logger = window.Logger;
+if (typeof Logger === 'undefined') {
+    var Logger = window.Logger;
+}
 
 class GameDataManager {
     constructor() {
