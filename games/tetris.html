@@ -504,24 +504,34 @@
         }
         
         .tutorial-close {
-            background: none;
-            border: none;
-            font-size: 2rem;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            font-size: 1.5rem;
+            font-weight: bold;
             color: #2c3e50;
             cursor: pointer;
             padding: 0;
-            width: 30px;
-            height: 30px;
+            width: 36px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         
         .tutorial-close:hover {
-            background: rgba(44, 62, 80, 0.1);
-            color: #1a252f;
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+        }
+        
+        .tutorial-close:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
         }
         
         .tutorial-body {
@@ -603,6 +613,10 @@
                 <div class="label">行数</div>
                 <div class="value" id="lines">0</div>
             </div>
+            <div class="stat-box" id="ai-status" style="display: none;">
+                <div class="label">AI状态</div>
+                <div class="value" style="color: #e74c3c; font-weight: bold;">启用</div>
+            </div>
         </div>
         <div class="game-board" id="board"></div>
         <div class="controls">
@@ -620,6 +634,7 @@
                 <button id="pauseBtn">暂停</button>
                 <button id="resetBtn">重置</button>
                 <button id="tutorial-btn">玩法教程</button>
+                <button id="ai-toggle" style="display: none; padding: 8px 12px; background: #e74c3c; color: white; border: none; border-radius: 6px; font-weight: 500; transition: all 0.2s ease;">关闭AI</button>
             </div>
             
             <!-- 移动端虚拟方向键 -->
@@ -700,6 +715,23 @@
             </div>
         </div>
     </div>
+    
+    <!-- 困难模式确认模态框 -->
+    <div id="difficulty-confirm-modal" class="tutorial-modal">
+        <div class="tutorial-content" style="max-width: 400px;">
+            <div class="tutorial-header">
+                <h2>难度确认</h2>
+                <button class="tutorial-close">×</button>
+            </div>
+            <div class="tutorial-body" style="text-align: center;">
+                <div style="font-size: 1.1rem; margin-bottom: 20px;">当前难度过高，是否确认选择？</div>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button id="difficulty-confirm-yes" style="padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">确认</button>
+                    <button id="difficulty-confirm-no" style="padding: 10px 20px; background: #e74c3c; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="../js/lib/hammer.min.js"></script>
     <script src="../js/logger.js"></script>
@@ -727,6 +759,12 @@
             let gameInterval;          // 游戏循环ID
             let dropCounter = 0;       // 下落计数器
             let currentDifficulty = 'medium'; // 当前难度级别
+            
+            // AI相关状态变量
+            let isAIEnabled = false;   // AI是否启用
+            let aiSpeedMultiplier = 1.2; // AI模式下的速度倍数
+            let aiLinesCleared = 0;    // AI模式下已消除的行数
+            let aiSpeedIncrement = 0;  // AI模式下的速度增量
             
             // 难度配置 - 不同级别对应不同的下落速度参数
             const difficultySettings = {
@@ -881,12 +919,26 @@
                         // 更新等级（每5行升一级）
                         level = Math.floor(lines / 5) + 1;
                         
-                                                        // 检查是否打破高分记录
-                                                        if (score > highScore) {
-                                                            highScore = score;
-                                                            scoreManager.updateHighScore('tetris', highScore);
-                                                            document.getElementById('high-score').textContent = highScore;
-                                                        }                        
+                        // AI模式下的速度控制
+                        if (isAIEnabled) {
+                            aiLinesCleared += linesCleared;
+                            
+                            // 每消除5行，速度提升15%
+                            const newSpeedIncrement = Math.floor(aiLinesCleared / 5);
+                            if (newSpeedIncrement > aiSpeedIncrement) {
+                                aiSpeedMultiplier *= 1.15; // 速度提升15%
+                                aiSpeedIncrement = newSpeedIncrement;
+                                console.log(`AI速度提升！当前倍数: ${aiSpeedMultiplier.toFixed(2)}`);
+                            }
+                        }
+                        
+                        // 检查是否打破高分记录
+                        if (score > highScore) {
+                            highScore = score;
+                            scoreManager.updateHighScore('tetris', highScore);
+                            document.getElementById('high-score').textContent = highScore;
+                        }
+                        
                         // 更新UI
                         document.getElementById('score').textContent = score;
                         document.getElementById('level').textContent = level;
@@ -1144,14 +1196,35 @@
                     // 优化：缓存难度设置，避免重复查找
                     const difficulty = difficultySettings[currentDifficulty];
                     
-                    // 优化：仅在等级变化时重新计算下落速度
-                    if (!window.lastLevel || window.lastLevel !== level || window.lastDifficulty !== currentDifficulty) {
-                        window.currentDropInterval = Math.max(
-                            difficulty.minDropInterval,
-                            difficulty.initialDropInterval - (level - 1) * difficulty.speedIncrease
-                        );
-                        window.lastLevel = level;
-                        window.lastDifficulty = currentDifficulty;
+                    // 计算基础下落速度
+                    let baseDropInterval = Math.max(
+                        difficulty.minDropInterval,
+                        difficulty.initialDropInterval - (level - 1) * difficulty.speedIncrease
+                    );
+                    
+                    // AI模式下的速度调整
+                    if (isAIEnabled) {
+                        // 计算AI模式下的速度
+                        let aiDropInterval = baseDropInterval / aiSpeedMultiplier;
+                        
+                        // 确保速度不会过快
+                        aiDropInterval = Math.max(difficulty.minDropInterval * 0.8, aiDropInterval);
+                        
+                        // 优化：仅在等级或速度变化时重新计算下落速度
+                        if (!window.lastLevel || window.lastLevel !== level || window.lastDifficulty !== currentDifficulty || window.lastAiSpeedMultiplier !== aiSpeedMultiplier) {
+                            window.currentDropInterval = aiDropInterval;
+                            window.lastLevel = level;
+                            window.lastDifficulty = currentDifficulty;
+                            window.lastAiSpeedMultiplier = aiSpeedMultiplier;
+                        }
+                    } else {
+                        // 普通模式
+                        // 优化：仅在等级变化时重新计算下落速度
+                        if (!window.lastLevel || window.lastLevel !== level || window.lastDifficulty !== currentDifficulty) {
+                            window.currentDropInterval = baseDropInterval;
+                            window.lastLevel = level;
+                            window.lastDifficulty = currentDifficulty;
+                        }
                     }
                     
                     // 计算时间差
@@ -1319,6 +1392,24 @@
                 resetGame();
             });
             
+            // 困难模式确认模态框
+            const difficultyConfirmModal = document.getElementById('difficulty-confirm-modal');
+            const difficultyConfirmYes = document.getElementById('difficulty-confirm-yes');
+            const difficultyConfirmNo = document.getElementById('difficulty-confirm-no');
+            let pendingDifficulty = null;
+            
+            // 显示困难模式确认模态框
+            function showDifficultyConfirmModal(difficulty) {
+                pendingDifficulty = difficulty;
+                difficultyConfirmModal.classList.add('active');
+            }
+            
+            // 隐藏困难模式确认模态框
+            function hideDifficultyConfirmModal() {
+                pendingDifficulty = null;
+                difficultyConfirmModal.classList.remove('active');
+            }
+            
             // 难度选择按钮事件处理
             const difficultyBtns = document.querySelectorAll('.difficulty-btn');
             const difficultySelect = document.getElementById('difficultySelect');
@@ -1327,59 +1418,108 @@
                 btn.addEventListener('click', function() {
                     const newDifficulty = this.getAttribute('data-difficulty');
                     
-                    // 更新按钮状态
-                    difficultyBtns.forEach(b => {
-                        b.classList.remove('active');
-                        b.style.borderColor = '#ddd';
-                        b.style.background = '#f8f9fa';
-                        b.style.color = '#2c3e50';
-                    });
-                    this.classList.add('active');
-                    this.style.borderColor = '#3498db';
-                    this.style.background = '#3498db';
-                    this.style.color = 'white';
-                    
-                    // 更新隐藏输入值
-                    difficultySelect.value = newDifficulty;
-                    
-                    // 更新当前难度
-                    const oldDifficulty = currentDifficulty;
-                    currentDifficulty = newDifficulty;
-                    console.log(`难度已更改为: ${currentDifficulty}`);
-                    
-                    // 如果游戏未开始，不需要重置
-                    if (gameOver || !gameInterval) {
+                    // 如果选择困难模式，显示确认模态框
+                    if (newDifficulty === 'hard') {
+                        showDifficultyConfirmModal(newDifficulty);
                         return;
                     }
                     
-                    // 如果游戏正在进行，询问是否重置游戏以应用新难度
-                    if (!isPaused && !gameOver) {
-                        const shouldReset = confirm('更改难度将重置游戏，是否继续？');
-                        if (shouldReset) {
-                            resetGame();
-                        } else {
-                            // 恢复原来的难度选择
-                            currentDifficulty = oldDifficulty;
-                            difficultySelect.value = oldDifficulty;
-                            
-                            // 恢复按钮状态
-                            difficultyBtns.forEach(b => {
-                                if (b.getAttribute('data-difficulty') === oldDifficulty) {
-                                    b.classList.add('active');
-                                    b.style.borderColor = '#3498db';
-                                    b.style.background = '#3498db';
-                                    b.style.color = 'white';
-                                } else {
-                                    b.classList.remove('active');
-                                    b.style.borderColor = '#ddd';
-                                    b.style.background = '#f8f9fa';
-                                    b.style.color = '#2c3e50';
-                                }
-                            });
-                        }
-                    }
+                    // 非困难模式直接更新
+                    updateDifficulty(newDifficulty, this);
                 });
             });
+            
+            // 更新难度函数
+            function updateDifficulty(newDifficulty, activeBtn) {
+                // 更新按钮状态
+                difficultyBtns.forEach(b => {
+                    b.classList.remove('active');
+                    b.style.borderColor = '#ddd';
+                    b.style.background = '#f8f9fa';
+                    b.style.color = '#2c3e50';
+                });
+                activeBtn.classList.add('active');
+                activeBtn.style.borderColor = '#3498db';
+                activeBtn.style.background = '#3498db';
+                activeBtn.style.color = 'white';
+                
+                // 更新隐藏输入值
+                difficultySelect.value = newDifficulty;
+                
+                // 更新当前难度
+                const oldDifficulty = currentDifficulty;
+                currentDifficulty = newDifficulty;
+                console.log(`难度已更改为: ${currentDifficulty}`);
+                
+                // 如果游戏未开始，不需要重置
+                if (gameOver || !gameInterval) {
+                    return;
+                }
+                
+                // 如果游戏正在进行，询问是否重置游戏以应用新难度
+                if (!isPaused && !gameOver) {
+                    const shouldReset = confirm('更改难度将重置游戏，是否继续？');
+                    if (shouldReset) {
+                        resetGame();
+                    } else {
+                        // 恢复原来的难度选择
+                        currentDifficulty = oldDifficulty;
+                        difficultySelect.value = oldDifficulty;
+                        
+                        // 恢复按钮状态
+                        difficultyBtns.forEach(b => {
+                            if (b.getAttribute('data-difficulty') === oldDifficulty) {
+                                b.classList.add('active');
+                                b.style.borderColor = '#3498db';
+                                b.style.background = '#3498db';
+                                b.style.color = 'white';
+                            } else {
+                                b.classList.remove('active');
+                                b.style.borderColor = '#ddd';
+                                b.style.background = '#f8f9fa';
+                                b.style.color = '#2c3e50';
+                            }
+                        });
+                    }
+                }
+            }
+            
+            // 困难模式确认按钮事件处理
+            if (difficultyConfirmYes) {
+                difficultyConfirmYes.addEventListener('click', function() {
+                    if (pendingDifficulty === 'hard') {
+                        // 找到困难模式按钮
+                        const hardBtn = document.querySelector('[data-difficulty="hard"]');
+                        if (hardBtn) {
+                            updateDifficulty(pendingDifficulty, hardBtn);
+                            // 启用AI功能
+                            enableAI();
+                        }
+                    }
+                    hideDifficultyConfirmModal();
+                });
+            }
+            
+            if (difficultyConfirmNo) {
+                difficultyConfirmNo.addEventListener('click', function() {
+                    hideDifficultyConfirmModal();
+                });
+            }
+            
+            // 关闭按钮事件处理
+            const modalCloseBtns = document.querySelectorAll('#difficulty-confirm-modal .tutorial-close');
+            modalCloseBtns.forEach(btn => {
+                btn.addEventListener('click', hideDifficultyConfirmModal);
+            });
+            
+            // 点击模态框外部关闭
+            if (difficultyConfirmModal) {
+                difficultyConfirmModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        hideDifficultyConfirmModal();
+                    }
+                });
+            }
             
             // 重写返回主页按钮的逻辑，添加提交分数选项
             const backHomeButton = document.querySelector('.back-home');
@@ -1484,6 +1624,189 @@
             checkDeviceType();
             initVirtualControls();
             
+            // AI功能相关函数
+            function enableAI() {
+                isAIEnabled = true;
+                aiLinesCleared = 0;
+                aiSpeedMultiplier = 1.2;
+                aiSpeedIncrement = 0;
+                
+                // 显示AI状态
+                const aiStatus = document.getElementById('ai-status');
+                if (aiStatus) {
+                    aiStatus.style.display = 'block';
+                }
+                
+                // 显示AI切换按钮
+                const aiToggle = document.getElementById('ai-toggle');
+                if (aiToggle) {
+                    aiToggle.style.display = 'block';
+                    aiToggle.textContent = '关闭AI';
+                }
+                
+                // 记录AI启用
+                console.log('AI功能已启用');
+            }
+            
+            function disableAI() {
+                isAIEnabled = false;
+                
+                // 隐藏AI状态
+                const aiStatus = document.getElementById('ai-status');
+                if (aiStatus) {
+                    aiStatus.style.display = 'none';
+                }
+                
+                // 隐藏AI切换按钮
+                const aiToggle = document.getElementById('ai-toggle');
+                if (aiToggle) {
+                    aiToggle.style.display = 'none';
+                }
+                
+                // 记录AI禁用
+                console.log('AI功能已禁用');
+            }
+            
+            // 分析当前棋盘状态
+            function analyzeBoardState() {
+                // 计算每行的高度
+                const rowHeights = Array(COLS).fill(0);
+                for (let x = 0; x < COLS; x++) {
+                    for (let y = 0; y < ROWS; y++) {
+                        if (board[y][x].filled) {
+                            rowHeights[x] = ROWS - y;
+                            break;
+                        }
+                    }
+                }
+                
+                // 计算孔洞数量
+                let holes = 0;
+                for (let x = 0; x < COLS; x++) {
+                    let foundBlock = false;
+                    for (let y = 0; y < ROWS; y++) {
+                        if (board[y][x].filled) {
+                            foundBlock = true;
+                        } else if (foundBlock) {
+                            holes++;
+                        }
+                    }
+                }
+                
+                // 计算行的平整度
+                let roughness = 0;
+                for (let x = 1; x < COLS; x++) {
+                    roughness += Math.abs(rowHeights[x] - rowHeights[x-1]);
+                }
+                
+                return {
+                    rowHeights,
+                    holes,
+                    roughness
+                };
+            }
+            
+            // 计算玩家最可能需要的方块形状
+            function getBestPieceForPlayer() {
+                const boardState = analyzeBoardState();
+                const { rowHeights, holes, roughness } = boardState;
+                
+                // 基于棋盘状态评估每种方块的适用性
+                const pieceScores = SHAPES.map((shape, index) => {
+                    let score = 0;
+                    
+                    // 根据孔洞数量偏好不同形状
+                    if (holes > 5) {
+                        // 有很多孔洞，偏好I型方块
+                        if (index === 0) score += 10;
+                    }
+                    
+                    // 根据平整度偏好不同形状
+                    if (roughness > 15) {
+                        // 棋盘不平整，偏好O型方块
+                        if (index === 1) score += 10;
+                    }
+                    
+                    // 根据行高度偏好不同形状
+                    const averageHeight = rowHeights.reduce((sum, h) => sum + h, 0) / COLS;
+                    if (averageHeight > 10) {
+                        // 棋盘较高，偏好T型方块
+                        if (index === 2) score += 10;
+                    }
+                    
+                    return { index, score };
+                });
+                
+                // 按分数排序，返回得分最高的方块
+                pieceScores.sort((a, b) => b.score - a.score);
+                return pieceScores[0].index;
+            }
+            
+            // 获取对玩家最不利的方块
+            function getWorstPieceForPlayer() {
+                const boardState = analyzeBoardState();
+                const { rowHeights, holes, roughness } = boardState;
+                
+                // 基于棋盘状态评估每种方块的不利程度
+                const pieceScores = SHAPES.map((shape, index) => {
+                    let score = 0;
+                    
+                    // 根据孔洞数量评估方块的不利程度
+                    if (holes > 5) {
+                        // 有很多孔洞，I型方块最有利，其他方块相对不利
+                        if (index !== 0) score += 10;
+                    }
+                    
+                    // 根据平整度评估方块的不利程度
+                    if (roughness > 15) {
+                        // 棋盘不平整，O型方块最有利，其他方块相对不利
+                        if (index !== 1) score += 10;
+                    }
+                    
+                    // 根据行高度评估方块的不利程度
+                    const averageHeight = rowHeights.reduce((sum, h) => sum + h, 0) / COLS;
+                    if (averageHeight > 10) {
+                        // 棋盘较高，T型方块最有利，其他方块相对不利
+                        if (index !== 2) score += 10;
+                    }
+                    
+                    // 根据方块形状的复杂性评估不利程度
+                    // 例如：S型和Z型方块在某些情况下更难放置
+                    if (index === 3 || index === 4) {
+                        score += 5;
+                    }
+                    
+                    return { index, score };
+                });
+                
+                // 按分数排序，返回得分最高的方块（最不利的）
+                pieceScores.sort((a, b) => b.score - a.score);
+                return pieceScores[0].index;
+            }
+            
+            // 修改创建新方块的函数，支持AI模式
+            function createNewPiece() {
+                let shapeIndex;
+                
+                if (isAIEnabled) {
+                    // AI模式：获取对玩家最不利的方块
+                    shapeIndex = getWorstPieceForPlayer();
+                } else {
+                    // 普通模式：随机方块
+                    shapeIndex = Math.floor(Math.random() * SHAPES.length);
+                }
+                
+                const shape = SHAPES[shapeIndex].shape;
+                const color = SHAPES[shapeIndex].color;
+                
+                return {
+                    shape: shape,
+                    x: Math.floor(COLS / 2) - Math.floor(shape[0].length / 2),
+                    y: 0,
+                    color: color
+                };
+            }
+            
             // 开始游戏循环
             gameInterval = requestAnimationFrame(gameLoop);
             
@@ -1491,6 +1814,20 @@
             const tutorialModal = document.getElementById('tutorial-modal');
             const tutorialBtn = document.getElementById('tutorial-btn');
             const tutorialClose = document.querySelector('.tutorial-close');
+            
+            // AI切换按钮事件处理
+            const aiToggleBtn = document.getElementById('ai-toggle');
+            if (aiToggleBtn) {
+                aiToggleBtn.addEventListener('click', function() {
+                    if (isAIEnabled) {
+                        disableAI();
+                        this.textContent = '开启AI';
+                    } else {
+                        enableAI();
+                        this.textContent = '关闭AI';
+                    }
+                });
+            }
             
             if (tutorialBtn) {
                 tutorialBtn.addEventListener('click', () => {

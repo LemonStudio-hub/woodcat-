@@ -187,21 +187,6 @@ function handleGameCardClick(card, e) {
     }
 }
 
-// 启动初始化
-initGameCardsWithRetry();
-
-// 动态加载Supabase库和配置（如果需要）
-// 首先检查配置是否已存在
-if (typeof window.AppConfig === 'undefined' || !window.AppConfig || !window.AppConfig.supabase) {
-    // 如果配置不存在，尝试动态加载
-    window.loadConfigAndSupabase();
-} else {
-    // 配置已存在，直接初始化非排行榜功能，确保菜单等正常工作
-    window.initializeNonLeaderboardFeatures();
-    // 然后尝试初始化排行榜功能
-    window.initializeLeaderboard();
-}
-
 // 动态加载配置和Supabase库
 window.loadConfigAndSupabase = function() {
     // 创建script标签加载配置文件
@@ -235,6 +220,21 @@ window.loadConfigAndSupabase = function() {
     };
     document.head.appendChild(configScript);
 };
+
+// 启动初始化
+initGameCardsWithRetry();
+
+// 动态加载Supabase库和配置（如果需要）
+// 首先检查配置是否已存在
+if (typeof window.AppConfig === 'undefined' || !window.AppConfig || !window.AppConfig.supabase) {
+    // 如果配置不存在，尝试动态加载
+    window.loadConfigAndSupabase();
+} else {
+    // 配置已存在，直接初始化非排行榜功能，确保菜单等正常工作
+    window.initializeNonLeaderboardFeatures();
+    // 然后尝试初始化排行榜功能
+    window.initializeLeaderboard();
+}
 
 // 验证Supabase连接的函数
 window.validateSupabaseConnection = async function() {
