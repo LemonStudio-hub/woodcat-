@@ -283,6 +283,139 @@
             animation: pulse 0.5s ease;
         }
         
+        /* 教程模态框样式 */
+        .tutorial-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .tutorial-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .tutorial-content {
+            background: #faf8ef;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .tutorial-modal.active .tutorial-content {
+            transform: scale(1);
+        }
+        
+        .tutorial-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 2px solid #bbada0;
+            background: #f9f6f2;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .tutorial-header h2 {
+            color: #776e65;
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .tutorial-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #776e65;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        .tutorial-close:hover {
+            background: rgba(127, 110, 101, 0.1);
+            color: #5d5043;
+        }
+        
+        .tutorial-body {
+            padding: 20px;
+            color: #776e65;
+        }
+        
+        .tutorial-section {
+            margin-bottom: 20px;
+        }
+        
+        .tutorial-section h3 {
+            color: #776e65;
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-bottom: 1px solid #bbada0;
+            padding-bottom: 5px;
+        }
+        
+        .tutorial-section p {
+            margin: 0 0 10px 0;
+            line-height: 1.5;
+        }
+        
+        .tutorial-section ul {
+            margin: 0 0 10px 0;
+            padding-left: 20px;
+        }
+        
+        .tutorial-section li {
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+        
+        /* 移动端优化 */
+        @media (max-width: 480px) {
+            .tutorial-content {
+                width: 95%;
+                max-height: 90vh;
+            }
+            
+            .tutorial-header {
+                padding: 15px;
+            }
+            
+            .tutorial-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .tutorial-body {
+                padding: 15px;
+            }
+            
+            .tutorial-section h3 {
+                font-size: 1rem;
+            }
+        }
+        
         /* 移动端优化 */
         @media (max-width: 480px) {
             body {
@@ -380,10 +513,56 @@
         <div class="controls">
             <div class="buttons">
                 <button id="new-game" data-i18n="btn.newGame">新游戏</button>
+                <button id="tutorial-btn" data-i18n="btn.tutorial">玩法教程</button>
             </div>
         </div>
         <div class="instructions">
-            <p data-i18n="game2048.instructions">向上滑动↑ 向下滑动↓ 向左滑动← 向右滑动→</p>
+            <p data-i18n="game2048.instructions">向上滑动↑ 向下滑动↓ 向左滑动→ 向右滑动→</p>
+        </div>
+    </div>
+
+    <!-- 教程模态框 -->
+    <div id="tutorial-modal" class="tutorial-modal">
+        <div class="tutorial-content">
+            <div class="tutorial-header">
+                <h2 data-i18n="tutorial.title">玩法教程</h2>
+                <button class="tutorial-close" data-i18n="tutorial.close">×</button>
+            </div>
+            <div class="tutorial-body">
+                <div class="tutorial-section">
+                    <h3 data-i18n="tutorial.gameGoal">游戏目标</h3>
+                    <p>通过合并相同数字的方块，获得2048方块，挑战更高分数！</p>
+                </div>
+                <div class="tutorial-section">
+                    <h3 data-i18n="tutorial.controls">操作方法</h3>
+                    <ul>
+                        <li>键盘：使用方向键（↑↓←→）或 WASD 键移动方块</li>
+                        <li>触摸：在屏幕上滑动手指控制方块移动方向</li>
+                    </ul>
+                </div>
+                <div class="tutorial-section">
+                    <h3 data-i18n="tutorial.rules">游戏规则</h3>
+                    <ul>
+                        <li>滑动时，所有方块会向滑动方向移动到尽头</li>
+                        <li>相同数字的方块相撞时会合并成它们的和</li>
+                        <li>每次移动后会随机生成一个2或4的方块</li>
+                        <li>当方块填满整个棋盘且无法移动时，游戏结束</li>
+                    </ul>
+                </div>
+                <div class="tutorial-section">
+                    <h3 data-i18n="tutorial.scoring">得分机制</h3>
+                    <p>每次合并方块时，获得与合并结果相同的分数。例如，合并两个2会得到4分，合并两个4会得到8分，以此类推。</p>
+                </div>
+                <div class="tutorial-section">
+                    <h3 data-i18n="tutorial.tips">技巧提示</h3>
+                    <ul>
+                        <li>尝试在角落建立高分方块，保持它们不动</li>
+                        <li>尽量保持方块按从大到小的顺序排列</li>
+                        <li>优先合并较小的方块，避免棋盘被填满</li>
+                        <li>注意观察棋盘，提前规划移动策略</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -791,6 +970,39 @@
                 initGame();
                 enableAudioOnMobile(); // 启用移动端音频
             });
+            
+            // 教程按钮事件
+            const tutorialBtn = document.getElementById('tutorial-btn');
+            const tutorialModal = document.getElementById('tutorial-modal');
+            const tutorialClose = document.querySelector('.tutorial-close');
+            
+            if (tutorialBtn && tutorialModal) {
+                tutorialBtn.addEventListener('click', () => {
+                    tutorialModal.classList.add('active');
+                    enableAudioOnMobile(); // 启用移动端音频
+                });
+                
+                // 关闭教程模态框
+                if (tutorialClose) {
+                    tutorialClose.addEventListener('click', () => {
+                        tutorialModal.classList.remove('active');
+                    });
+                }
+                
+                // 点击模态框外部关闭
+                tutorialModal.addEventListener('click', (e) => {
+                    if (e.target === tutorialModal) {
+                        tutorialModal.classList.remove('active');
+                    }
+                });
+                
+                // 按ESC键关闭模态框
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        tutorialModal.classList.remove('active');
+                    }
+                });
+            }
             
             // 初始化游戏
             initGame();

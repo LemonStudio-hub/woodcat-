@@ -479,6 +479,139 @@
                 margin-bottom: 0;
             }
         }
+        
+        /* 教程模态框样式 */
+        .tutorial-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .tutorial-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .tutorial-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .tutorial-modal.active .tutorial-content {
+            transform: scale(1);
+        }
+        
+        .tutorial-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 2px solid #3498db;
+            background: #f8f9fa;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .tutorial-header h2 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .tutorial-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #2c3e50;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        .tutorial-close:hover {
+            background: rgba(44, 62, 80, 0.1);
+            color: #1a252f;
+        }
+        
+        .tutorial-body {
+            padding: 20px;
+            color: #2c3e50;
+        }
+        
+        .tutorial-section {
+            margin-bottom: 20px;
+        }
+        
+        .tutorial-section h3 {
+            color: #3498db;
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-bottom: 1px solid #ecf0f1;
+            padding-bottom: 5px;
+        }
+        
+        .tutorial-section p {
+            margin: 0 0 10px 0;
+            line-height: 1.5;
+        }
+        
+        .tutorial-section ul {
+            margin: 0 0 10px 0;
+            padding-left: 20px;
+        }
+        
+        .tutorial-section li {
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+        
+        /* 移动端教程模态框优化 */
+        @media (max-width: 480px) {
+            .tutorial-content {
+                width: 95%;
+                max-height: 90vh;
+            }
+            
+            .tutorial-header {
+                padding: 15px;
+            }
+            
+            .tutorial-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .tutorial-body {
+                padding: 15px;
+            }
+            
+            .tutorial-section h3 {
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -512,10 +645,52 @@
             </div>
             <div class="buttons">
                 <button id="resetBtn">新游戏</button>
+                <button id="tutorial-btn">玩法教程</button>
             </div>
         </div>
     </div>
 
+    <!-- 教程模态框 -->
+    <div id="tutorial-modal" class="tutorial-modal">
+        <div class="tutorial-content">
+            <div class="tutorial-header">
+                <h2>玩法教程</h2>
+                <button class="tutorial-close">×</button>
+            </div>
+            <div class="tutorial-body">
+                <div class="tutorial-section">
+                    <h3>游戏目标</h3>
+                    <p>通过标记和排除，找出所有隐藏的地雷，同时揭开所有安全的格子！</p>
+                </div>
+                <div class="tutorial-section">
+                    <h3>操作方法</h3>
+                    <ul>
+                        <li>点击：揭开格子，显示下方内容</li>
+                        <li>右键点击（PC）或长按（触屏）：标记可能存在地雷的格子</li>
+                    </ul>
+                </div>
+                <div class="tutorial-section">
+                    <h3>游戏规则</h3>
+                    <ul>
+                        <li>数字显示周围8个格子中的地雷数量</li>
+                        <li>踩到地雷游戏结束</li>
+                        <li>揭开所有非雷格子或正确标记所有地雷获胜</li>
+                        <li>不同难度对应不同大小的棋盘和地雷数量</li>
+                    </ul>
+                </div>
+                <div class="tutorial-section">
+                    <h3>技巧提示</h3>
+                    <ul>
+                        <li>从角落或边缘开始，减少踩到地雷的概率</li>
+                        <li>利用数字推断周围地雷的位置</li>
+                        <li>当数字与周围未揭开格子数相等时，这些格子都是地雷</li>
+                        <li>合理使用标记功能，避免重复思考</li>
+                        <li>保持冷静，逐步分析每个区域</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="../js/logger.js"></script>
     <script src="../js/dataManager.js"></script>
@@ -1038,6 +1213,30 @@
                     }
                 });
             }
+            
+            // 教程模态框逻辑
+            const tutorialModal = document.getElementById('tutorial-modal');
+            const tutorialBtn = document.getElementById('tutorial-btn');
+            const tutorialClose = document.querySelector('.tutorial-close');
+            
+            if (tutorialBtn) {
+                tutorialBtn.addEventListener('click', () => {
+                    tutorialModal.classList.add('active');
+                });
+            }
+            
+            if (tutorialClose) {
+                tutorialClose.addEventListener('click', () => {
+                    tutorialModal.classList.remove('active');
+                });
+            }
+            
+            // 点击模态框外部关闭
+            tutorialModal.addEventListener('click', (e) => {
+                if (e.target === tutorialModal) {
+                    tutorialModal.classList.remove('active');
+                }
+            });
         });
     </script>
 </body>

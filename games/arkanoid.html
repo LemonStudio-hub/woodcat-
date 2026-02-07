@@ -358,6 +358,139 @@
                 font-size: 12px;
             }
         }
+        
+        /* 教程模态框样式 */
+        .tutorial-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .tutorial-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .tutorial-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .tutorial-modal.active .tutorial-content {
+            transform: scale(1);
+        }
+        
+        .tutorial-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 2px solid #34495e;
+            background: #f8f9fa;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .tutorial-header h2 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .tutorial-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #2c3e50;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        .tutorial-close:hover {
+            background: rgba(44, 62, 80, 0.1);
+            color: #1a252f;
+        }
+        
+        .tutorial-body {
+            padding: 20px;
+            color: #2c3e50;
+        }
+        
+        .tutorial-section {
+            margin-bottom: 20px;
+        }
+        
+        .tutorial-section h3 {
+            color: #34495e;
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-bottom: 1px solid #ecf0f1;
+            padding-bottom: 5px;
+        }
+        
+        .tutorial-section p {
+            margin: 0 0 10px 0;
+            line-height: 1.5;
+        }
+        
+        .tutorial-section ul {
+            margin: 0 0 10px 0;
+            padding-left: 20px;
+        }
+        
+        .tutorial-section li {
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+        
+        /* 移动端教程模态框优化 */
+        @media (max-width: 480px) {
+            .tutorial-content {
+                width: 95%;
+                max-height: 90vh;
+            }
+            
+            .tutorial-header {
+                padding: 15px;
+            }
+            
+            .tutorial-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .tutorial-body {
+                padding: 15px;
+            }
+            
+            .tutorial-section h3 {
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -399,6 +532,7 @@
             <div class="buttons">
                 <button id="startBtn">开始游戏</button>
                 <button id="pauseBtn">暂停</button>
+                <button id="tutorial-btn">玩法教程</button>
             </div>
             <p style="margin-top: 10px; color: #7f8c8d; font-size: 0.85rem;">使用 ← → 键、鼠标或滑动手势移动挡板</p>
         </div>
@@ -407,7 +541,48 @@
         </div>
     </div>
 
-
+    <!-- 教程模态框 -->
+    <div id="tutorial-modal" class="tutorial-modal">
+        <div class="tutorial-content">
+            <div class="tutorial-header">
+                <h2>玩法教程</h2>
+                <button class="tutorial-close">×</button>
+            </div>
+            <div class="tutorial-body">
+                <div class="tutorial-section">
+                    <h3>游戏目标</h3>
+                    <p>控制挡板反弹小球，打破所有砖块，获取高分！</p>
+                </div>
+                <div class="tutorial-section">
+                    <h3>操作方法</h3>
+                    <ul>
+                        <li>键盘：使用方向键左右移动挡板</li>
+                        <li>鼠标：移动鼠标控制挡板位置</li>
+                        <li>触屏：在屏幕上左右滑动控制挡板</li>
+                    </ul>
+                </div>
+                <div class="tutorial-section">
+                    <h3>游戏规则</h3>
+                    <ul>
+                        <li>小球碰到砖块会反弹并消除砖块</li>
+                        <li>消除砖块获得分数</li>
+                        <li>小球掉出屏幕会减少生命值</li>
+                        <li>生命值耗尽游戏结束</li>
+                        <li>消除所有砖块进入下一关</li>
+                    </ul>
+                </div>
+                <div class="tutorial-section">
+                    <h3>技巧提示</h3>
+                    <ul>
+                        <li>尝试让小球击中挡板的不同位置，改变反弹角度</li>
+                        <li>优先消除顶部的砖块</li>
+                        <li>保持挡板移动平稳，避免小球快速改变方向</li>
+                        <li>注意观察小球的运动轨迹，提前预判</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="../js/lib/hammer.min.js"></script>
     <script src="../js/logger.js"></script>
@@ -1681,6 +1856,30 @@
                         drawBall();
 
                         drawPaddle();
+                        
+                        // 教程模态框逻辑
+                        const tutorialModal = document.getElementById('tutorial-modal');
+                        const tutorialBtn = document.getElementById('tutorial-btn');
+                        const tutorialClose = document.querySelector('.tutorial-close');
+                        
+                        if (tutorialBtn) {
+                            tutorialBtn.addEventListener('click', () => {
+                                tutorialModal.classList.add('active');
+                            });
+                        }
+                        
+                        if (tutorialClose) {
+                            tutorialClose.addEventListener('click', () => {
+                                tutorialModal.classList.remove('active');
+                            });
+                        }
+                        
+                        // 点击模态框外部关闭
+                        tutorialModal.addEventListener('click', (e) => {
+                            if (e.target === tutorialModal) {
+                                tutorialModal.classList.remove('active');
+                            }
+                        });
 
         });
 

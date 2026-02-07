@@ -586,8 +586,9 @@
         <div class="game-board" id="board"></div>
         <div class="controls">
             <div class="buttons">
-                <button id="resetBtn">新游戏</button>
-            </div>
+                    <button id="resetBtn">新游戏</button>
+                    <button id="tutorialBtn">玩法教程</button>
+                </div>
         </div>
     </div>
 
@@ -608,6 +609,46 @@
                         <h4>人机对战</h4>
                         <p>与AI对战挑战</p>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 玩法教程模态框 -->
+    <div id="tutorial-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>跳棋玩法教程</h3>
+                <span id="tutorial-modal-close" class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="tutorial-content">
+                    <h4>游戏目标</h4>
+                    <p>跳棋是一种经典的策略游戏，目标是通过跳跃和移动棋子，吃掉对手的所有棋子或使对手无法移动。</p>
+                    
+                    <h4>游戏控制</h4>
+                    <p>• 点击：选择棋子并移动到目标位置<br>
+                    • 有效移动：会显示绿色圆点标记<br>
+                    • 有效吃子：会显示红色边框标记</p>
+                    
+                    <h4>游戏规则</h4>
+                    <p>• 棋子只能在深色格子上移动<br>
+                    • 普通棋子只能斜向前进<br>
+                    • 吃到对方棋子时可以连续跳跃<br>
+                    • 棋子到达对方底线会升级为王<br>
+                    • 王可以向任意方向移动</p>
+                    
+                    <h4>游戏得分</h4>
+                    <p>• 吃到一个对方棋子：游戏会自动记录<br>
+                    • 胜利条件：吃掉对方所有棋子或使对方无法移动<br>
+                    • 游戏会记录回合数，挑战用最少步数获胜</p>
+                    
+                    <h4>游戏技巧</h4>
+                    <p>• 控制中心位置，获得更多移动选择<br>
+                    • 优先选择可以吃到对方棋子的移动<br>
+                    • 保护自己的棋子，避免被对方吃掉<br>
+                    • 尽快将棋子升级为王，获得更大优势<br>
+                    • 注意观察对手的移动，预测其策略</p>
                 </div>
             </div>
         </div>
@@ -1633,6 +1674,32 @@
                 initBoard();
                 enableAudioOnMobile(); // 启用移动端音频
             });
+            
+            // 教程功能
+            const tutorialBtn = document.getElementById('tutorialBtn');
+            const tutorialModal = document.getElementById('tutorial-modal');
+            const tutorialModalClose = document.getElementById('tutorial-modal-close');
+            
+            if (tutorialBtn) {
+                tutorialBtn.addEventListener('click', () => {
+                    tutorialModal.classList.add('show');
+                    enableAudioOnMobile(); // 启用移动端音频
+                });
+            }
+            
+            if (tutorialModalClose) {
+                tutorialModalClose.addEventListener('click', () => {
+                    tutorialModal.classList.remove('show');
+                });
+            }
+            
+            if (tutorialModal) {
+                tutorialModal.addEventListener('click', (e) => {
+                    if (e.target === tutorialModal) {
+                        tutorialModal.classList.remove('show');
+                    }
+                });
+            }
             
             // 模式选择功能
             function showModeModal() {

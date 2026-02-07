@@ -362,6 +362,7 @@
                 <button class="control-btn" id="new-game" data-i18n="spiderSolitaire.newGame">新游戏</button>
                 <button class="control-btn" id="undo" data-i18n="spiderSolitaire.undo">撤销</button>
                 <button class="control-btn" id="hint" data-i18n="spiderSolitaire.hint">提示</button>
+                <button class="control-btn" id="tutorial" data-i18n="spiderSolitaire.tutorial">玩法教程</button>
             </div>
         </div>
         
@@ -378,6 +379,7 @@
             <button class="control-btn" id="mobile-new-game" data-i18n="spiderSolitaire.newGame">新游戏</button>
             <button class="control-btn" id="mobile-undo" data-i18n="spiderSolitaire.undo">撤销</button>
             <button class="control-btn" id="mobile-hint" data-i18n="spiderSolitaire.hint">提示</button>
+            <button class="control-btn" id="mobile-tutorial" data-i18n="spiderSolitaire.tutorial">玩法教程</button>
         </div>
     </div>
     
@@ -392,6 +394,43 @@
             </div>
             <button class="modal-btn" id="play-again" data-i18n="spiderSolitaire.playAgain">再玩一次</button>
             <button class="modal-btn" id="back-to-menu" data-i18n="spiderSolitaire.backToMenu">返回菜单</button>
+        </div>
+    </div>
+
+    <!-- 玩法教程模态框 -->
+    <div class="modal" id="tutorial-modal">
+        <div class="modal-content">
+            <h2 class="modal-title">蜘蛛卡牌玩法教程</h2>
+            <div class="modal-stats">
+                <h3>游戏目标</h3>
+                <p>蜘蛛卡牌的目标是将所有卡牌按照花色顺序从K到A堆叠成完整的序列。</p>
+                
+                <h3>游戏控制</h3>
+                <p>• 点击：选择卡牌并移动到目标位置<br>
+                • 发牌堆：点击发牌堆分发更多卡牌<br>
+                • 难度选择：可以选择1、2或4花色的难度</p>
+                
+                <h3>游戏规则</h3>
+                <p>• 卡牌只能按照降序堆叠（K→Q→J→10→...→A）<br>
+                • 只有相同花色的卡牌才能堆叠<br>
+                • 每次可以移动一张或多张连续的同花色卡牌<br>
+                • 空列可以放置任何卡牌<br>
+                • 每次发牌会给每列分发一张卡牌</p>
+                
+                <h3>游戏得分</h3>
+                <p>• 移动卡牌：10分<br>
+                • 完成一组花色：额外奖励<br>
+                • 时间奖励：越快完成得分越高<br>
+                • 移动奖励：越少移动得分越高</p>
+                
+                <h3>游戏技巧</h3>
+                <p>• 优先清空列，创造更多的移动空间<br>
+                • 尽量将同花色的卡牌堆叠在一起<br>
+                • 注意观察卡牌的分布，规划移动路径<br>
+                • 合理使用撤销功能纠正错误<br>
+                • 在卡住时使用提示功能获取帮助</p>
+            </div>
+            <button class="modal-btn" id="close-tutorial">关闭</button>
         </div>
     </div>
     
@@ -436,10 +475,14 @@
                     newGame: document.getElementById('new-game'),
                     undo: document.getElementById('undo'),
                     hint: document.getElementById('hint'),
+                    tutorial: document.getElementById('tutorial'),
                     mobileNewGame: document.getElementById('mobile-new-game'),
                     mobileUndo: document.getElementById('mobile-undo'),
                     mobileHint: document.getElementById('mobile-hint'),
+                    mobileTutorial: document.getElementById('mobile-tutorial'),
                     gameOverModal: document.getElementById('game-over-modal'),
+                    tutorialModal: document.getElementById('tutorial-modal'),
+                    closeTutorial: document.getElementById('close-tutorial'),
                     finalScore: document.getElementById('final-score'),
                     finalTime: document.getElementById('final-time'),
                     finalMoves: document.getElementById('final-moves'),
@@ -453,6 +496,7 @@
                 this.elements.newGame.addEventListener('click', () => this.startNewGame());
                 this.elements.undo.addEventListener('click', () => this.undoMove());
                 this.elements.hint.addEventListener('click', () => this.getHint());
+                this.elements.tutorial.addEventListener('click', () => this.showTutorial());
                 this.elements.difficulty.addEventListener('change', (e) => {
                     this.difficulty = parseInt(e.target.value);
                     this.startNewGame();
@@ -462,6 +506,10 @@
                 this.elements.mobileNewGame.addEventListener('click', () => this.startNewGame());
                 this.elements.mobileUndo.addEventListener('click', () => this.undoMove());
                 this.elements.mobileHint.addEventListener('click', () => this.getHint());
+                this.elements.mobileTutorial.addEventListener('click', () => this.showTutorial());
+                
+                // 教程模态框按钮
+                this.elements.closeTutorial.addEventListener('click', () => this.hideTutorial());
                 
                 // 发牌堆点击事件
                 this.elements.stockPile.addEventListener('click', () => this.dealFromStock());
@@ -944,16 +992,27 @@
                     Logger.error('保存最佳成绩失败:', error);
                 }
             }
+            
+            showTutorial() {
+                this.elements.tutorialModal.style.display = 'flex';
+            }
+            
+            hideTutorial() {
+                this.elements.tutorialModal.style.display = 'none';
+            }
         }
         
         // 初始化游戏
         document.addEventListener('DOMContentLoaded', () => {
-            const game = new SpiderSolitaire();
-            
-            // 初始化本地化
-            if (typeof i18n !== 'undefined') {
-                i18n.init();
-            }
+            // 确保DOM元素完全加载后再初始化游戏
+            setTimeout(() => {
+                const game = new SpiderSolitaire();
+                
+                // 初始化本地化
+                if (typeof i18n !== 'undefined') {
+                    i18n.init();
+                }
+            }, 100);
         });
     </script>
 </body>

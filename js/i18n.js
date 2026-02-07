@@ -381,7 +381,8 @@ class I18n {
     detectLanguage() {
         // 确保translations对象存在
         if (!this.translations) {
-            Logger.error('translations对象未初始化');
+            // 使用console而不是Logger，因为Logger可能还未初始化
+            console.error('translations对象未初始化');
             return 'zh-CN';
         }
         
@@ -396,7 +397,8 @@ class I18n {
                 return 'ru';
             }
         } catch (error) {
-            Logger.error('检测浏览器语言时出错:', error);
+            // 使用console而不是Logger，因为Logger可能还未初始化
+            console.error('检测浏览器语言时出错:', error);
         }
         
         return 'zh-CN';

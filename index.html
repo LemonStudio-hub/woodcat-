@@ -264,6 +264,8 @@
                     }
                 } else {
                     console.warn('i18n对象未初始化');
+                    // 设置默认值
+                    langText.textContent = 'RU';
                 }
             }
 
@@ -295,33 +297,77 @@
             updateLangButton();
         }
 
+        // 等待i18n对象初始化的函数
+        function waitForI18n() {
+            let attempts = 0;
+            const maxAttempts = 10;
+            const interval = 200;
+
+            function checkI18n() {
+                attempts++;
+                if (window.i18n) {
+                    initLanguageSwitcher();
+                } else if (attempts < maxAttempts) {
+                    setTimeout(checkI18n, interval);
+                } else {
+                    console.warn('i18n对象初始化超时，使用默认语言设置');
+                    initLanguageSwitcher(); // 即使i18n未初始化也执行，设置默认值
+                }
+            }
+
+            checkI18n();
+        }
+
         // 确保在DOM加载完成后初始化语言切换器
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', function() {
                 // 等待i18n对象初始化完成
-                setTimeout(function() {
-                    if (window.i18n) {
-                        initLanguageSwitcher();
-                    } else {
-                        // 再次尝试，确保i18n对象已初始化
-                        setTimeout(initLanguageSwitcher, 500);
-                    }
-                }, 200);
+                waitForI18n();
             });
         } else {
             // 立即初始化语言切换器
-            setTimeout(function() {
-                if (window.i18n) {
-                    initLanguageSwitcher();
-                } else {
-                    // 再次尝试，确保i18n对象已初始化
-                    setTimeout(initLanguageSwitcher, 500);
-                }
-            }, 200);
+            waitForI18n();
         }
     </script>
     <script src="js/main.js"></script>
     <script src="js/cdnLoader.js"></script>
+    <!-- 滚动效果脚本 -->
+    <script>
+        // 添加滚动效果
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('.header');
+            if (header) {
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            }
+        });
+        
+        // 移动端菜单按钮状态切换
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navUl = document.querySelector('.nav ul');
+        
+        if (mobileMenuBtn && navUl) {
+            mobileMenuBtn.addEventListener('click', function() {
+                this.classList.toggle('active');
+                if (navUl.style.display === 'flex') {
+                    navUl.style.display = 'none';
+                } else {
+                    navUl.style.display = 'flex';
+                }
+            });
+            
+            // 点击菜单外部关闭菜单
+            document.addEventListener('click', function(e) {
+                if (!mobileMenuBtn.contains(e.target) && !navUl.contains(e.target)) {
+                    mobileMenuBtn.classList.remove('active');
+                    navUl.style.display = 'none';
+                }
+            });
+        }
+    </script>
     <!-- 排行榜相关脚本（动态加载） -->
     <!-- 使用cdnLoader.js覆盖默认的配置和Supabase库加载方式 -->
 

@@ -320,6 +320,139 @@
                 min-width: 60px;
             }
         }
+        
+        /* 教程模态框样式 */
+        .tutorial-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .tutorial-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .tutorial-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .tutorial-modal.active .tutorial-content {
+            transform: scale(1);
+        }
+        
+        .tutorial-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 2px solid #3498db;
+            background: #f8f9fa;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .tutorial-header h2 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .tutorial-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #2c3e50;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        .tutorial-close:hover {
+            background: rgba(44, 62, 80, 0.1);
+            color: #1a252f;
+        }
+        
+        .tutorial-body {
+            padding: 20px;
+            color: #2c3e50;
+        }
+        
+        .tutorial-section {
+            margin-bottom: 20px;
+        }
+        
+        .tutorial-section h3 {
+            color: #3498db;
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-bottom: 1px solid #ecf0f1;
+            padding-bottom: 5px;
+        }
+        
+        .tutorial-section p {
+            margin: 0 0 10px 0;
+            line-height: 1.5;
+        }
+        
+        .tutorial-section ul {
+            margin: 0 0 10px 0;
+            padding-left: 20px;
+        }
+        
+        .tutorial-section li {
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+        
+        /* 移动端教程模态框优化 */
+        @media (max-width: 480px) {
+            .tutorial-content {
+                width: 95%;
+                max-height: 90vh;
+            }
+            
+            .tutorial-header {
+                padding: 15px;
+            }
+            
+            .tutorial-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .tutorial-body {
+                padding: 15px;
+            }
+            
+            .tutorial-section h3 {
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -350,6 +483,7 @@
                 <button id="startBtn">开始</button>
                 <button id="pauseBtn">暂停</button>
                 <button id="resetBtn">重置</button>
+                <button id="tutorial-btn">玩法教程</button>
             </div>
         </div>
         <div class="game-over" id="game-over">
@@ -359,6 +493,60 @@
         </div>
     </div>
 
+    <!-- 教程模态框 -->
+    <div id="tutorial-modal" class="tutorial-modal">
+        <div class="tutorial-content">
+            <div class="tutorial-header">
+                <h2>玩法教程</h2>
+                <button class="tutorial-close">×</button>
+            </div>
+            <div class="tutorial-body">
+                <div class="tutorial-section">
+                    <h3>游戏目标</h3>
+                    <p>通过移动和旋转下落的方块，填满一行消除得分，挑战更高分数！</p>
+                </div>
+                <div class="tutorial-section">
+                    <h3>操作方法</h3>
+                    <ul>
+                        <li>键盘：使用方向键控制方块移动</li>
+                        <li>↑ 键：旋转方块</li>
+                        <li>↓ 键：加速下落</li>
+                        <li>←→ 键：左右移动方块</li>
+                        <li>空格：直接下落到底部</li>
+                        <li>触摸：在屏幕上滑动手指控制方块</li>
+                    </ul>
+                </div>
+                <div class="tutorial-section">
+                    <h3>游戏规则</h3>
+                    <ul>
+                        <li>方块会从顶部随机生成并自动下落</li>
+                        <li>填满一整行方块会消除该行并得分</li>
+                        <li>方块堆积到顶部时游戏结束</li>
+                        <li>每消除5行升级一次，等级越高方块下落速度越快</li>
+                    </ul>
+                </div>
+                <div class="tutorial-section">
+                    <h3>得分机制</h3>
+                    <ul>
+                        <li>消除1行：100分 × 当前等级</li>
+                        <li>消除2行：300分 × 当前等级</li>
+                        <li>消除3行：500分 × 当前等级</li>
+                        <li>消除4行：800分 × 当前等级</li>
+                    </ul>
+                </div>
+                <div class="tutorial-section">
+                    <h3>技巧提示</h3>
+                    <ul>
+                        <li>尽量保持底部平整，避免出现孔洞</li>
+                        <li>优先消除多行以获得更高分数</li>
+                        <li>合理使用旋转功能调整方块位置</li>
+                        <li>在合适时机使用硬下降（空格）节省时间</li>
+                        <li>注意观察下一个方块，提前规划放置位置</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="../js/lib/hammer.min.js"></script>
     <script src="../js/logger.js"></script>
@@ -903,6 +1091,30 @@
             
             // 开始游戏循环
             gameInterval = requestAnimationFrame(gameLoop);
+            
+            // 教程模态框逻辑
+            const tutorialModal = document.getElementById('tutorial-modal');
+            const tutorialBtn = document.getElementById('tutorial-btn');
+            const tutorialClose = document.querySelector('.tutorial-close');
+            
+            if (tutorialBtn) {
+                tutorialBtn.addEventListener('click', () => {
+                    tutorialModal.classList.add('active');
+                });
+            }
+            
+            if (tutorialClose) {
+                tutorialClose.addEventListener('click', () => {
+                    tutorialModal.classList.remove('active');
+                });
+            }
+            
+            // 点击模态框外部关闭
+            tutorialModal.addEventListener('click', (e) => {
+                if (e.target === tutorialModal) {
+                    tutorialModal.classList.remove('active');
+                }
+            });
         });
     </script>
 </body>

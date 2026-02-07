@@ -582,6 +582,48 @@
             <div class="buttons">
                 <button id="resetBtn">新游戏</button>
                 <button id="resetScoresBtn">重置计分</button>
+                <button id="tutorial-btn">玩法教程</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 教程模态框 -->
+    <div id="tutorial-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>玩法教程</h3>
+                <span class="modal-close tutorial-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="tutorial-section">
+                    <h4>游戏目标</h4>
+                    <p>通过在3×3网格中放置自己的标记（X或O），先形成一行、一列或对角线的连续三个相同标记获胜！</p>
+                </div>
+                <div class="tutorial-section">
+                    <h4>操作方法</h4>
+                    <ul>
+                        <li>点击：在空格里放置你的标记</li>
+                        <li>双人对战：玩家轮流放置X和O</li>
+                        <li>人机对战：你使用X，AI使用O</li>
+                    </ul>
+                </div>
+                <div class="tutorial-section">
+                    <h4>游戏规则</h4>
+                    <ul>
+                        <li>玩家只能在空格子里放置标记</li>
+                        <li>先形成三个连续标记的玩家获胜</li>
+                        <li>如果所有格子都被填满但没有玩家获胜，则为平局</li>
+                    </ul>
+                </div>
+                <div class="tutorial-section">
+                    <h4>技巧提示</h4>
+                    <ul>
+                        <li>优先占据中心格子，控制更多的获胜路线</li>
+                        <li>注意防守，阻止对手形成三个连续标记</li>
+                        <li>尝试同时形成多个获胜机会</li>
+                        <li>在人机对战中，保持冷静，仔细思考每一步</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -1306,6 +1348,32 @@
             updateTurnIndicator();
             
             enableAudioOnMobile(); // 启用移动端音频
+            
+            // 教程模态框逻辑
+            const tutorialModal = document.getElementById('tutorial-modal');
+            const tutorialBtn = document.getElementById('tutorial-btn');
+            const tutorialClose = document.querySelector('.tutorial-close');
+            
+            if (tutorialBtn) {
+                tutorialBtn.addEventListener('click', () => {
+                    tutorialModal.classList.add('show');
+                });
+            }
+            
+            if (tutorialClose) {
+                tutorialClose.addEventListener('click', () => {
+                    tutorialModal.classList.remove('show');
+                });
+            }
+            
+            // 点击模态框外部关闭
+            if (tutorialModal) {
+                tutorialModal.addEventListener('click', (e) => {
+                    if (e.target === tutorialModal) {
+                        tutorialModal.classList.remove('show');
+                    }
+                });
+            }
         });
     </script>
 </body>

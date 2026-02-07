@@ -25,100 +25,177 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 10px 0;
+    padding: 15px 0;
     border-bottom: 1px solid #eee;
     margin-bottom: 20px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    transition: all 0.3s ease;
+}
+
+.header.scrolled {
+    padding: 10px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .logo {
     text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
 }
 
 .logo h1 {
     color: #2c3e50;
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     margin-bottom: 5px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    transition: all 0.3s ease;
 }
 
 .logo .slogan {
     color: #7f8c8d;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+    font-weight: 400;
+    transition: all 0.3s ease;
 }
 
 .nav {
     width: 100%;
+    max-width: 400px;
 }
 
 .nav ul {
     display: none; /* 默认隐藏导航，通过按钮控制显示 */
     list-style: none;
     flex-direction: column;
-    gap: 10px;
-    padding: 10px 0;
+    gap: 8px;
+    padding: 15px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin: 10px 15px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.nav ul li {
+    transition: all 0.2s ease;
 }
 
 .nav ul li.lang-switcher {
     display: flex;
     justify-content: center;
-    padding: 5px 0;
+    padding: 10px 0;
+    border-top: 1px solid #eee;
+    margin-top: 5px;
 }
 
 .lang-btn {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 16px;
-    background: #34495e;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #34495e, #2c3e50);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 25px;
     font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(52, 73, 94, 0.3);
 }
 
 .lang-btn:hover {
-    background: #2c3e50;
-    transform: scale(1.05);
+    background: linear-gradient(135deg, #2c3e50, #1a252f);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 73, 94, 0.4);
 }
 
 .lang-btn:active {
-    transform: scale(0.95);
+    transform: translateY(0);
 }
 
 #langIcon {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
 }
 
 #langText {
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-    .nav a {
-        display: block;
-        text-decoration: none;
-        color: #34495e;
-        font-weight: 500;
-        padding: 10px;
-        border-radius: 4px;
-        background: #f8f9fa;
-        text-align: center;
-    }
-    
-    .feedback-menu-item a {
-        background: #3498db;
-        color: white;
-    }
-    
-    .feedback-menu-item a:hover {
-        background: #2980b9;
-    }
+.nav a {
+    display: block;
+    text-decoration: none;
+    color: #34495e;
+    font-weight: 500;
+    padding: 12px 16px;
+    border-radius: 6px;
+    background: #f8f9fa;
+    text-align: center;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(52, 152, 219, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.nav a:hover::before {
+    left: 100%;
+}
+
+.feedback-menu-item a {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+.feedback-menu-item a:hover {
+    background: linear-gradient(135deg, #2980b9, #1f618d);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+}
+
 .nav a:hover,
 .nav a.active {
-    background: #3498db;
+    background: linear-gradient(135deg, #3498db, #2980b9);
     color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.nav a.active {
+    font-weight: 600;
 }
 
 .connection-status-item {
@@ -130,26 +207,26 @@ body {
     color: #ccc !important;
 }
 
-
-
 .feedback-link {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
-    background: #3498db;
+    background: linear-gradient(135deg, #3498db, #2980b9);
     color: white;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     margin-left: 10px;
     transition: all 0.3s ease;
     text-decoration: none;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
 }
 
 .feedback-link:hover {
-    background: #2980b9;
-    transform: scale(1.1);
+    background: linear-gradient(135deg, #2980b9, #1f618d);
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
 }
 
 /* 移动端菜单按钮 */
@@ -160,20 +237,46 @@ body {
     padding: 5px;
     background: #fff;
     border: 1px solid #ddd;
-    border-radius: 4px;
-    width: 40px;
-    height: 40px;
+    border-radius: 8px;
+    width: 45px;
+    height: 45px;
     justify-content: center;
     align-items: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 101;
+}
+
+.mobile-menu-btn:hover {
+    background: #f8f9fa;
+    transform: scale(1.05);
+}
+
+.mobile-menu-btn.active {
+    border-color: #3498db;
+    background: #e8f4fd;
 }
 
 .mobile-menu-btn span {
-    width: 25px;
+    width: 28px;
     height: 3px;
-    background: #333;
+    background: #34495e;
     margin: 3px 0;
-    transition: 0.3s;
+    transition: all 0.3s ease;
     border-radius: 2px;
+}
+
+.mobile-menu-btn.active span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+
+.mobile-menu-btn.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.mobile-menu-btn.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
 }
 
 /* 英雄区域 - 移动端优先 */
@@ -378,20 +481,30 @@ body {
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
-        padding: 15px 0;
+        padding: 20px 0;
         margin-bottom: 30px;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 1200px;
+    }
+    
+    .header.scrolled {
+        padding: 15px 0;
     }
     
     .logo {
         margin-bottom: 0;
+        text-align: left;
     }
     
     .logo h1 {
-        font-size: 1.8rem;
+        font-size: 2rem;
+        letter-spacing: -0.8px;
     }
     
     .logo .slogan {
-        font-size: 0.9rem;
+        font-size: 0.95rem;
+        margin-left: 2px;
     }
     
     .mobile-menu-btn {
@@ -400,23 +513,56 @@ body {
     
     .nav {
         display: block;
+        width: auto;
+        max-width: none;
     }
     
     .nav ul {
         display: flex;
         flex-direction: row;
-        gap: 25px;
+        gap: 15px;
+        padding: 0;
+        background: transparent;
+        border-radius: 0;
+        box-shadow: none;
+        position: static;
+        margin: 0;
+        animation: none;
+    }
+    
+    .nav ul li {
+        display: flex;
+        align-items: center;
+    }
+    
+    .nav ul li.lang-switcher {
+        border-top: none;
+        margin-top: 0;
         padding: 0;
     }
     
     .nav a {
         display: inline-block;
-        padding: 5px 10px;
+        padding: 10px 18px;
         background: transparent;
         text-align: initial;
+        border-radius: 25px;
+        font-size: 1rem;
     }
     
-        
+    .nav a:hover {
+        transform: translateY(-3px);
+    }
+    
+    .nav a.active {
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+    }
+    
+    .lang-btn {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+    }
+    
     .hero {
         padding: 40px;
         margin-bottom: 40px;
@@ -516,6 +662,32 @@ body {
 
 /* 桌面设备 (最小1024px) */
 @media (min-width: 1024px) {
+    .header {
+        padding: 25px 0;
+    }
+    
+    .header.scrolled {
+        padding: 18px 0;
+    }
+    
+    .logo h1 {
+        font-size: 2.2rem;
+    }
+    
+    .nav ul {
+        gap: 20px;
+    }
+    
+    .nav a {
+        padding: 12px 22px;
+        font-size: 1.05rem;
+    }
+    
+    .lang-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+    
     .games-grid {
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     }
