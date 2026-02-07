@@ -56,6 +56,45 @@ function fixSingleHtmlFile(filePath) {
   console.log(`已修复: ${filePath}`);
 }
 
+// 复制根目录js目录中的文件到dist目录
+function copyRootJsFiles() {
+  const rootJsDir = './js';
+  const distJsDir = path.join(distDir, 'js');
+  
+  if (!fs.existsSync(rootJsDir)) {
+    console.log('js目录不存在，跳过复制');
+    return;
+  }
+  
+  // 确保目标目录存在
+  if (!fs.existsSync(distJsDir)) {
+    fs.mkdirSync(distJsDir, { recursive: true });
+  }
+  
+  // 复制所有JS文件
+  const copyDir = (src, dest) => {
+    const files = fs.readdirSync(src);
+    
+    for (const file of files) {
+      const srcPath = path.join(src, file);
+      const destPath = path.join(dest, file);
+      const stat = fs.statSync(srcPath);
+      
+      if (stat.isDirectory()) {
+        if (!fs.existsSync(destPath)) {
+          fs.mkdirSync(destPath, { recursive: true });
+        }
+        copyDir(srcPath, destPath);
+      } else {
+        fs.copyFileSync(srcPath, destPath);
+        console.log(`已复制: ${srcPath} -> ${destPath}`);
+      }
+    }
+  };
+  
+  copyDir(rootJsDir, distJsDir);
+}
+
 // 复制public目录中的JS文件到dist目录
 function copyPublicJsFiles() {
   const publicJsDir = path.join(publicDir, 'js');
@@ -97,6 +136,7 @@ function copyPublicJsFiles() {
 
 // 运行修复
 fixHtmlScriptTags();
+copyRootJsFiles();
 copyPublicJsFiles();
 
 console.log('构建后处理完成！');

@@ -660,39 +660,9 @@ window.initializeNonLeaderboardFeatures = function() {
         });
     });
     
-    // 添加连接状态监控
-    const connectionStatusItem = document.createElement('div');
-    connectionStatusItem.className = 'menu-item connection-status-item';
-    connectionStatusItem.style.padding = '10px';
-    connectionStatusItem.style.borderTop = '1px solid #333';
-    connectionStatusItem.style.marginTop = '10px';
-    connectionStatusItem.style.textAlign = 'center';
-    connectionStatusItem.style.fontSize = '14px';
-    connectionStatusItem.style.color = '#ccc';
-    connectionStatusItem.innerHTML = `
-        <span>连接状态: </span>
-        <span id="connection-status" style="color: gray;">未知</span>
-    `;
-    
-    const nav = document.querySelector('.nav');
-    const navList = nav.querySelector('ul');
-    if (navList) {
-        navList.appendChild(connectionStatusItem);
-    }
-    
-    // 开始连接监控
+    // 开始连接监控（如果Supabase客户端已初始化）
     if (globalSupabaseClient) {
         startConnectionMonitoring();
-        
-        // 立即更新一次状态
-        setTimeout(async () => {
-            const isConnected = await monitorSupabaseConnection();
-            const statusElement = document.getElementById('connection-status');
-            if (statusElement) {
-                statusElement.textContent = isConnected ? '在线' : '离线';
-                statusElement.style.color = isConnected ? 'green' : 'red';
-            }
-        }, 1000);
     }
 }
 
