@@ -4,17 +4,16 @@
  */
 
 // 使用全局Logger对象（如果不存在则创建一个简单的替代实现）
-let Logger;
-if (typeof window.Logger !== 'undefined') {
-    Logger = window.Logger;
-} else {
-    Logger = {
+if (!window.Logger) {
+    window.Logger = {
         info: function(...args) { console.info(...args); },
         warn: function(...args) { console.warn(...args); },
         error: function(...args) { console.error(...args); }
     };
-    window.Logger = Logger;
 }
+
+// 本地引用全局Logger
+const Logger = window.Logger;
 
 class ScoreManager {
     constructor() {

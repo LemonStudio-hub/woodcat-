@@ -143,6 +143,88 @@
             color: #7f8c8d;
         }
         
+        /* 维护公告模态框样式 */
+        .maintenance-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .maintenance-content {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 90%;
+            width: 500px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+        
+        .maintenance-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #f39c12;
+        }
+        
+        .maintenance-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .maintenance-message {
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        .maintenance-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #34495e;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .maintenance-btn:hover {
+            background: #2c3e50;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
         @media (max-width: 480px) {
             .container {
                 padding: 20px;
@@ -161,11 +243,36 @@
                 height: 32px;
                 font-size: 16px;
             }
+            
+            .maintenance-content {
+                padding: 30px 20px;
+            }
+            
+            .maintenance-title {
+                font-size: 1.5rem;
+            }
+            
+            .maintenance-message {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
 <body>
     <a class="back-home" href="./index.html">←</a>
+    
+    <!-- 维护公告模态框 -->
+    <div class="maintenance-modal" id="maintenanceModal">
+        <div class="maintenance-content">
+            <div class="maintenance-icon">🔧</div>
+            <h2 class="maintenance-title">排行榜功能维护中</h2>
+            <p class="maintenance-message">
+                尊敬的玩家，排行榜功能目前正在进行维护升级，
+                预计很快就会恢复正常。感谢您的理解和支持！
+            </p>
+            <a href="./index.html" class="maintenance-btn">返回主页面</a>
+        </div>
+    </div>
     
     <div class="container">
         <h1>游戏排行榜</h1>

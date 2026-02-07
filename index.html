@@ -256,8 +256,14 @@
             // 更新语言按钮显示
             function updateLangButton() {
                 if (window.i18n) {
-                    const currentLang = window.i18n.getCurrentLanguage();
-                    langText.textContent = currentLang === 'zh-CN' ? 'RU' : '中文';
+                    try {
+                        const currentLang = window.i18n.getCurrentLanguage();
+                        langText.textContent = currentLang === 'zh-CN' ? 'RU' : '中文';
+                    } catch (error) {
+                        console.error('更新语言按钮显示时出错:', error);
+                    }
+                } else {
+                    console.warn('i18n对象未初始化');
                 }
             }
 
@@ -270,11 +276,17 @@
                 // 添加新的事件监听器
                 newLangToggle.addEventListener('click', function() {
                     if (window.i18n) {
-                        const currentLang = window.i18n.getCurrentLanguage();
-                        const newLang = currentLang === 'zh-CN' ? 'ru' : 'zh-CN';
-                        console.log('切换语言:', currentLang, '->', newLang);
-                        window.i18n.setLanguage(newLang);
-                        updateLangButton();
+                        try {
+                            const currentLang = window.i18n.getCurrentLanguage();
+                            const newLang = currentLang === 'zh-CN' ? 'ru' : 'zh-CN';
+                            console.log('切换语言:', currentLang, '->', newLang);
+                            window.i18n.setLanguage(newLang);
+                            updateLangButton();
+                        } catch (error) {
+                            console.error('切换语言时出错:', error);
+                        }
+                    } else {
+                        console.warn('i18n对象未初始化，无法切换语言');
                     }
                 });
             }
@@ -287,11 +299,25 @@
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', function() {
                 // 等待i18n对象初始化完成
-                setTimeout(initLanguageSwitcher, 100);
+                setTimeout(function() {
+                    if (window.i18n) {
+                        initLanguageSwitcher();
+                    } else {
+                        // 再次尝试，确保i18n对象已初始化
+                        setTimeout(initLanguageSwitcher, 500);
+                    }
+                }, 200);
             });
         } else {
             // 立即初始化语言切换器
-            setTimeout(initLanguageSwitcher, 100);
+            setTimeout(function() {
+                if (window.i18n) {
+                    initLanguageSwitcher();
+                } else {
+                    // 再次尝试，确保i18n对象已初始化
+                    setTimeout(initLanguageSwitcher, 500);
+                }
+            }, 200);
         }
     </script>
     <script src="js/main.js"></script>

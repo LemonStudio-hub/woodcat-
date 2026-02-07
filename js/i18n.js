@@ -379,14 +379,24 @@ class I18n {
      * 检测浏览器语言
      */
     detectLanguage() {
+        // 确保translations对象存在
+        if (!this.translations) {
+            Logger.error('translations对象未初始化');
+            return 'zh-CN';
+        }
+        
         const savedLang = localStorage.getItem('woodcat_lang');
         if (savedLang && this.translations[savedLang]) {
             return savedLang;
         }
         
-        const browserLang = navigator.language || navigator.userLanguage;
-        if (browserLang.startsWith('ru')) {
-            return 'ru';
+        try {
+            const browserLang = navigator.language || navigator.userLanguage;
+            if (browserLang && browserLang.startsWith('ru')) {
+                return 'ru';
+            }
+        } catch (error) {
+            Logger.error('检测浏览器语言时出错:', error);
         }
         
         return 'zh-CN';
@@ -409,6 +419,9 @@ class I18n {
      * @returns {string} 翻译后的文本
      */
     t(key) {
+        if (!this.translations || !this.translations[this.currentLang]) {
+            return key;
+        }
         const lang = this.translations[this.currentLang];
         return lang[key] || key;
     }
@@ -550,6 +563,13 @@ class I18n {
             'ru': 'Русский'
         };
         return names[lang] || lang;
+    }
+    
+    /**
+     * 初始化方法（兼容调用）
+     */
+    init() {
+        this.initLanguage();
     }
 }
 

@@ -14,6 +14,34 @@ function overrideLoadConfig() {
     
     // 覆盖loadConfigAndSupabase函数
     window.loadConfigAndSupabase = function() {
+        // 检查必要的函数是否存在
+        function checkRequiredFunctions() {
+            return typeof window.initializeNonLeaderboardFeatures === 'function' && 
+                   typeof window.initializeLeaderboard === 'function';
+        }
+        
+        // 确保必要的函数存在
+        function ensureFunctionsExist() {
+            if (checkRequiredFunctions()) {
+                return Promise.resolve();
+            }
+            
+            return new Promise((resolve) => {
+                const checkInterval = setInterval(() => {
+                    if (checkRequiredFunctions()) {
+                        clearInterval(checkInterval);
+                        resolve();
+                    }
+                }, 100);
+                
+                // 最多等待5秒
+                setTimeout(() => {
+                    clearInterval(checkInterval);
+                    resolve(); // 即使函数不存在也继续执行
+                }, 5000);
+            });
+        }
+        
         // 创建script标签加载配置文件
         const configScript = document.createElement('script');
         configScript.src = 'js/config.js';
@@ -24,17 +52,37 @@ function overrideLoadConfig() {
                 if (window.CDNManager) {
                     Logger.info('使用CDNManager加载Supabase库');
                     window.CDNManager.loadLibrary('supabase').then(success => {
-                        if (success) {
-                            // 库加载完成后，初始化所有功能
-                            initializeNonLeaderboardFeatures();
-                            initializeLeaderboard();
-                        } else {
-                            Logger.warn('Supabase库加载失败，仅初始化基本功能');
-                            initializeNonLeaderboardFeatures();
-                        }
+                        ensureFunctionsExist().then(() => {
+                            if (success) {
+                                // 库加载完成后，初始化所有功能
+                                if (typeof window.initializeNonLeaderboardFeatures === 'function') {
+                                    window.initializeNonLeaderboardFeatures();
+                                } else {
+                                    Logger.error('initializeNonLeaderboardFeatures函数未定义');
+                                }
+                                if (typeof window.initializeLeaderboard === 'function') {
+                                    window.initializeLeaderboard();
+                                } else {
+                                    Logger.error('initializeLeaderboard函数未定义');
+                                }
+                            } else {
+                                Logger.warn('Supabase库加载失败，仅初始化基本功能');
+                                if (typeof window.initializeNonLeaderboardFeatures === 'function') {
+                                    window.initializeNonLeaderboardFeatures();
+                                } else {
+                                    Logger.error('initializeNonLeaderboardFeatures函数未定义');
+                                }
+                            }
+                        });
                     }).catch(error => {
                         Logger.error('加载Supabase库时发生错误:', error);
-                        initializeNonLeaderboardFeatures();
+                        ensureFunctionsExist().then(() => {
+                            if (typeof window.initializeNonLeaderboardFeatures === 'function') {
+                                window.initializeNonLeaderboardFeatures();
+                            } else {
+                                Logger.error('initializeNonLeaderboardFeatures函数未定义');
+                            }
+                        });
                     });
                 } else {
                     Logger.error('CDNManager未初始化，使用备用方式加载Supabase库');
@@ -42,27 +90,64 @@ function overrideLoadConfig() {
                     const supabaseScript = document.createElement('script');
                     supabaseScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
                     supabaseScript.onload = function() {
-                        // 库加载完成后，初始化所有功能
-                        initializeNonLeaderboardFeatures();
-                        initializeLeaderboard();
+                        ensureFunctionsExist().then(() => {
+                            // 库加载完成后，初始化所有功能
+                            if (typeof window.initializeNonLeaderboardFeatures === 'function') {
+                                window.initializeNonLeaderboardFeatures();
+                            } else {
+                                Logger.error('initializeNonLeaderboardFeatures函数未定义');
+                            }
+                            if (typeof window.initializeLeaderboard === 'function') {
+                                window.initializeLeaderboard();
+                            } else {
+                                Logger.error('initializeLeaderboard函数未定义');
+                            }
+                        });
                     };
                     supabaseScript.onerror = function() {
                         Logger.warn('Supabase库加载失败，仅初始化基本功能');
-                        initializeNonLeaderboardFeatures();
+                        ensureFunctionsExist().then(() => {
+                            if (typeof window.initializeNonLeaderboardFeatures === 'function') {
+                                window.initializeNonLeaderboardFeatures();
+                            } else {
+                                Logger.error('initializeNonLeaderboardFeatures函数未定义');
+                            }
+                        });
                     };
                     document.head.appendChild(supabaseScript);
                 }
             } else {
                 // 排行榜功能已禁用，直接初始化非排行榜功能
                 Logger.info('排行榜功能已禁用，跳过Supabase库加载');
-                initializeNonLeaderboardFeatures();
+                ensureFunctionsExist().then(() => {
+                    if (typeof window.initializeNonLeaderboardFeatures === 'function') {
+                        window.initializeNonLeaderboardFeatures();
+                    } else {
+                        Logger.error('initializeNonLeaderboardFeatures函数未定义');
+                    }
+                });
             }
         };
         configScript.onerror = function() {
             Logger.warn('配置文件加载失败，仅初始化基本功能');
-            initializeNonLeaderboardFeatures();
+            ensureFunctionsExist().then(() => {
+                if (typeof window.initializeNonLeaderboardFeatures === 'function') {
+                    window.initializeNonLeaderboardFeatures();
+                } else {
+                    Logger.error('initializeNonLeaderboardFeatures函数未定义');
+                }
+            });
         };
         document.head.appendChild(configScript);
+    };
+    
+    // 将必要的函数暴露到全局
+    window.initializeNonLeaderboardFeatures = window.initializeNonLeaderboardFeatures || function() {
+        Logger.warn('initializeNonLeaderboardFeatures函数未定义，使用默认实现');
+    };
+    
+    window.initializeLeaderboard = window.initializeLeaderboard || function() {
+        Logger.warn('initializeLeaderboard函数未定义，使用默认实现');
     };
     
     // 重新执行配置加载

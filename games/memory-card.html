@@ -757,7 +757,7 @@
                             clearInterval(timerInterval);
                             setTimeout(() => {
                                 // 检查是否打破最佳时间记录
-                                const currentDifficulty = difficultySelect.value;
+                                const currentDifficulty = currentLevel;
                                 const isBestTime = timer < bestTime.time || 
                                     (timer === bestTime.time && currentDifficulty !== bestTime.difficulty);
                                 
