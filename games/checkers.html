@@ -1786,7 +1786,13 @@
             initBoard();
             updateCurrentModeDisplay(); // 设置当前模式显示
             enableAudioOnMobile(); // 启用移动端音频
+            
+            // 初始化游戏熟悉度系统
+            if (window.gameFamiliaritySystem) {
+                window.gameFamiliaritySystem.init('checkers', '跳棋');
+            }
         });
     </script>
+    <script src="../js/gameFamiliarity.js"></script>
 </body>
 </html>

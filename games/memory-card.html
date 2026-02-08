@@ -1094,7 +1094,13 @@
                     tutorialModal.classList.remove('active');
                 }
             });
+            
+            // 初始化游戏熟悉度系统
+            if (window.gameFamiliaritySystem) {
+                window.gameFamiliaritySystem.init('memory-card', '记忆卡牌');
+            }
         });
     </script>
+    <script src="../js/gameFamiliarity.js"></script>
 </body>
 </html>

@@ -94,6 +94,7 @@
             position: relative;
             overflow: hidden;
             box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+            aspect-ratio: 1/2; /* 确保游戏板的宽高比为1:2，与10x20网格匹配 */
         }
         
         .game-board::before {
@@ -106,17 +107,18 @@
             background-image: 
                 linear-gradient(rgba(52, 152, 219, 0.1) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(52, 152, 219, 0.1) 1px, transparent 1px);
-            background-size: 10% 5%;
+            background-size: calc(100% / 10) calc(100% / 20); /* 确保网格线间距一致，每个单元格一个网格线 */
             pointer-events: none;
             z-index: 0;
         }
         
         .cell {
             width: 100%;
-            height: 100%;
+            padding-top: 100%; /* 使用padding-top: 100%确保单元格是正方形 */
             background: #fff;
             border: 1px solid #e0e0e0;
             transition: all 0.15s ease;
+            position: relative;
         }
         
         .cell.filled {
@@ -1595,26 +1597,12 @@
                 });
             }
             
-            // 设置游戏板高度，确保网格单元为正方形
-            function setGameBoardHeight() {
-                const gameBoard = document.getElementById('board');
-                if (gameBoard) {
-                    const width = gameBoard.offsetWidth;
-                    // 10列×20行，所以高度应该是宽度的2倍
-                    gameBoard.style.height = `${width * 2}px`;
-                }
-            }
-            
             // 初始化游戏
             initBoard();
             currentPiece = createNewPiece();
             
-            // 设置游戏板高度
-            setGameBoardHeight();
-            
-            // 窗口大小改变时重新设置游戏板高度
+            // 窗口大小改变时重新检查设备类型
             window.addEventListener('resize', function() {
-                setGameBoardHeight();
                 checkDeviceType();
             });
             
@@ -1776,12 +1764,28 @@
                         score += 5;
                     }
                     
+                    // 添加一定的随机性，避免完全可预测
+                    score += Math.random() * 2;
+                    
                     return { index, score };
                 });
                 
-                // 按分数排序，返回得分最高的方块（最不利的）
+                // 按分数排序
                 pieceScores.sort((a, b) => b.score - a.score);
-                return pieceScores[0].index;
+                
+                // 引入概率选择机制，而不是总是选择得分最高的
+                // 得分最高的方块有60%的概率被选中，第二高的有25%，第三高的有15%
+                const random = Math.random();
+                if (random < 0.6) {
+                    return pieceScores[0].index;
+                } else if (random < 0.85 && pieceScores.length > 1) {
+                    return pieceScores[1].index;
+                } else if (random < 1 && pieceScores.length > 2) {
+                    return pieceScores[2].index;
+                } else {
+                    // 兜底情况，返回得分最高的
+                    return pieceScores[0].index;
+                }
             }
             
             // 修改创建新方块的函数，支持AI模式
@@ -1847,7 +1851,13 @@
                     tutorialModal.classList.remove('active');
                 }
             });
+            
+            // 初始化游戏熟悉度系统
+            if (window.gameFamiliaritySystem) {
+                window.gameFamiliaritySystem.init('tetris', '俄罗斯方块');
+            }
         });
     </script>
+    <script src="../js/gameFamiliarity.js"></script>
 </body>
 </html>

@@ -284,10 +284,22 @@ window.initializeLeaderboard = function() {
     
     if (window.AppConfig && window.AppConfig.supabase) {
         try {
-            // 初始化Supabase客户端
-            globalSupabaseClient = window.supabase.createClient(window.AppConfig.supabase.url, window.AppConfig.supabase.key);
+            // 验证Supabase URL是否有效
+            const supabaseUrl = window.AppConfig.supabase.url;
+            const supabaseKey = window.AppConfig.supabase.key;
             
-            Logger.info('Supabase客户端初始化成功');
+            // 检查URL是否是有效的HTTP或HTTPS URL
+            const isUrlValid = supabaseUrl && (supabaseUrl.startsWith('http://') || supabaseUrl.startsWith('https://'));
+            
+            if (isUrlValid && supabaseKey && supabaseKey !== 'YOUR_SUPABASE_ANON_KEY') {
+                // 初始化Supabase客户端
+                globalSupabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+                
+                Logger.info('Supabase客户端初始化成功');
+            } else {
+                Logger.warn('Supabase配置无效，跳过初始化');
+                globalSupabaseClient = null;
+            }
         } catch (error) {
             Logger.error('Supabase客户端初始化失败:', error);
             globalSupabaseClient = null;

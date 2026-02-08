@@ -1012,8 +1012,14 @@
                 if (typeof i18n !== 'undefined') {
                     i18n.init();
                 }
+                
+                // 初始化游戏熟悉度系统
+                if (window.gameFamiliaritySystem) {
+                    window.gameFamiliaritySystem.init('spider-solitaire', '蜘蛛卡牌');
+                }
             }, 100);
         });
     </script>
+    <script src="../js/gameFamiliarity.js"></script>
 </body>
 </html>

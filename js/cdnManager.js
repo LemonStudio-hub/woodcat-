@@ -14,7 +14,8 @@ class CDNManager {
                     supabase: 'https://npmmirror.com/mirrors/supabase-js@2/dist/umd/supabase.min.js',
                     vue: 'https://npmmirror.com/mirrors/vue@3.5.27/dist/vue.global.min.js',
                     vueRouter: 'https://npmmirror.com/mirrors/vue-router@5.0.2/dist/vue-router.global.min.js',
-                    pinia: 'https://npmmirror.com/mirrors/pinia@3.0.4/dist/pinia.global.min.js'
+                    pinia: 'https://npmmirror.com/mirrors/pinia@3.0.4/dist/pinia.global.min.js',
+                    howler: 'https://npmmirror.com/mirrors/howler@2.2.3/dist/howler.min.js'
                 }
             },
             // 腾讯云镜像源
@@ -24,7 +25,8 @@ class CDNManager {
                     supabase: 'https://mirrors.cloud.tencent.com/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js',
                     vue: 'https://mirrors.cloud.tencent.com/npm/vue@3.5.27/dist/vue.global.min.js',
                     vueRouter: 'https://mirrors.cloud.tencent.com/npm/vue-router@5.0.2/dist/vue-router.global.min.js',
-                    pinia: 'https://mirrors.cloud.tencent.com/npm/pinia@3.0.4/dist/pinia.global.min.js'
+                    pinia: 'https://mirrors.cloud.tencent.com/npm/pinia@3.0.4/dist/pinia.global.min.js',
+                    howler: 'https://mirrors.cloud.tencent.com/npm/howler@2.2.3/dist/howler.min.js'
                 }
             },
             // 华为云镜像源
@@ -34,7 +36,8 @@ class CDNManager {
                     supabase: 'https://mirrors.huaweicloud.com/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js',
                     vue: 'https://mirrors.huaweicloud.com/npm/vue@3.5.27/dist/vue.global.min.js',
                     vueRouter: 'https://mirrors.huaweicloud.com/npm/vue-router@5.0.2/dist/vue-router.global.min.js',
-                    pinia: 'https://mirrors.huaweicloud.com/npm/pinia@3.0.4/dist/pinia.global.min.js'
+                    pinia: 'https://mirrors.huaweicloud.com/npm/pinia@3.0.4/dist/pinia.global.min.js',
+                    howler: 'https://mirrors.huaweicloud.com/npm/howler@2.2.3/dist/howler.min.js'
                 }
             },
             // 官方CDN作为最后备用
@@ -44,7 +47,8 @@ class CDNManager {
                     supabase: 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
                     vue: 'https://cdn.jsdelivr.net/npm/vue@3.5.27/dist/vue.global.min.js',
                     vueRouter: 'https://cdn.jsdelivr.net/npm/vue-router@5.0.2/dist/vue-router.global.min.js',
-                    pinia: 'https://cdn.jsdelivr.net/npm/pinia@3.0.4/dist/pinia.global.min.js'
+                    pinia: 'https://cdn.jsdelivr.net/npm/pinia@3.0.4/dist/pinia.global.min.js',
+                    howler: 'https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js'
                 }
             }
         };
@@ -54,7 +58,8 @@ class CDNManager {
             supabase: 'js/lib/supabase.min.js',
             vue: 'js/lib/vue.global.min.js',
             vueRouter: 'js/lib/vue-router.global.min.js',
-            pinia: 'js/lib/pinia.global.min.js'
+            pinia: 'js/lib/pinia.global.min.js',
+            howler: 'js/lib/howler.min.js'
         };
         
         // 加载状态

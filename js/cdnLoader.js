@@ -48,6 +48,25 @@ function overrideLoadConfig() {
         const configScript = document.createElement('script');
         configScript.src = 'js/config.js';
         configScript.onload = function() {
+            // 加载Howler.js库（无论是否启用排行榜功能都需要）
+            if (window.CDNManager) {
+                window.Logger.info('使用CDNManager加载Howler.js库');
+                window.CDNManager.loadLibrary('howler').catch(error => {
+                    window.Logger.warn('Howler.js库加载失败，音频功能将不可用:', error);
+                });
+            } else {
+                // 备用方式：直接创建script标签加载Howler.js
+                const howlerScript = document.createElement('script');
+                howlerScript.src = 'https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js';
+                howlerScript.onload = function() {
+                    window.Logger.info('Howler.js库加载成功');
+                };
+                howlerScript.onerror = function() {
+                    window.Logger.warn('Howler.js库加载失败，音频功能将不可用');
+                };
+                document.head.appendChild(howlerScript);
+            }
+            
             // 配置加载完成后，检查是否启用了排行榜功能
             if (window.AppConfig && window.AppConfig.game && window.AppConfig.game.enableLeaderboard) {
                 // 使用CDNManager加载Supabase库

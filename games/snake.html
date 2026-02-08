@@ -939,12 +939,18 @@
                         }
                         
                         // 点击模态框外部关闭
-                        tutorialModal.addEventListener('click', (e) => {
-                            if (e.target === tutorialModal) {
-                                tutorialModal.classList.remove('active');
-                            }
-                        });
-                    });
+            tutorialModal.addEventListener('click', (e) => {
+                if (e.target === tutorialModal) {
+                    tutorialModal.classList.remove('active');
+                }
+            });
+            
+            // 初始化游戏熟悉度系统
+            if (window.gameFamiliaritySystem) {
+                window.gameFamiliaritySystem.init('snake', '贪吃蛇');
+            }
+        });
     </script>
+    <script src="../js/gameFamiliarity.js"></script>
 </body>
 </html>

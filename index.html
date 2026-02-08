@@ -243,41 +243,43 @@
         </div>
     </div>
 
-    <script src="js/logger.js"></script>
-    <script src="js/cdnManager.js"></script>
-    <script src="js/lib/hammer.min.js"></script>
-    <script src="js/audioVibration.js"></script>
-    <script src="js/dataManager.js"></script>
-    <script src="js/scoreManager.js"></script>
-    <script src="js/modal.js"></script>
-    <script src="js/i18n.js"></script>
+    <script src="js/logger.js" defer></script>
+    <script src="js/cdnManager.js" defer></script>
+    <script src="js/lib/hammer.min.js" defer></script>
+    <script src="js/audioVibration.js" defer></script>
+    <script src="js/dataManager.js" defer></script>
+    <script src="js/scoreManager.js" defer></script>
+    <script src="js/modal.js" defer></script>
+    <script src="js/i18n.js" defer></script>
     <script>
         // 语言切换功能
         function initLanguageSwitcher() {
             const langToggle = document.getElementById('langToggle');
-            const langText = document.getElementById('langText');
-
-            // 更新语言按钮显示
-            function updateLangButton() {
-                if (window.i18n) {
-                    try {
-                        const currentLang = window.i18n.getCurrentLanguage();
-                        langText.textContent = currentLang === 'zh-CN' ? 'RU' : '中文';
-                    } catch (error) {
-                        console.error('更新语言按钮显示时出错:', error);
-                    }
-                } else {
-                    console.warn('i18n对象未初始化');
-                    // 设置默认值
-                    langText.textContent = 'RU';
-                }
-            }
 
             // 语言切换事件
             if (langToggle) {
                 // 移除可能存在的旧事件监听器
                 const newLangToggle = langToggle.cloneNode(true);
                 langToggle.parentNode.replaceChild(newLangToggle, langToggle);
+                
+                // 获取新按钮中的langText元素
+                const langText = newLangToggle.querySelector('#langText');
+
+                // 更新语言按钮显示
+                function updateLangButton() {
+                    if (window.i18n) {
+                        try {
+                            const currentLang = window.i18n.getCurrentLanguage();
+                            langText.textContent = currentLang === 'zh-CN' ? 'RU' : '中文';
+                        } catch (error) {
+                            console.error('更新语言按钮显示时出错:', error);
+                        }
+                    } else {
+                        console.warn('i18n对象未初始化');
+                        // 设置默认值
+                        langText.textContent = 'RU';
+                    }
+                }
                 
                 // 添加新的事件监听器
                 newLangToggle.addEventListener('click', function() {
@@ -295,10 +297,10 @@
                         console.warn('i18n对象未初始化，无法切换语言');
                     }
                 });
-            }
 
-            // 初始化语言按钮
-            updateLangButton();
+                // 初始化语言按钮
+                updateLangButton();
+            }
         }
 
         // 等待i18n对象初始化的函数
@@ -333,8 +335,8 @@
             waitForI18n();
         }
     </script>
-    <script src="js/main.js"></script>
-    <script src="js/cdnLoader.js"></script>
+    <script src="js/main.js" defer></script>
+    <script src="js/cdnLoader.js" defer></script>
     <!-- 滚动效果脚本 -->
     <script>
         // 添加滚动效果
