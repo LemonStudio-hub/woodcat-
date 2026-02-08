@@ -26,44 +26,50 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 15px 0;
+    padding: 12px 0;
     border-bottom: 1px solid #eee;
     margin-bottom: 20px;
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 1000;
     transition: all 0.3s ease;
     width: 100%;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .header.scrolled {
-    padding: 10px 0;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 8px 0;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    background: rgba(255, 255, 255, 0.95);
 }
 
 .header-content {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: space-between;
     width: 100%;
     max-width: 1200px;
     padding: 0 15px;
     margin: 0 auto;
+    gap: 10px;
 }
 
 .logo {
-    text-align: center;
-    margin-bottom: 15px;
+    flex: 1;
+    text-align: left;
+    margin-bottom: 0;
     transition: all 0.3s ease;
+    min-width: 120px;
 }
 
 .logo h1 {
     color: #2c3e50;
-    font-size: 1.8rem;
-    margin-bottom: 5px;
+    font-size: 1.5rem;
+    margin-bottom: 2px;
     font-weight: 700;
     letter-spacing: -0.5px;
     transition: all 0.3s ease;
@@ -72,7 +78,7 @@ body {
 
 .logo .slogan {
     color: #7f8c8d;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 400;
     transition: all 0.3s ease;
     line-height: 1.4;
@@ -104,12 +110,12 @@ body {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    width: 100%;
-    gap: 15px;
+    gap: 8px;
+    flex-shrink: 0;
 }
 
 .nav {
-    width: 100%;
+    width: auto;
     position: relative;
 }
 
@@ -117,29 +123,36 @@ body {
     display: none; /* 默认隐藏导航，通过按钮控制显示 */
     list-style: none;
     flex-direction: column;
-    gap: 8px;
-    padding: 15px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    gap: 6px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
     position: absolute;
-    top: 100%;
-    left: 0;
+    top: calc(100% + 8px);
     right: 0;
-    margin: 10px 0;
-    animation: slideDown 0.3s ease-out;
-    z-index: 100;
+    min-width: 180px;
+    margin: 0;
+    animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1001;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 @keyframes slideDown {
     from {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateY(-10px) scale(0.95);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
+}
+
+.nav ul.show {
+    display: flex;
 }
 
 .nav ul li {
@@ -149,9 +162,9 @@ body {
 .nav ul li.lang-switcher {
     display: flex;
     justify-content: center;
-    padding: 10px 0;
-    border-top: 1px solid #eee;
-    margin-top: 5px;
+    padding: 8px 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    margin-top: 8px;
 }
 
 .lang-btn {
@@ -168,6 +181,8 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(52, 73, 94, 0.3);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .lang-btn:hover {
@@ -193,14 +208,14 @@ body {
 .nav a {
     display: block;
     text-decoration: none;
-    color: #34495e;
+    color: #2c3e50;
     font-weight: 500;
     padding: 12px 16px;
-    border-radius: 6px;
-    background: #f8f9fa;
-    text-align: center;
-    transition: all 0.3s ease;
-    font-size: 1rem;
+    border-radius: 8px;
+    background: transparent;
+    text-align: left;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
     position: relative;
     overflow: hidden;
 }
@@ -220,23 +235,11 @@ body {
     left: 100%;
 }
 
-.feedback-menu-item a {
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    color: white;
-    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
-}
-
-.feedback-menu-item a:hover {
-    background: linear-gradient(135deg, #2980b9, #1f618d);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
-}
-
 .nav a:hover,
 .nav a.active {
     background: linear-gradient(135deg, #3498db, #2980b9);
     color: white;
-    transform: translateY(-2px);
+    transform: translateX(4px);
     box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
 }
 
@@ -280,18 +283,43 @@ body {
     display: flex;
     flex-direction: column;
     cursor: pointer;
-    padding: 5px;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    width: 52px;
-    height: 52px;
+    padding: 8px;
+    background: linear-gradient(135deg, #f8f9fa, #ffffff);
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    width: 42px;
+    height: 42px;
     justify-content: center;
     align-items: center;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     position: relative;
-    z-index: 101;
+    z-index: 1001;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* 移动端菜单按钮触摸反馈 */
+.mobile-menu-btn:active {
+    transform: scale(0.95);
+    transition: transform 0.1s;
+    background: #f0f4f8;
+}
+
+/* 导航链接触控优化 */
+.nav a {
+    display: block;
+    text-decoration: none;
+    color: #34495e;
+    font-weight: 500;
+    padding: 12px 16px;
+    border-radius: 6px;
+    background: #f8f9fa;
+    text-align: center;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    position: relative;
+    overflow: hidden;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
 }
@@ -328,34 +356,40 @@ body {
 }
 
 .mobile-menu-btn:hover {
-    background: #f8f9fa;
+    background: linear-gradient(135deg, #e8f4fd, #f8f9fa);
+    border-color: #3498db;
     transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
 }
 
 .mobile-menu-btn.active {
     border-color: #3498db;
-    background: #e8f4fd;
+    background: linear-gradient(135deg, #e8f4fd, #d4e9f7);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
 }
 
 .mobile-menu-btn span {
-    width: 28px;
-    height: 3px;
-    background: #34495e;
-    margin: 3px 0;
-    transition: all 0.3s ease;
+    width: 24px;
+    height: 2.5px;
+    background: linear-gradient(90deg, #34495e, #2c3e50);
+    margin: 2.5px 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 2px;
 }
 
 .mobile-menu-btn.active span:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
+    transform: rotate(45deg) translate(6px, 6px);
+    background: linear-gradient(90deg, #3498db, #2980b9);
 }
 
 .mobile-menu-btn.active span:nth-child(2) {
     opacity: 0;
+    transform: translateX(-10px);
 }
 
 .mobile-menu-btn.active span:nth-child(3) {
-    transform: rotate(-45deg) translate(7px, -7px);
+    transform: rotate(-45deg) translate(6px, -6px);
+    background: linear-gradient(90deg, #3498db, #2980b9);
 }
 
 /* 英雄区域 - 移动端优先 */
