@@ -10,6 +10,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="public/favicon-32x32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="public/apple-touch-icon.png">
     <link rel="manifest" href="public/site.webmanifest">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -71,6 +72,35 @@
         .back-home:hover {
             background: #2c3e50;
             transform: scale(1.1) rotate(-10deg);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .lang-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+        }
+        
+        .lang-btn {
+            background: #34495e;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        .lang-btn:hover {
+            background: #2c3e50;
+            transform: scale(1.1);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
         
@@ -244,6 +274,17 @@
                 font-size: 16px;
             }
             
+            .lang-switcher {
+                top: 10px;
+                right: 10px;
+            }
+            
+            .lang-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+            
             .maintenance-content {
                 padding: 30px 20px;
             }
@@ -261,30 +302,113 @@
 <body>
     <a class="back-home" href="./index.html">←</a>
     
+    <div class="lang-switcher">
+        <button class="lang-btn" id="langToggle">
+            <span id="langIcon">🌐</span>
+            <span id="langText">RU</span>
+        </button>
+    </div>
+    
     <!-- 维护公告模态框 -->
     <div class="maintenance-modal" id="maintenanceModal">
         <div class="maintenance-content">
             <div class="maintenance-icon">🔧</div>
-            <h2 class="maintenance-title">排行榜功能维护中</h2>
-            <p class="maintenance-message">
-                尊敬的玩家，排行榜功能目前正在进行维护升级，
-                预计很快就会恢复正常。感谢您的理解和支持！
+            <h2 class="maintenance-title" data-i18n="leaderboard.maintenance.title">排行榜功能维护中</h2>
+            <p class="maintenance-message" data-i18n="leaderboard.maintenance.message">
+                尊敬的玩家，排行榜功能目前正在进行维护升级，预计很快就会恢复正常。感谢您的理解和支持！
             </p>
-            <a href="./index.html" class="maintenance-btn">返回主页面</a>
+            <a href="./index.html" class="maintenance-btn" data-i18n="btn.back">返回主页面</a>
         </div>
     </div>
     
     <div class="container">
-        <h1>游戏排行榜</h1>
+        <h1 data-i18n="nav.leaderboard">游戏排行榜</h1>
         <div id="leaderboards">
-            <div class="loading">加载中...</div>
+            <div class="loading" data-i18n="leaderboard.loading">加载中...</div>
         </div>
-        <button class="reset-all-btn" id="resetAllBtn">重置所有游戏数据</button>
+        <button class="reset-all-btn" id="resetAllBtn" data-i18n="leaderboard.resetAll">重置所有游戏数据</button>
     </div>
 
+    <script src="./js/logger.js"></script>
     <script src="./js/dataManager.js"></script>
     <script src="./js/scoreManager.js"></script>
+    <script src="./js/i18n.js"></script>
     <script>
+        // 语言切换功能
+        function initLanguageSwitcher() {
+            const langToggle = document.getElementById('langToggle');
+
+            // 语言切换事件
+            if (langToggle) {
+                // 移除可能存在的旧事件监听器
+                const newLangToggle = langToggle.cloneNode(true);
+                langToggle.parentNode.replaceChild(newLangToggle, langToggle);
+                
+                // 获取新按钮中的langText元素
+                const langText = newLangToggle.querySelector('#langText');
+
+                // 更新语言按钮显示
+                function updateLangButton() {
+                    if (window.i18n) {
+                        try {
+                            const currentLang = window.i18n.getCurrentLanguage();
+                            langText.textContent = currentLang === 'zh-CN' ? 'RU' : '中文';
+                        } catch (error) {
+                            console.error('更新语言按钮显示时出错:', error);
+                        }
+                    } else {
+                        console.warn('i18n对象未初始化');
+                        // 设置默认值
+                        langText.textContent = 'RU';
+                    }
+                }
+                
+                // 添加新的事件监听器
+                newLangToggle.addEventListener('click', function() {
+                    if (window.i18n) {
+                        try {
+                            const currentLang = window.i18n.getCurrentLanguage();
+                            const newLang = currentLang === 'zh-CN' ? 'ru' : 'zh-CN';
+                            console.log('切换语言:', currentLang, '->', newLang);
+                            window.i18n.setLanguage(newLang);
+                            updateLangButton();
+                        } catch (error) {
+                            console.error('切换语言时出错:', error);
+                        }
+                    } else {
+                        console.warn('i18n对象未初始化，无法切换语言');
+                    }
+                });
+
+                // 初始化语言按钮
+                updateLangButton();
+            }
+        }
+
+        // 等待i18n对象初始化的函数
+        function waitForI18n() {
+            let attempts = 0;
+            const maxAttempts = 10;
+            const interval = 200;
+
+            function checkI18n() {
+                attempts++;
+                if (window.i18n) {
+                    initLanguageSwitcher();
+                } else if (attempts < maxAttempts) {
+                    setTimeout(checkI18n, interval);
+                } else {
+                    console.warn('i18n对象初始化超时，使用默认语言设置');
+                    initLanguageSwitcher(); // 即使i18n未初始化也执行，设置默认值
+                }
+            }
+
+            checkI18n();
+        }
+
+        // 初始化语言切换器
+        waitForI18n();
+        
         document.addEventListener('DOMContentLoaded', async () => {
             const leaderboardsContainer = document.getElementById('leaderboards');
             const resetAllBtn = document.getElementById('resetAllBtn');
@@ -295,7 +419,11 @@
                     const leaderboard = await scoreManager.getGlobalLeaderboard();
                     
                     if (Object.keys(leaderboard).length === 0) {
-                        leaderboardsContainer.innerHTML = '<div class="loading">暂无游戏数据</div>';
+                        leaderboardsContainer.innerHTML = '<div class="loading" data-i18n="leaderboard.empty">暂无游戏数据</div>';
+                        // 应用翻译
+                        if (window.i18n) {
+                            window.i18n.applyTranslations();
+                        }
                         return;
                     }
                     
@@ -308,27 +436,27 @@
                                 <div class="game-header">${gameData.name}</div>
                                 <div class="game-stats">
                                     <div class="stat-item">
-                                        <span class="stat-label">最高分</span>
+                                        <span class="stat-label" data-i18n="game.highScore">最高分</span>
                                         <span class="stat-value">${scoreManager.formatScore(gameName, gameData.highScore)}</span>
                                     </div>
                                     <div class="stat-item">
-                                        <span class="stat-label">总游戏数</span>
+                                        <span class="stat-label" data-i18n="leaderboard.totalGames">总游戏数</span>
                                         <span class="stat-value">${gameData.stats.totalGames || 0}</span>
                                     </div>
                                     <div class="stat-item">
-                                        <span class="stat-label">胜场</span>
+                                        <span class="stat-label" data-i18n="leaderboard.wins">胜场</span>
                                         <span class="stat-value">${gameData.stats.wins || 0}</span>
                                     </div>
                                     <div class="stat-item">
-                                        <span class="stat-label">负场</span>
+                                        <span class="stat-label" data-i18n="leaderboard.losses">负场</span>
                                         <span class="stat-value">${gameData.stats.losses || 0}</span>
                                     </div>
                                     <div class="stat-item">
-                                        <span class="stat-label">胜率</span>
+                                        <span class="stat-label" data-i18n="leaderboard.winRate">胜率</span>
                                         <span class="stat-value">${gameData.stats.winRate || 0}%</span>
                                     </div>
                                     <div class="stat-item">
-                                        <span class="stat-label">总得分</span>
+                                        <span class="stat-label" data-i18n="leaderboard.totalScore">总得分</span>
                                         <span class="stat-value">${gameData.stats.totalScore || 0}</span>
                                     </div>
                                 </div>
@@ -337,15 +465,25 @@
                     }
                     
                     leaderboardsContainer.innerHTML = html;
+                    
+                    // 应用翻译
+                    if (window.i18n) {
+                        window.i18n.applyTranslations();
+                    }
                 } catch (error) {
                     console.error('加载排行榜失败:', error);
-                    leaderboardsContainer.innerHTML = '<div class="loading">加载失败，请稍后重试</div>';
+                    leaderboardsContainer.innerHTML = '<div class="loading" data-i18n="leaderboard.loadingFailed">加载失败，请稍后重试</div>';
+                    // 应用翻译
+                    if (window.i18n) {
+                        window.i18n.applyTranslations();
+                    }
                 }
             }
             
             // 重置所有游戏数据
             resetAllBtn.addEventListener('click', async () => {
-                const confirmReset = confirm('确定要重置所有游戏的统计数据吗？此操作不可撤销！');
+                const confirmMessage = window.i18n ? window.i18n.t('leaderboard.resetConfirm') : '确定要重置所有游戏的统计数据吗？此操作不可撤销！';
+                const confirmReset = confirm(confirmMessage);
                 if (confirmReset) {
                     try {
                         // 遍历所有游戏类型并重置
@@ -359,13 +497,15 @@
                             }
                         }
                         
-                        alert(`成功重置了 ${successCount} 个游戏的统计数据`);
+                        const successMessage = window.i18n ? window.i18n.t('leaderboard.resetSuccess', { count: successCount }) : `成功重置了 ${successCount} 个游戏的统计数据`;
+                        alert(successMessage);
                         
                         // 重新加载排行榜
                         loadLeaderboards();
                     } catch (error) {
                         console.error('重置游戏数据失败:', error);
-                        alert('重置失败，请稍后重试');
+                        const errorMessage = window.i18n ? window.i18n.t('leaderboard.resetFailed') : '重置失败，请稍后重试';
+                        alert(errorMessage);
                     }
                 }
             });

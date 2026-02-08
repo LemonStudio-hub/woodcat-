@@ -4,12 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>木头猫 - 小游戏合集</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="public/favicon.ico">
-    <link rel="icon" type="image/png" sizes="16x16" href="public/favicon-16x16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="public/favicon-32x32.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="public/apple-touch-icon.png">
-    <link rel="manifest" href="public/site.webmanifest">
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="A collection of classic games with modern web technologies">
+    <meta name="keywords" content="games, classic games, web games, woodcat, tetris, snake, minesweeper, 2048">
+    <meta name="theme-color" content="#3498db">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Woodcat Games">
+    <meta name="application-name" content="Woodcat Game Collection">
+    <meta name="msapplication-TileColor" content="#3498db">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+    <!-- Favicon and Icons -->
+    <link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/icons/favicon-96x96.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+    <link rel="mask-icon" href="/icons/favicon.svg" color="#3498db">
+    <link rel="manifest" href="/site.webmanifest">
     <link rel="preload" href="css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
     <noscript><link rel="stylesheet" href="css/style.css"></noscript>
@@ -147,6 +159,15 @@
                         <div class="game-meta">
                             <span class="difficulty hard" data-i18n="difficulty.hard">困难</span>
                             <span class="players" data-i18n="players.1">1人</span>
+                        </div>
+                    </div>
+                    <div class="game-card" data-game="tank-battle" role="button" tabindex="0">
+                        <div class="game-icon">🎖️</div>
+                        <h4 data-i18n="game.tank-battle">坦克对战</h4>
+                        <p data-i18n="game.tank-battle.desc">多人对战游戏</p>
+                        <div class="game-meta">
+                            <span class="difficulty medium" data-i18n="difficulty.medium">中等</span>
+                            <span class="players" data-i18n="players.2">2人</span>
                         </div>
                     </div>
                 </div>
@@ -381,5 +402,57 @@
     <div class="copyright-notice">
         <p data-i18n="copyright">&copy; 2026 木头猫 - 保留所有权利</p>
     </div>
+
+    <!-- Service Worker Registration -->
+    <script>
+        // Register Service Worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(function(registration) {
+                        console.log('Service Worker registered with scope:', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.error('Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        // Check for PWA installation capability
+        let deferredPrompt;
+        const addBtn = document.createElement('button');
+        addBtn.style.display = 'none';
+        document.body.appendChild(addBtn);
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later
+            deferredPrompt = e;
+            // Update UI to notify the user they can add to home screen
+            addBtn.style.display = 'block';
+            addBtn.textContent = '添加到主屏幕';
+            addBtn.addEventListener('click', () => {
+                // Show the install prompt
+                deferredPrompt.prompt();
+                // Wait for the user to respond to the prompt
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the A2HS prompt');
+                    } else {
+                        console.log('User dismissed the A2HS prompt');
+                    }
+                    deferredPrompt = null;
+                    addBtn.style.display = 'none';
+                });
+            });
+        });
+
+        // Listen for app installed event
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('App installed successfully!');
+            addBtn.style.display = 'none';
+        });
+    </script>
 </body>
 </html>

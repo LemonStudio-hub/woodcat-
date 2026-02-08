@@ -56,6 +56,11 @@ const gameData = {
         title: '蜘蛛卡牌',
         description: '经典纸牌游戏，通过排序将卡牌按花色顺序排列',
         url: 'games/spider-solitaire.html'
+    },
+    'tank-battle': {
+        title: '坦克对战',
+        description: '多人对战游戏，控制坦克击败对手',
+        url: 'games/tank-battle.html'
     }
 };
 
@@ -275,11 +280,11 @@ window.validateSupabaseConnection = async function() {
     }
     
     try {
-        // 尝试执行一个简单的查询来验证连接
-        const { error } = await globalSupabaseClient
-            .from('leaderboard')
-            .select('id')
-            .limit(1);
+            // 尝试执行一个简单的查询来验证连接
+            const { error } = await globalSupabaseClient
+                .from('gameleaderboard')
+                .select('id')
+                .limit(1);
         
         if (error) {
             Logger.error('Supabase连接验证失败:', error);
@@ -391,7 +396,7 @@ window.initializeLeaderboard = function() {
                                 
                                 // 从Supabase获取排行榜数据，按分数降序排列，限制前20条
                                 const queryPromise = globalSupabaseClient
-                                    .from('leaderboard')
+                                    .from('gameleaderboard')
                                     .select('*')
                                     .order('score', { ascending: false })
                                     .limit(20);
@@ -798,7 +803,7 @@ function checkForScoreSubmission() {
                                 while (attempts < maxAttempts) {
                                     try {
                                         const { data, error } = await globalSupabaseClient
-                                            .from('leaderboard')
+                                            .from('gameleaderboard')
                                             .insert([insertData]);
                                             
                                         if (error) {

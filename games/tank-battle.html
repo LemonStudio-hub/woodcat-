@@ -1,0 +1,2187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>坦克对战 - 木头猫</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* 横屏提示样式 */
+        .landscape-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .landscape-warning.show {
+            display: flex;
+        }
+        
+        .landscape-warning i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: rotateDevice 2s ease-in-out infinite;
+        }
+        
+        @keyframes rotateDevice {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+            100% { transform: rotate(0deg); }
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 10px;
+            color: #333;
+            overflow: hidden;
+        }
+        
+        /* 设备检测类 */
+        .mobile .virtual-controls {
+            display: block !important;
+        }
+        
+        .desktop .virtual-controls {
+            display: none !important;
+        }
+        
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            width: 100%;
+            max-width: 600px;
+            min-height: 80vh;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin: 5px 0 8px;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 600;
+            flex-shrink: 0;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            animation: slideIn 0.4s ease-out;
+        }
+        
+        .stat-box {
+            text-align: center;
+        }
+        
+        .stat-box .label {
+            color: #7f8c8d;
+            font-size: 0.75rem;
+            margin-bottom: 2px;
+        }
+        
+        .stat-box .value {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+        
+        .game-board {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1/1;
+            min-height: 300px;
+            max-height: 400px;
+            border: 2px solid #3498db;
+            background: linear-gradient(135deg, #4a6fa5 0%, #6b8cce 50%, #87a7d9 100%);
+            margin-bottom: 10px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tank {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            transform-origin: center;
+            transition: transform 0.1s ease;
+        }
+        
+        .tank.player1 {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.8);
+        }
+        
+        .tank.player2 {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.8);
+        }
+        
+        .tank.ai {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            box-shadow: 0 0 10px rgba(155, 89, 182, 0.8);
+        }
+        
+        .tank::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 8px;
+            background: #333;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 4px;
+        }
+        
+        .tank::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 20px;
+            background: #333;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 4px;
+        }
+        
+        .turret {
+            position: absolute;
+            width: 25px;
+            height: 6px;
+            background: #333;
+            top: 50%;
+            left: 50%;
+            transform-origin: left center;
+            border-radius: 3px;
+            transform: translate(0, -50%);
+            transition: transform 0.1s ease-out;
+        }
+        
+        .turret.rotating {
+            animation: rotateTurret 0.2s ease-out;
+        }
+        
+        @keyframes rotateTurret {
+            0% { transform: translate(0, -50%) rotate(0deg); }
+            100% { transform: translate(0, -50%) rotate(360deg); }
+        }
+        
+        .bullet {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #f39c12;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(243, 156, 18, 0.8);
+        }
+        
+        .wall {
+            position: absolute;
+            background: #7f8c8d;
+            border-radius: 4px;
+        }
+        
+        .power-up {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+        
+        .power-up.speed {
+            background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
+        }
+        
+        .power-up.fire {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+        
+        .power-up.shield {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            flex-shrink: 0;
+            animation: slideIn 0.5s ease-out 0.2s both;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 16px;
+            font-size: 0.9rem;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            flex: 1;
+            min-width: 75px;
+            min-height: 44px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        
+        .back-home {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #34495e;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 20;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+        }
+        
+        .back-home:hover {
+            background: #2c3e50;
+            transform: scale(1.15) rotate(-10deg);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .back-home:active {
+            transform: scale(1.05);
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 16px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 100;
+            display: none;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .game-over.show {
+            display: block;
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+        
+        .game-over h2 {
+            margin-bottom: 8px;
+            font-size: 1.3rem;
+            animation: textPop 0.5s ease-out 0.2s both;
+        }
+        
+        .game-over p {
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+            animation: textPop 0.5s ease-out 0.3s both;
+        }
+        
+        .mode-selector {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            margin-bottom: 10px;
+            justify-content: center;
+        }
+        
+        .mode-btn {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: #f8f9fa;
+            color: #2c3e50;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .mode-btn.active {
+            border-color: #3498db;
+            background: #3498db;
+            color: white;
+        }
+        
+        .difficulty-selector {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            margin-bottom: 10px;
+            justify-content: center;
+        }
+        
+        .difficulty-btn {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: #f8f9fa;
+            color: #2c3e50;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .difficulty-btn.active {
+            border-color: #3498db;
+            background: #3498db;
+            color: white;
+        }
+        
+        .virtual-controls {
+            display: none;
+            margin-top: 15px;
+            width: 100%;
+            max-width: 280px;
+        }
+        
+        .control-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .control-btn {
+            padding: 12px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            min-height: 55px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes textPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes explosion {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+        
+        .explosion {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #f39c12 0%, #e74c3c 70%, transparent 100%);
+            border-radius: 50%;
+            animation: explosion 0.5s ease-out forwards;
+        }
+        
+        /* 平板设备优化 */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .game-container {
+                max-width: 420px;
+                max-height: none;
+                min-height: 85vh;
+            }
+            
+            .game-board {
+                min-height: 350px;
+                max-height: 400px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .stat-box .value {
+                font-size: 1.1rem;
+            }
+            
+            button {
+                padding: 10px 14px;
+                font-size: 0.9rem;
+                min-width: 75px;
+            }
+            
+            .virtual-controls {
+                display: block;
+            }
+        }
+        
+        /* 移动端优化 */
+        @media (max-width: 480px) {
+            body {
+                overflow-x: hidden;
+            }
+            
+            .game-container {
+                padding: 10px;
+                min-height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+                padding-top: 50px;
+                padding-bottom: 10px;
+            }
+            
+            .game-board {
+                min-height: 280px;
+                max-height: 350px;
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+                margin: 8px 0 10px;
+            }
+            
+            .stats {
+                flex-wrap: wrap;
+                gap: 8px;
+                padding: 8px;
+                margin-bottom: 10px;
+            }
+            
+            .stat-box {
+                flex: 1 1 40%;
+                min-width: 80px;
+            }
+            
+            .stat-box .label {
+                font-size: 0.7rem;
+            }
+            
+            .stat-box .value {
+                font-size: 0.95rem;
+            }
+            
+            button {
+                padding: 10px 14px;
+                font-size: 0.85rem;
+                min-width: 70px;
+            }
+            
+            .buttons {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            .buttons button {
+                flex: 1 1 40%;
+                margin-bottom: 5px;
+            }
+            
+            .virtual-controls {
+                display: block;
+            }
+            
+            .back-home {
+                width: 38px;
+                height: 38px;
+                font-size: 18px;
+            }
+            
+            .game-over {
+                width: 90%;
+                max-width: 320px;
+                padding: 20px;
+            }
+        }
+        
+        /* 桌面设备优化 */
+        @media (min-width: 769px) {
+            .game-container {
+                max-width: 500px;
+                max-height: none;
+                min-height: 80vh;
+            }
+            
+            .game-board {
+                min-height: 400px;
+                max-height: 450px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .stat-box .value {
+                font-size: 1.2rem;
+            }
+            
+            button {
+                padding: 11px 18px;
+                font-size: 0.95rem;
+                min-width: 85px;
+            }
+        }
+        
+        /* 横屏模式优化 */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .game-container {
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: flex-start;
+                padding: 10px;
+                padding-top: 45px;
+                min-height: 100vh;
+            }
+            
+            h1 {
+                width: 100%;
+                font-size: 1.2rem;
+                margin: 5px 0;
+            }
+            
+            .stats {
+                width: auto;
+                margin-bottom: 8px;
+                flex-wrap: nowrap;
+            }
+            
+            .game-board {
+                min-height: 250px;
+                max-height: 380px;
+                margin-bottom: 8px;
+            }
+            
+            .controls {
+                flex-direction: row;
+                gap: 15px;
+                flex: 1;
+            }
+            
+            .virtual-controls {
+                max-width: 180px;
+                margin-top: 0;
+            }
+            
+            .virtual-controls button {
+                padding: 10px;
+                font-size: 1.3rem;
+                min-height: 50px;
+            }
+        }
+        
+        /* 设备类型询问模态框样式 */
+        .device-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .device-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .device-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .device-modal.active .device-content {
+            transform: scale(1);
+        }
+        
+        .device-content h2 {
+            color: #2c3e50;
+            margin: 0 0 15px 0;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+        
+        .device-content p {
+            color: #34495e;
+            margin: 0 0 20px 0;
+            line-height: 1.5;
+        }
+        
+        .device-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .device-btn {
+            padding: 12px 16px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .device-btn.primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .device-btn.primary:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+        
+        .device-btn.secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .device-btn.secondary:hover {
+            background: #7f8c8d;
+            transform: translateY(-1px);
+        }
+        
+        /* 教程模态框样式 */
+        .tutorial-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .tutorial-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .tutorial-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .tutorial-modal.active .tutorial-content {
+            transform: scale(1);
+        }
+        
+        .tutorial-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 2px solid #3498db;
+            background: #f8f9fa;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .tutorial-header h2 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .tutorial-close {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            cursor: pointer;
+            padding: 0;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tutorial-close:hover {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+        }
+        
+        .tutorial-close:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
+        }
+        
+        .tutorial-body {
+            padding: 20px;
+            color: #2c3e50;
+        }
+        
+        .tutorial-section {
+            margin-bottom: 20px;
+        }
+        
+        .tutorial-section h3 {
+            color: #3498db;
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-bottom: 1px solid #ecf0f1;
+            padding-bottom: 5px;
+        }
+        
+        .tutorial-section p {
+            margin: 0 0 10px 0;
+            line-height: 1.5;
+        }
+        
+        .tutorial-section ul {
+            margin: 0 0 10px 0;
+            padding-left: 20px;
+        }
+        
+        .tutorial-section li {
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+        
+        /* 移动端教程模态框优化 */
+        @media (max-width: 480px) {
+            .tutorial-content {
+                width: 95%;
+                max-height: 90vh;
+            }
+            
+            .tutorial-header {
+                padding: 15px;
+            }
+            
+            .tutorial-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .tutorial-body {
+                padding: 15px;
+            }
+            
+            .tutorial-section h3 {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 设备类型询问模态框 -->
+    <div class="device-modal" id="device-modal">
+        <div class="device-content">
+            <h2>设备检测</h2>
+            <p>为了获得最佳游戏体验，我们需要确认您的设备类型。</p>
+            <div class="device-buttons">
+                <button class="device-btn primary" id="pc-btn">我使用的是PC</button>
+                <button class="device-btn primary" id="mobile-btn">我使用的是移动设备</button>
+                <button class="device-btn secondary" id="skip-btn">跳过检测</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 横屏提示 -->
+    <div class="landscape-warning" id="landscape-warning">
+        <i>📱</i>
+        <h2>请将设备横屏</h2>
+        <p>为了获得最佳游戏体验，请将您的设备旋转至横屏模式</p>
+        <button class="device-btn secondary" id="skip-landscape-btn" style="margin-top: 20px;">跳过横屏</button>
+    </div>
+    
+    <a class="back-home" href="../index.html">←</a>
+    <div class="game-container">
+        <h1>坦克对战</h1>
+        <div class="stats">
+            <div class="stat-box">
+                <div class="label">玩家1</div>
+                <div class="value" id="player1-score">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">玩家2</div>
+                <div class="value" id="player2-score">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">回合</div>
+                <div class="value" id="round">1</div>
+            </div>
+        </div>
+        <div class="mode-selector">
+            <button class="mode-btn active" data-mode="two-player">双人对战</button>
+            <button class="mode-btn" data-mode="single-player">人机对战</button>
+        </div>
+        <div class="difficulty-selector" id="difficulty-selector" style="display: none;">
+            <button class="difficulty-btn active" data-difficulty="easy">简单</button>
+            <button class="difficulty-btn" data-difficulty="medium">中等</button>
+            <button class="difficulty-btn" data-difficulty="hard">困难</button>
+        </div>
+        <div class="game-board" id="game-board"></div>
+        <div class="controls">
+            <div class="buttons">
+                <button id="startBtn">开始游戏</button>
+                <button id="pauseBtn" disabled>暂停</button>
+                <button id="resetBtn" disabled>重置</button>
+                <button id="tutorial-btn">玩法教程</button>
+                <button id="fullscreenBtn">全屏</button>
+            </div>
+            
+            <!-- 移动端虚拟控制 -->
+            <div class="virtual-controls">
+                <div class="control-pad">
+                    <div></div>
+                    <button class="control-btn" data-action="up">↑</button>
+                    <div></div>
+                    <button class="control-btn" data-action="left">←</button>
+                    <button class="control-btn" data-action="down">↓</button>
+                    <button class="control-btn" data-action="right">→</button>
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <button class="control-btn" data-action="fire" style="flex: 1;">开火</button>
+                    <button class="control-btn" data-action="rotate-left" style="flex: 1;">左转</button>
+                    <button class="control-btn" data-action="rotate-right" style="flex: 1;">右转</button>
+                </div>
+            </div>
+        </div>
+        <div class="game-over" id="game-over">
+            <h2>游戏结束</h2>
+            <p id="winner-text">玩家1获胜！</p>
+            <button id="play-again">再玩一次</button>
+        </div>
+    </div>
+
+    <!-- 教程模态框 -->
+    <div id="tutorial-modal" class="tutorial-modal">
+        <div class="tutorial-content">
+            <div class="tutorial-header">
+                <h2>玩法教程</h2>
+                <button class="tutorial-close">×</button>
+            </div>
+            <div class="tutorial-body">
+                <div class="tutorial-section">
+                    <h3>游戏目标</h3>
+                    <p>控制你的坦克击败对手，获得更高的分数！</p>
+                </div>
+                <div class="tutorial-section">
+                    <h3>操作方法</h3>
+                    <h4>双人对战模式：</h4>
+                    <ul>
+                        <li>玩家1：WASD键控制移动，Q键左转炮塔，E键右转炮塔，空格开火</li>
+                        <li>玩家2：方向键控制移动，[键左转炮塔，]键右转炮塔，Enter开火</li>
+                    </ul>
+                    <h4>人机对战模式：</h4>
+                    <ul>
+                        <li>使用WASD键控制移动，Q键左转炮塔，E键右转炮塔，空格开火</li>
+                    </ul>
+                    <h4>触摸控制：</h4>
+                    <ul>
+                        <li>使用屏幕上的虚拟按钮控制坦克</li>
+                        <li>方向键控制移动，开火按钮发射炮弹</li>
+                        <li>左右旋转按钮控制炮塔方向</li>
+                    </ul>
+                </div>
+                <div class="tutorial-section">
+                    <h3>游戏规则</h3>
+                    <ul>
+                        <li>击中对手坦克获得分数</li>
+                        <li>每回合限时60秒，时间结束后生命值高的一方获胜</li>
+                        <li>可以破坏墙壁获得更好的射击位置</li>
+                        <li>收集道具获得特殊能力：</li>
+                        <li>黄色：提升移动速度</li>
+                        <li>红色：提升炮弹威力</li>
+                        <li>蓝色：获得临时护盾</li>
+                    </ul>
+                </div>
+                <div class="tutorial-section">
+                    <h3>难度说明</h3>
+                    <ul>
+                        <li>简单：AI反应较慢，炮弹威力较小</li>
+                        <li>中等：AI反应适中，炮弹威力正常</li>
+                        <li>困难：AI反应迅速，炮弹威力较大</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/lib/hammer.min.js"></script>
+    <script src="../js/logger.js"></script>
+    <script src="../js/dataManager.js"></script>
+    <script src="../js/scoreManager.js"></script>
+    <script>
+        // 坦克对战游戏核心逻辑
+        document.addEventListener('DOMContentLoaded', () => {
+            // ==========================================
+            // 设备检测和横屏检测
+            // ==========================================
+            
+            // 全局变量
+            let userDeviceType = null; // 'pc', 'mobile', or null
+            let skipLandscapeCheck = false;
+            
+            // 检测设备类型
+            function detectDevice() {
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                if (isMobile) {
+                    document.body.classList.add('mobile');
+                    document.body.classList.remove('desktop');
+                } else {
+                    document.body.classList.add('desktop');
+                    document.body.classList.remove('mobile');
+                }
+                return isMobile;
+            }
+            
+            // 检测横屏状态
+            function checkOrientation() {
+                const landscapeWarning = document.getElementById('landscape-warning');
+                const isMobile = detectDevice();
+                
+                if (skipLandscapeCheck) {
+                    landscapeWarning.classList.remove('show');
+                    return;
+                }
+                
+                if (isMobile && userDeviceType === 'mobile') {
+                    if (window.innerHeight > window.innerWidth) {
+                        // 竖屏，显示提示
+                        landscapeWarning.classList.add('show');
+                    } else {
+                        // 横屏，隐藏提示
+                        landscapeWarning.classList.remove('show');
+                    }
+                } else {
+                    // 非移动设备或用户选择了PC，始终隐藏提示
+                    landscapeWarning.classList.remove('show');
+                }
+            }
+            
+            // 显示设备类型询问模态框
+            function showDeviceModal() {
+                const deviceModal = document.getElementById('device-modal');
+                deviceModal.classList.add('active');
+            }
+            
+            // 隐藏设备类型询问模态框
+            function hideDeviceModal() {
+                const deviceModal = document.getElementById('device-modal');
+                deviceModal.classList.remove('active');
+            }
+            
+            // 处理设备类型选择
+            function handleDeviceSelection(deviceType) {
+                userDeviceType = deviceType;
+                hideDeviceModal();
+                
+                // 根据设备类型设置
+                if (deviceType === 'pc') {
+                    // PC设备，跳过横屏检测
+                    skipLandscapeCheck = true;
+                } else if (deviceType === 'mobile') {
+                    // 移动设备，检查横屏
+                    skipLandscapeCheck = false;
+                }
+                
+                // 初始化检测
+                checkOrientation();
+            }
+            
+            // 跳过横屏检测
+            function skipLandscapeCheckFunc() {
+                skipLandscapeCheck = true;
+                document.getElementById('landscape-warning').classList.remove('show');
+            }
+            
+            // 初始化设备检测
+            detectDevice();
+            checkOrientation();
+            
+            // 监听窗口大小变化和旋转
+            window.addEventListener('resize', checkOrientation);
+            window.addEventListener('orientationchange', checkOrientation);
+            
+            // 设备类型询问模态框事件监听
+            document.getElementById('pc-btn').addEventListener('click', () => {
+                handleDeviceSelection('pc');
+            });
+            
+            document.getElementById('mobile-btn').addEventListener('click', () => {
+                handleDeviceSelection('mobile');
+            });
+            
+            document.getElementById('skip-btn').addEventListener('click', () => {
+                hideDeviceModal();
+                // 跳过检测，使用自动检测结果
+                userDeviceType = detectDevice() ? 'mobile' : 'pc';
+            });
+            
+            // 跳过横屏按钮事件监听
+            document.getElementById('skip-landscape-btn').addEventListener('click', skipLandscapeCheckFunc);
+            
+            // 显示设备类型询问模态框
+            showDeviceModal();
+            
+            // ==========================================
+            // 游戏常量和状态
+            // ==========================================
+            
+            // 游戏板尺寸
+            let BOARD_WIDTH = 0;
+            let BOARD_HEIGHT = 0;
+            
+            // 游戏状态变量
+            let gameMode = 'two-player'; // 游戏模式：two-player 或 single-player
+            let currentDifficulty = 'easy'; // 当前难度级别
+            let isGameStarted = false; // 游戏是否开始
+            let isPaused = false; // 游戏是否暂停
+            let gameInterval; // 游戏循环ID
+            let player1Score = 0; // 玩家1得分
+            let player2Score = 0; // 玩家2得分
+            let round = 1; // 当前回合
+            let gameTime = 60; // 每回合时间（秒）
+            let timeLeft = gameTime; // 剩余时间
+            let timeInterval; // 时间计时器ID
+            
+            // 坦克状态
+            let tanks = [];
+            let bullets = [];
+            let walls = [];
+            let powerUps = [];
+            
+            // 键盘控制状态
+            let keys = {};
+            let player2Keys = {};
+            
+            // 游戏板元素
+            const gameBoard = document.getElementById('game-board');
+            
+            // ==========================================
+            // 初始化游戏
+            // ==========================================
+            
+            function initGame() {
+                // 获取游戏板尺寸
+                const rect = gameBoard.getBoundingClientRect();
+                BOARD_WIDTH = rect.width || 400; // 默认宽度
+                BOARD_HEIGHT = rect.height || 400; // 默认高度
+                console.log(`游戏板尺寸: ${BOARD_WIDTH}x${BOARD_HEIGHT}`);
+                
+                // 重置游戏状态
+                player1Score = 0;
+                player2Score = 0;
+                round = 1;
+                timeLeft = gameTime;
+                isGameStarted = false;
+                isPaused = false;
+                
+                // 清空游戏板
+                clearGameBoard();
+                
+                // 重置UI
+                document.getElementById('player1-score').textContent = player1Score;
+                document.getElementById('player2-score').textContent = player2Score;
+                document.getElementById('round').textContent = round;
+                
+                // 隐藏游戏结束界面
+                document.getElementById('game-over').classList.remove('show');
+                
+                // 重置按钮状态
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('pauseBtn').disabled = true;
+                document.getElementById('resetBtn').disabled = true;
+            }
+            
+            function clearGameBoard() {
+                // 清空数组
+                tanks = [];
+                bullets = [];
+                walls = [];
+                powerUps = [];
+                
+                // 清空DOM
+                gameBoard.innerHTML = '';
+            }
+            
+            // ==========================================
+            // 创建游戏元素
+            // ==========================================
+            
+            function createTanks() {
+                // 创建玩家1坦克
+                const tank1 = {
+                    element: document.createElement('div'),
+                    x: 50,
+                    y: BOARD_HEIGHT / 2,
+                    width: 40,
+                    height: 40,
+                    direction: 0, // 坦克方向（角度）
+                    turretDirection: 0, // 炮塔方向（角度）
+                    speed: 3,
+                    bulletSpeed: 5,
+                    fireRate: 300, // 开火间隔（毫秒）
+                    lastFire: 0,
+                    health: 100,
+                    score: 0,
+                    isPlayer: true,
+                    isAI: false,
+                    name: 'player1'
+                };
+                
+                tank1.element.className = 'tank player1';
+                tank1.element.style.left = `${tank1.x}px`;
+                tank1.element.style.top = `${tank1.y}px`;
+                tank1.element.style.transform = `rotate(${tank1.direction}deg)`;
+                
+                // 添加炮塔
+                const turret1 = document.createElement('div');
+                turret1.className = 'turret';
+                turret1.style.transform = `translate(0, -50%) rotate(${tank1.turretDirection}deg)`;
+                tank1.element.appendChild(turret1);
+                tank1.turret = turret1;
+                
+                gameBoard.appendChild(tank1.element);
+                tanks.push(tank1);
+                
+                // 创建玩家2或AI坦克
+                let tank2;
+                if (gameMode === 'two-player') {
+                    tank2 = {
+                        element: document.createElement('div'),
+                        x: BOARD_WIDTH - 90,
+                        y: BOARD_HEIGHT / 2,
+                        width: 40,
+                        height: 40,
+                        direction: 180,
+                        turretDirection: 180,
+                        speed: 3,
+                        bulletSpeed: 5,
+                        fireRate: 300,
+                        lastFire: 0,
+                        health: 100,
+                        score: 0,
+                        isPlayer: true,
+                        isAI: false,
+                        name: 'player2'
+                    };
+                    
+                    tank2.element.className = 'tank player2';
+                } else {
+                    tank2 = {
+                        element: document.createElement('div'),
+                        x: BOARD_WIDTH - 90,
+                        y: BOARD_HEIGHT / 2,
+                        width: 40,
+                        height: 40,
+                        direction: 180,
+                        turretDirection: 180,
+                        speed: 3,
+                        bulletSpeed: 5,
+                        fireRate: 300,
+                        lastFire: 0,
+                        health: 100,
+                        score: 0,
+                        isPlayer: false,
+                        isAI: true,
+                        name: 'ai',
+                        difficulty: currentDifficulty,
+                        target: tank1
+                    };
+                    
+                    // 根据难度调整AI属性
+                    switch (currentDifficulty) {
+                        case 'easy':
+                            tank2.speed = 2.5;
+                            tank2.bulletSpeed = 4;
+                            tank2.fireRate = 400;
+                            break;
+                        case 'medium':
+                            tank2.speed = 3;
+                            tank2.bulletSpeed = 5;
+                            tank2.fireRate = 300;
+                            break;
+                        case 'hard':
+                            tank2.speed = 3.5;
+                            tank2.bulletSpeed = 6;
+                            tank2.fireRate = 250;
+                            break;
+                    }
+                    
+                    tank2.element.className = 'tank ai';
+                }
+                
+                tank2.element.style.left = `${tank2.x}px`;
+                tank2.element.style.top = `${tank2.y}px`;
+                tank2.element.style.transform = `rotate(${tank2.direction}deg)`;
+                
+                // 添加炮塔
+                const turret2 = document.createElement('div');
+                turret2.className = 'turret';
+                turret2.style.transform = `translate(0, -50%) rotate(${tank2.turretDirection}deg)`;
+                tank2.element.appendChild(turret2);
+                tank2.turret = turret2;
+                
+                gameBoard.appendChild(tank2.element);
+                tanks.push(tank2);
+            }
+            
+            function createWalls() {
+                // 创建随机墙壁
+                const wallCount = Math.floor(Math.random() * 5) + 5;
+                
+                for (let i = 0; i < wallCount; i++) {
+                    const wall = {
+                        element: document.createElement('div'),
+                        x: Math.random() * (BOARD_WIDTH - 60) + 30,
+                        y: Math.random() * (BOARD_HEIGHT - 60) + 30,
+                        width: Math.random() * 30 + 20,
+                        height: Math.random() * 30 + 20,
+                        health: 100
+                    };
+                    
+                    // 避免墙壁出现在坦克初始位置
+                    if (Math.abs(wall.x - 50) < 60 && Math.abs(wall.y - BOARD_HEIGHT / 2) < 60) continue;
+                    if (Math.abs(wall.x - (BOARD_WIDTH - 90)) < 60 && Math.abs(wall.y - BOARD_HEIGHT / 2) < 60) continue;
+                    
+                    wall.element.className = 'wall';
+                    wall.element.style.left = `${wall.x}px`;
+                    wall.element.style.top = `${wall.y}px`;
+                    wall.element.style.width = `${wall.width}px`;
+                    wall.element.style.height = `${wall.height}px`;
+                    
+                    gameBoard.appendChild(wall.element);
+                    walls.push(wall);
+                }
+            }
+            
+            function createPowerUps() {
+                // 创建随机道具
+                const powerUpTypes = ['speed', 'fire', 'shield'];
+                const powerUpCount = Math.floor(Math.random() * 3) + 2;
+                
+                for (let i = 0; i < powerUpCount; i++) {
+                    const powerUp = {
+                        element: document.createElement('div'),
+                        x: Math.random() * (BOARD_WIDTH - 30) + 15,
+                        y: Math.random() * (BOARD_HEIGHT - 30) + 15,
+                        type: powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)],
+                        active: true
+                    };
+                    
+                    // 避免道具出现在坦克初始位置
+                    if (Math.abs(powerUp.x - 50) < 60 && Math.abs(powerUp.y - BOARD_HEIGHT / 2) < 60) continue;
+                    if (Math.abs(powerUp.x - (BOARD_WIDTH - 90)) < 60 && Math.abs(powerUp.y - BOARD_HEIGHT / 2) < 60) continue;
+                    
+                    powerUp.element.className = `power-up ${powerUp.type}`;
+                    powerUp.element.style.left = `${powerUp.x}px`;
+                    powerUp.element.style.top = `${powerUp.y}px`;
+                    
+                    gameBoard.appendChild(powerUp.element);
+                    powerUps.push(powerUp);
+                }
+            }
+            
+            // ==========================================
+            // 游戏主循环
+            // ==========================================
+            
+            function gameLoop() {
+                if (!isGameStarted || isPaused) return;
+                
+                // 更新坦克位置
+                updateTanks();
+                
+                // 更新子弹位置
+                updateBullets();
+                
+                // 检查碰撞
+                checkCollisions();
+                
+                // 检查道具收集
+                checkPowerUps();
+                
+                // AI逻辑
+                if (gameMode === 'single-player') {
+                    updateAI();
+                }
+                
+                // 继续游戏循环
+                gameInterval = requestAnimationFrame(gameLoop);
+            }
+            
+            function updateTanks() {
+                // 更新玩家1坦克
+                const tank1 = tanks[0];
+                if (tank1.isPlayer) {
+                    // 移动控制
+                    if (keys['w']) {
+                        moveTank(tank1, 0);
+                    } else if (keys['s']) {
+                        moveTank(tank1, 180);
+                    }
+                    if (keys['a']) {
+                        moveTank(tank1, 270);
+                    } else if (keys['d']) {
+                        moveTank(tank1, 90);
+                    }
+                    
+                    // 炮塔控制
+                    if (keys['q']) {
+                        tank1.turretDirection -= 5;
+                        tank1.turret.style.transform = `translate(0, -50%) rotate(${tank1.turretDirection}deg)`;
+                        // 添加旋转动画
+                        tank1.turret.classList.add('rotating');
+                        setTimeout(() => {
+                            tank1.turret.classList.remove('rotating');
+                        }, 200);
+                    } else if (keys['e']) {
+                        tank1.turretDirection += 5;
+                        tank1.turret.style.transform = `translate(0, -50%) rotate(${tank1.turretDirection}deg)`;
+                        // 添加旋转动画
+                        tank1.turret.classList.add('rotating');
+                        setTimeout(() => {
+                            tank1.turret.classList.remove('rotating');
+                        }, 200);
+                    }
+                    
+                    // 开火控制
+                    if (keys[' '] && Date.now() - tank1.lastFire > tank1.fireRate) {
+                        fireBullet(tank1);
+                        tank1.lastFire = Date.now();
+                    }
+                }
+                
+                // 更新玩家2坦克
+                const tank2 = tanks[1];
+                if (tank2.isPlayer) {
+                    // 移动控制
+                    if (player2Keys['ArrowUp']) {
+                        moveTank(tank2, 0);
+                    } else if (player2Keys['ArrowDown']) {
+                        moveTank(tank2, 180);
+                    }
+                    if (player2Keys['ArrowLeft']) {
+                        moveTank(tank2, 270);
+                    } else if (player2Keys['ArrowRight']) {
+                        moveTank(tank2, 90);
+                    }
+                    
+                    // 炮塔控制
+                    if (player2Keys['[']) {
+                        tank2.turretDirection -= 5;
+                        tank2.turret.style.transform = `translate(0, -50%) rotate(${tank2.turretDirection}deg)`;
+                        // 添加旋转动画
+                        tank2.turret.classList.add('rotating');
+                        setTimeout(() => {
+                            tank2.turret.classList.remove('rotating');
+                        }, 200);
+                    } else if (player2Keys[']']) {
+                        tank2.turretDirection += 5;
+                        tank2.turret.style.transform = `translate(0, -50%) rotate(${tank2.turretDirection}deg)`;
+                        // 添加旋转动画
+                        tank2.turret.classList.add('rotating');
+                        setTimeout(() => {
+                            tank2.turret.classList.remove('rotating');
+                        }, 200);
+                    }
+                    
+                    // 开火控制
+                    if (player2Keys['Enter'] && Date.now() - tank2.lastFire > tank2.fireRate) {
+                        fireBullet(tank2);
+                        tank2.lastFire = Date.now();
+                    }
+                }
+            }
+            
+            function moveTank(tank, direction) {
+                // 更新坦克方向
+                tank.direction = direction;
+                tank.element.style.transform = `rotate(${tank.direction}deg)`;
+                
+                // 计算移动向量
+                const radians = (direction * Math.PI) / 180;
+                const dx = Math.cos(radians) * tank.speed;
+                const dy = Math.sin(radians) * tank.speed;
+                
+                // 计算新位置
+                const newX = tank.x + dx;
+                const newY = tank.y + dy;
+                
+                // 检查边界碰撞
+                if (newX >= 0 && newX <= BOARD_WIDTH - tank.width && newY >= 0 && newY <= BOARD_HEIGHT - tank.height) {
+                    // 检查墙壁碰撞
+                    let collision = false;
+                    for (const wall of walls) {
+                        if (checkRectCollision(
+                            newX, newY, tank.width, tank.height,
+                            wall.x, wall.y, wall.width, wall.height
+                        )) {
+                            collision = true;
+                            break;
+                        }
+                    }
+                    
+                    // 检查其他坦克碰撞
+                    for (const otherTank of tanks) {
+                        if (otherTank !== tank && checkRectCollision(
+                            newX, newY, tank.width, tank.height,
+                            otherTank.x, otherTank.y, otherTank.width, otherTank.height
+                        )) {
+                            collision = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!collision) {
+                        tank.x = newX;
+                        tank.y = newY;
+                        tank.element.style.left = `${tank.x}px`;
+                        tank.element.style.top = `${tank.y}px`;
+                    }
+                }
+            }
+            
+            function fireBullet(tank) {
+                const bullet = {
+                    element: document.createElement('div'),
+                    x: tank.x + tank.width / 2 - 3,
+                    y: tank.y + tank.height / 2 - 3,
+                    direction: tank.turretDirection,
+                    speed: tank.bulletSpeed,
+                    damage: 20,
+                    owner: tank
+                };
+                
+                // 计算子弹初始位置（从炮塔前端发射）
+                const radians = (tank.turretDirection * Math.PI) / 180;
+                const distance = 20;
+                bullet.x += Math.cos(radians) * distance;
+                bullet.y += Math.sin(radians) * distance;
+                
+                bullet.element.className = 'bullet';
+                bullet.element.style.left = `${bullet.x}px`;
+                bullet.element.style.top = `${bullet.y}px`;
+                
+                gameBoard.appendChild(bullet.element);
+                bullets.push(bullet);
+            }
+            
+            function updateBullets() {
+                for (let i = bullets.length - 1; i >= 0; i--) {
+                    const bullet = bullets[i];
+                    
+                    // 计算移动向量
+                    const radians = (bullet.direction * Math.PI) / 180;
+                    const dx = Math.cos(radians) * bullet.speed;
+                    const dy = Math.sin(radians) * bullet.speed;
+                    
+                    // 更新子弹位置
+                    bullet.x += dx;
+                    bullet.y += dy;
+                    bullet.element.style.left = `${bullet.x}px`;
+                    bullet.element.style.top = `${bullet.y}px`;
+                    
+                    // 检查边界
+                    if (bullet.x < 0 || bullet.x > BOARD_WIDTH || bullet.y < 0 || bullet.y > BOARD_HEIGHT) {
+                        removeBullet(bullet, i);
+                        continue;
+                    }
+                    
+                    // 检查墙壁碰撞
+                    for (const wall of walls) {
+                        if (checkRectCollision(
+                            bullet.x, bullet.y, 6, 6,
+                            wall.x, wall.y, wall.width, wall.height
+                        )) {
+                            // 墙壁受损
+                            wall.health -= bullet.damage;
+                            if (wall.health <= 0) {
+                                removeWall(wall);
+                            }
+                            removeBullet(bullet, i);
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            function checkCollisions() {
+                // 检查子弹与坦克碰撞
+                for (let i = bullets.length - 1; i >= 0; i--) {
+                    const bullet = bullets[i];
+                    
+                    for (const tank of tanks) {
+                        if (tank !== bullet.owner && checkRectCollision(
+                            bullet.x, bullet.y, 6, 6,
+                            tank.x, tank.y, tank.width, tank.height
+                        )) {
+                            // 坦克受损
+                            tank.health -= bullet.damage;
+                            
+                            // 创建爆炸效果
+                            createExplosion(bullet.x, bullet.y);
+                            
+                            // 检查坦克是否被摧毁
+                            if (tank.health <= 0) {
+                                // 增加击中者得分
+                                bullet.owner.score += 10;
+                                updateScores();
+                                
+                                // 重置坦克位置
+                                resetTank(tank);
+                            }
+                            
+                            removeBullet(bullet, i);
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            function checkPowerUps() {
+                for (let i = powerUps.length - 1; i >= 0; i--) {
+                    const powerUp = powerUps[i];
+                    if (!powerUp.active) continue;
+                    
+                    for (const tank of tanks) {
+                        if (checkRectCollision(
+                            tank.x, tank.y, tank.width, tank.height,
+                            powerUp.x, powerUp.y, 20, 20
+                        )) {
+                            // 应用道具效果
+                            applyPowerUp(tank, powerUp.type);
+                            
+                            // 移除道具
+                            powerUp.active = false;
+                            powerUp.element.style.display = 'none';
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            function applyPowerUp(tank, type) {
+                switch (type) {
+                    case 'speed':
+                        tank.speed *= 1.5;
+                        setTimeout(() => {
+                            tank.speed /= 1.5;
+                        }, 10000);
+                        break;
+                    case 'fire':
+                        tank.bulletSpeed *= 1.3;
+                        tank.fireRate *= 0.8;
+                        setTimeout(() => {
+                            tank.bulletSpeed /= 1.3;
+                            tank.fireRate /= 0.8;
+                        }, 10000);
+                        break;
+                    case 'shield':
+                        tank.health = Math.min(tank.health + 50, 100);
+                        break;
+                }
+            }
+            
+            // ==========================================
+            // AI逻辑
+            // ==========================================
+            
+            function updateAI() {
+                const aiTank = tanks[1];
+                if (!aiTank.isAI) return;
+                
+                const playerTank = tanks[0];
+                
+                // 计算到玩家的角度
+                const dx = playerTank.x - aiTank.x;
+                const dy = playerTank.y - aiTank.y;
+                const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                
+                // 旋转炮塔朝向玩家
+                aiTank.turretDirection = angle;
+                aiTank.turret.style.transform = `translate(0, -50%) rotate(${aiTank.turretDirection}deg)`;
+                // 添加旋转动画
+                aiTank.turret.classList.add('rotating');
+                setTimeout(() => {
+                    aiTank.turret.classList.remove('rotating');
+                }, 200);
+                
+                // 移动逻辑
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance > 150) {
+                    // 靠近玩家
+                    moveTank(aiTank, angle);
+                } else if (distance < 80) {
+                    // 远离玩家
+                    moveTank(aiTank, angle + 180);
+                }
+                
+                // 开火逻辑
+                if (Date.now() - aiTank.lastFire > aiTank.fireRate) {
+                    // 简单的射击精度
+                    let fireAccuracy = 0;
+                    switch (currentDifficulty) {
+                        case 'easy':
+                            fireAccuracy = 0.6;
+                            break;
+                        case 'medium':
+                            fireAccuracy = 0.8;
+                            break;
+                        case 'hard':
+                            fireAccuracy = 0.95;
+                            break;
+                    }
+                    
+                    if (Math.random() < fireAccuracy) {
+                        fireBullet(aiTank);
+                        aiTank.lastFire = Date.now();
+                    }
+                }
+            }
+            
+            // ==========================================
+            // 辅助函数
+            // ==========================================
+            
+            function checkRectCollision(x1, y1, w1, h1, x2, y2, w2, h2) {
+                return x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + h2 && y1 + h1 > y2;
+            }
+            
+            function removeBullet(bullet, index) {
+                if (bullet.element && bullet.element.parentNode) {
+                    bullet.element.parentNode.removeChild(bullet.element);
+                }
+                bullets.splice(index, 1);
+            }
+            
+            function removeWall(wall) {
+                if (wall.element && wall.element.parentNode) {
+                    wall.element.parentNode.removeChild(wall.element);
+                }
+                const index = walls.indexOf(wall);
+                if (index > -1) {
+                    walls.splice(index, 1);
+                }
+            }
+            
+            function createExplosion(x, y) {
+                const explosion = document.createElement('div');
+                explosion.className = 'explosion';
+                explosion.style.left = `${x - 15}px`;
+                explosion.style.top = `${y - 15}px`;
+                gameBoard.appendChild(explosion);
+                
+                // 动画结束后移除
+                setTimeout(() => {
+                    if (explosion.parentNode) {
+                        explosion.parentNode.removeChild(explosion);
+                    }
+                }, 500);
+            }
+            
+            function resetTank(tank) {
+                // 重置坦克位置和状态
+                if (tank.name === 'player1') {
+                    tank.x = 50;
+                    tank.y = BOARD_HEIGHT / 2;
+                    tank.direction = 0;
+                    tank.turretDirection = 0;
+                } else {
+                    tank.x = BOARD_WIDTH - 90;
+                    tank.y = BOARD_HEIGHT / 2;
+                    tank.direction = 180;
+                    tank.turretDirection = 180;
+                }
+                
+                tank.health = 100;
+                tank.speed = 3;
+                tank.bulletSpeed = 5;
+                tank.fireRate = 300;
+                
+                // 更新UI
+                tank.element.style.left = `${tank.x}px`;
+                tank.element.style.top = `${tank.y}px`;
+                tank.element.style.transform = `rotate(${tank.direction}deg)`;
+                tank.turret.style.transform = `translate(0, -50%) rotate(${tank.turretDirection}deg)`;
+            }
+            
+            function updateScores() {
+                player1Score = tanks[0].score;
+                player2Score = tanks[1].score;
+                
+                document.getElementById('player1-score').textContent = player1Score;
+                document.getElementById('player2-score').textContent = player2Score;
+            }
+            
+            function startRound() {
+                // 重新获取游戏板尺寸，确保准确性
+                const rect = gameBoard.getBoundingClientRect();
+                BOARD_WIDTH = rect.width || 400;
+                BOARD_HEIGHT = rect.height || 400;
+                console.log(`开始回合 - 游戏板尺寸: ${BOARD_WIDTH}x${BOARD_HEIGHT}`);
+                
+                // 清除游戏板
+                clearGameBoard();
+                
+                // 创建游戏元素
+                createTanks();
+                createWalls();
+                createPowerUps();
+                
+                // 重置时间
+                timeLeft = gameTime;
+                
+                // 开始游戏循环
+                gameInterval = requestAnimationFrame(gameLoop);
+                
+                // 开始时间计时
+                if (timeInterval) {
+                    clearInterval(timeInterval);
+                }
+                timeInterval = setInterval(() => {
+                    timeLeft--;
+                    if (timeLeft <= 0) {
+                        endRound();
+                    }
+                }, 1000);
+            }
+            
+            function endRound() {
+                // 停止游戏循环
+                if (gameInterval) {
+                    cancelAnimationFrame(gameInterval);
+                    gameInterval = null;
+                }
+                
+                // 停止时间计时
+                if (timeInterval) {
+                    clearInterval(timeInterval);
+                    timeInterval = null;
+                }
+                
+                // 检查回合结果
+                if (player1Score > player2Score) {
+                    showGameOver('player1');
+                } else if (player2Score > player1Score) {
+                    showGameOver('player2');
+                } else {
+                    // 平局，进入下一回合
+                    round++;
+                    document.getElementById('round').textContent = round;
+                    startRound();
+                }
+            }
+            
+            function showGameOver(winner) {
+                const winnerText = document.getElementById('winner-text');
+                if (winner === 'player1') {
+                    winnerText.textContent = '玩家1获胜！';
+                } else {
+                    winnerText.textContent = gameMode === 'two-player' ? '玩家2获胜！' : 'AI获胜！';
+                }
+                
+                // 记录游戏结果
+                scoreManager.recordGameResult('tank-battle', winner, player1Score);
+                
+                // 保存游戏进度
+                saveGameProgress();
+                
+                // 显示游戏结束界面
+                const gameOverElement = document.getElementById('game-over');
+                gameOverElement.classList.add('show');
+                
+                // 停止游戏
+                isGameStarted = false;
+            }
+            
+            // ==========================================
+            // 事件监听器
+            // ==========================================
+            
+            // 键盘事件
+            document.addEventListener('keydown', (e) => {
+                // 玩家1控制
+                if (['w', 'a', 's', 'd', 'q', 'e', ' '].includes(e.key)) {
+                    keys[e.key] = true;
+                }
+                
+                // 玩家2控制
+                if (['ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight', '[', ']', 'Enter'].includes(e.key)) {
+                    player2Keys[e.key] = true;
+                }
+            });
+            
+            document.addEventListener('keyup', (e) => {
+                // 玩家1控制
+                if (['w', 'a', 's', 'd', 'q', 'e', ' '].includes(e.key)) {
+                    keys[e.key] = false;
+                }
+                
+                // 玩家2控制
+                if (['ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight', '[', ']', 'Enter'].includes(e.key)) {
+                    player2Keys[e.key] = false;
+                }
+            });
+            
+            // 开始按钮
+            document.getElementById('startBtn').addEventListener('click', () => {
+                if (!isGameStarted) {
+                    isGameStarted = true;
+                    startRound();
+                    document.getElementById('startBtn').disabled = true;
+                    document.getElementById('pauseBtn').disabled = false;
+                    document.getElementById('resetBtn').disabled = false;
+                }
+            });
+            
+            // 暂停按钮
+            document.getElementById('pauseBtn').addEventListener('click', () => {
+                isPaused = !isPaused;
+                document.getElementById('pauseBtn').textContent = isPaused ? '继续' : '暂停';
+                
+                if (!isPaused && isGameStarted) {
+                    gameInterval = requestAnimationFrame(gameLoop);
+                }
+            });
+            
+            // 重置按钮
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                initGame();
+            });
+            
+            // 再玩一次按钮
+            document.getElementById('play-again').addEventListener('click', () => {
+                initGame();
+            });
+            
+            // 模式选择
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // 移除所有活动状态
+                    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                    
+                    // 添加当前活动状态
+                    btn.classList.add('active');
+                    
+                    // 更新游戏模式
+                    gameMode = btn.dataset.mode;
+                    
+                    // 显示/隐藏难度选择
+                    const difficultySelector = document.getElementById('difficulty-selector');
+                    if (gameMode === 'single-player') {
+                        difficultySelector.style.display = 'flex';
+                    } else {
+                        difficultySelector.style.display = 'none';
+                    }
+                    
+                    // 重置游戏
+                    initGame();
+                });
+            });
+            
+            // 难度选择
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // 移除所有活动状态
+                    document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                    
+                    // 添加当前活动状态
+                    btn.classList.add('active');
+                    
+                    // 更新难度
+                    currentDifficulty = btn.dataset.difficulty;
+                    
+                    // 重置游戏
+                    initGame();
+                });
+            });
+            
+            // 虚拟控制按钮
+            document.querySelectorAll('.control-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const action = btn.dataset.action;
+                    const tank1 = tanks[0];
+                    
+                    switch (action) {
+                        case 'up':
+                            moveTank(tank1, 0);
+                            break;
+                        case 'down':
+                            moveTank(tank1, 180);
+                            break;
+                        case 'left':
+                            moveTank(tank1, 270);
+                            break;
+                        case 'right':
+                            moveTank(tank1, 90);
+                            break;
+                        case 'fire':
+                            if (Date.now() - tank1.lastFire > tank1.fireRate) {
+                                fireBullet(tank1);
+                                tank1.lastFire = Date.now();
+                            }
+                            break;
+                        case 'rotate-left':
+                            tank1.turretDirection -= 15;
+                            tank1.turret.style.transform = `translate(0, -50%) rotate(${tank1.turretDirection}deg)`;
+                            break;
+                        case 'rotate-right':
+                            tank1.turretDirection += 15;
+                            tank1.turret.style.transform = `translate(0, -50%) rotate(${tank1.turretDirection}deg)`;
+                            break;
+                    }
+                });
+            });
+            
+            // 教程按钮
+            document.getElementById('tutorial-btn').addEventListener('click', () => {
+                document.getElementById('tutorial-modal').classList.add('active');
+            });
+            
+            // 关闭教程
+            document.querySelector('.tutorial-close').addEventListener('click', () => {
+                document.getElementById('tutorial-modal').classList.remove('active');
+            });
+            
+            // 点击教程外部关闭
+            document.getElementById('tutorial-modal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('tutorial-modal')) {
+                    document.getElementById('tutorial-modal').classList.remove('active');
+                }
+            });
+            
+            // 全屏按钮
+            document.getElementById('fullscreenBtn').addEventListener('click', () => {
+                const gameContainer = document.querySelector('.game-container');
+                if (!document.fullscreenElement) {
+                    if (gameContainer.requestFullscreen) {
+                        gameContainer.requestFullscreen();
+                    } else if (gameContainer.mozRequestFullScreen) {
+                        gameContainer.mozRequestFullScreen();
+                    } else if (gameContainer.webkitRequestFullscreen) {
+                        gameContainer.webkitRequestFullscreen();
+                    } else if (gameContainer.msRequestFullscreen) {
+                        gameContainer.msRequestFullscreen();
+                    }
+                    document.getElementById('fullscreenBtn').textContent = '退出全屏';
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.mozCancelFullScreen) {
+                        document.mozCancelFullScreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                    document.getElementById('fullscreenBtn').textContent = '全屏';
+                }
+            });
+            
+            // 全屏状态变化事件
+            document.addEventListener('fullscreenchange', () => {
+                if (!document.fullscreenElement) {
+                    document.getElementById('fullscreenBtn').textContent = '全屏';
+                } else {
+                    document.getElementById('fullscreenBtn').textContent = '退出全屏';
+                }
+            });
+            
+            // 保存游戏进度
+            function saveGameProgress() {
+                const gameProgress = {
+                    mode: gameMode,
+                    difficulty: currentDifficulty,
+                    player1Score: player1Score,
+                    player2Score: player2Score,
+                    round: round,
+                    timestamp: Date.now()
+                };
+                
+                try {
+                    localStorage.setItem('tankBattleProgress', JSON.stringify(gameProgress));
+                    console.log('游戏进度已保存');
+                } catch (error) {
+                    console.error('保存游戏进度失败:', error);
+                }
+            }
+            
+            // 加载游戏进度
+            function loadGameProgress() {
+                try {
+                    const savedProgress = localStorage.getItem('tankBattleProgress');
+                    if (savedProgress) {
+                        const gameProgress = JSON.parse(savedProgress);
+                        gameMode = gameProgress.mode;
+                        currentDifficulty = gameProgress.difficulty;
+                        player1Score = gameProgress.player1Score;
+                        player2Score = gameProgress.player2Score;
+                        round = gameProgress.round;
+                        
+                        // 更新UI
+                        document.getElementById('player1-score').textContent = player1Score;
+                        document.getElementById('player2-score').textContent = player2Score;
+                        document.getElementById('round').textContent = round;
+                        
+                        // 更新模式选择
+                        document.querySelectorAll('.mode-btn').forEach(btn => {
+                            btn.classList.remove('active');
+                            if (btn.dataset.mode === gameMode) {
+                                btn.classList.add('active');
+                            }
+                        });
+                        
+                        // 更新难度选择
+                        const difficultySelector = document.getElementById('difficulty-selector');
+                        if (gameMode === 'single-player') {
+                            difficultySelector.style.display = 'flex';
+                            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                                btn.classList.remove('active');
+                                if (btn.dataset.difficulty === currentDifficulty) {
+                                    btn.classList.add('active');
+                                }
+                            });
+                        } else {
+                            difficultySelector.style.display = 'none';
+                        }
+                        
+                        console.log('游戏进度已加载');
+                    }
+                } catch (error) {
+                    console.error('加载游戏进度失败:', error);
+                }
+            }
+            
+            // 修改initGame函数以加载游戏进度
+            const originalInitGame = initGame;
+            initGame = function() {
+                originalInitGame();
+                loadGameProgress();
+            };
+            
+            // ==========================================
+            // 初始化游戏
+            // ==========================================
+            
+            initGame();
+        });
+    </script>
+</body>
+</html>

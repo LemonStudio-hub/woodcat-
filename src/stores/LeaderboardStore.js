@@ -34,7 +34,7 @@ export const useLeaderboardStore = defineStore('leaderboard', {
 
       try {
         const { error } = await this.globalSupabaseClient
-          .from('leaderboard')
+          .from('gameleaderboard')
           .select('id')
           .limit(1);
 
@@ -81,7 +81,7 @@ export const useLeaderboardStore = defineStore('leaderboard', {
                   });
 
                   const queryPromise = this.globalSupabaseClient
-                    .from('leaderboard')
+                    .from('gameleaderboard')
                     .select('*')
                     .order('score', { ascending: false })
                     .limit(20);
@@ -202,7 +202,7 @@ export const useLeaderboardStore = defineStore('leaderboard', {
               while (attempts < maxAttempts) {
                 try {
                   const { data, error } = await this.globalSupabaseClient
-                    .from('leaderboard')
+                    .from('gameleaderboard')
                     .insert([insertData]);
 
                   if (error) {
