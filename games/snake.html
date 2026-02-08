@@ -358,6 +358,119 @@
             }
         }
 
+        /* 游戏模式选择界面样式 */
+        .mode-selector {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .mode-selector h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .mode-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .mode-btn:hover {
+            background: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .mode-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .mode-description {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mode-description p {
+            margin: 0;
+            color: #7f8c8d;
+            line-height: 1.5;
+        }
+
+        /* AI对战模式样式 */
+        .ai-stats {
+            background: #f0f8ff;
+            border: 1px solid #b8e0ff;
+        }
+
+        .cell.snake-ai {
+            background: #e67e22;
+            border-radius: 2px;
+            transition: all 0.1s ease;
+            box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .cell.snake-ai-head {
+            background: #f39c12;
+            border-radius: 3px;
+            position: relative;
+            box-shadow: 0 0 8px rgba(243, 156, 18, 0.6);
+            transition: all 0.1s ease;
+        }
+
+        /* 游戏结果界面样式 */
+        .game-result {
+            text-align: center;
+            padding: 30px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            animation: containerPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .game-result h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .game-result p {
+            color: #7f8c8d;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+        }
+
+        .result-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
         @media (max-width: 480px) {
             .game-container {
                 padding: 15px;
@@ -400,32 +513,74 @@
     <a class="back-home" href="../index.html">←</a>
     <div class="game-container">
         <h1>贪吃蛇</h1>
-        <div class="stats">
-            <div class="stat-box">
-                <div class="label">得分</div>
-                <div class="value" id="score">0</div>
+        
+        <!-- 游戏模式选择界面 -->
+        <div id="mode-selector" class="mode-selector">
+            <h2>选择游戏模式</h2>
+            <div class="mode-buttons">
+                <button id="single-player-btn" class="mode-btn">单人模式</button>
+                <button id="ai-battle-btn" class="mode-btn">AI对战模式</button>
             </div>
-            <div class="stat-box">
-                <div class="label">长度</div>
-                <div class="value" id="length">3</div>
+            <div class="mode-description" id="mode-description">
+                <p>选择一个游戏模式开始游戏</p>
             </div>
-            <div class="stat-box">
-                <div class="label">最高分</div>
-                <div class="value" id="high-score">0</div>
-            </div>
-        </div>
-        <div class="game-board" id="board"></div>
-        <div class="controls">
-            <div class="buttons">
-                    <button id="startBtn">开始</button>
-                    <button id="pauseBtn">暂停</button>
-                    <button id="resetBtn">重置</button>
-                    <button id="tutorial-btn">玩法教程</button>
-                </div>
-            <p style="margin-top: 10px; color: #7f8c8d; font-size: 0.85rem;">使用 ← → ↑ ↓ 键或滑动手势控制方向</p>
         </div>
         
-
+        <!-- 游戏界面 -->
+        <div id="game-interface" class="game-interface" style="display: none;">
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="label">得分</div>
+                    <div class="value" id="score">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">长度</div>
+                    <div class="value" id="length">3</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">最高分</div>
+                    <div class="value" id="high-score">0</div>
+                </div>
+            </div>
+            
+            <!-- AI对战模式特有统计 -->
+            <div id="ai-stats" class="stats ai-stats" style="display: none;">
+                <div class="stat-box">
+                    <div class="label">AI得分</div>
+                    <div class="value" id="ai-score">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">AI长度</div>
+                    <div class="value" id="ai-length">3</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">游戏状态</div>
+                    <div class="value" id="game-status">准备中</div>
+                </div>
+            </div>
+            
+            <div class="game-board" id="board"></div>
+            <div class="controls">
+                <div class="buttons">
+                        <button id="startBtn">开始</button>
+                        <button id="pauseBtn">暂停</button>
+                        <button id="resetBtn">重置</button>
+                        <button id="tutorial-btn">玩法教程</button>
+                        <button id="change-mode-btn">更换模式</button>
+                    </div>
+                <p style="margin-top: 10px; color: #7f8c8d; font-size: 0.85rem;">使用 ← → ↑ ↓ 键或滑动手势控制方向</p>
+            </div>
+        </div>
+        
+        <!-- 游戏结果界面 -->
+        <div id="game-result" class="game-result" style="display: none;">
+            <h2 id="result-title">游戏结束</h2>
+            <p id="result-message">得分: <span id="result-score">0</span></p>
+            <div class="result-buttons">
+                <button id="play-again-btn">再玩一次</button>
+                <button id="change-mode-result-btn">更换模式</button>
+            </div>
+        </div>
     </div>
 
     <!-- 教程模态框 -->
@@ -484,16 +639,22 @@
                         const ROWS = 20;
                         
                         // 游戏状态
+                        let gameMode = 'single-player'; // 'single-player' 或 'ai-battle'
                         let snake = [];
-                        let food = {};
+                        let aiSnake = [];
+                        let foods = []; // 多个食物
                         let direction = 'right';
                         let nextDirection = 'right';
+                        let aiDirection = 'left';
+                        let aiNextDirection = 'left';
                         let score = 0;
+                        let aiScore = 0;
                         let highScore = 0; // 初始化为0
                         let gameInterval;
                         let isPaused = false;
                         let gameOver = false;
                         let gameStarted = false; // 添加游戏是否真正开始的标志
+                        const MAX_FOODS = 5; // 最大食物数量
                         
                         // 异步加载高分
                         scoreManager.getHighScore('snake', 0).then(loadedHighScore => {
@@ -503,15 +664,34 @@
                         
                         // 初始化游戏
                         function initGame() {
-                            // 初始化蛇
+                            // 初始化玩家蛇（左上角）
                             snake = [
-                                {x: 10, y: 10},
-                                {x: 9, y: 10},
-                                {x: 8, y: 10}
+                                {x: 5, y: 5},
+                                {x: 4, y: 5},
+                                {x: 3, y: 5}
                             ];
                             
-                            // 生成食物
-                            generateFood();
+                            // 初始化AI蛇（右下角）
+                            if (gameMode === 'ai-battle') {
+                                aiSnake = [
+                                    {x: COLS - 5, y: ROWS - 5},
+                                    {x: COLS - 6, y: ROWS - 5},
+                                    {x: COLS - 7, y: ROWS - 5}
+                                ];
+                                aiDirection = 'left';
+                                aiNextDirection = 'left';
+                                aiScore = 0;
+                                document.getElementById('ai-score').textContent = aiScore;
+                                document.getElementById('ai-length').textContent = aiSnake.length;
+                                document.getElementById('game-status').textContent = '准备中';
+                            }
+                            
+                            // 清空食物数组
+                            foods = [];
+                            // 生成多个食物
+                            for (let i = 0; i < MAX_FOODS; i++) {
+                                generateFood();
+                            }
                             
                             // 重置游戏状态
                             direction = 'right';
@@ -535,24 +715,47 @@
                         function generateFood() {
                             let newFood;
                             let foodOnSnake;
+                            let foodOnFood;
                             
                             do {
                                 foodOnSnake = false;
+                                foodOnFood = false;
                                 newFood = {
                                     x: Math.floor(Math.random() * COLS),
                                     y: Math.floor(Math.random() * ROWS)
                                 };
                                 
-                                // 检查食物是否在蛇身上
+                                // 检查食物是否在玩家蛇身上
                                 for (let segment of snake) {
                                     if (segment.x === newFood.x && segment.y === newFood.y) {
                                         foodOnSnake = true;
                                         break;
                                     }
                                 }
-                            } while (foodOnSnake);
+                                
+                                // 检查食物是否在AI蛇身上
+                                if (!foodOnSnake && gameMode === 'ai-battle') {
+                                    for (let segment of aiSnake) {
+                                        if (segment.x === newFood.x && segment.y === newFood.y) {
+                                            foodOnSnake = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                // 检查食物是否在其他食物上
+                                if (!foodOnSnake) {
+                                    for (let existingFood of foods) {
+                                        if (existingFood.x === newFood.x && existingFood.y === newFood.y) {
+                                            foodOnFood = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            } while (foodOnSnake || foodOnFood);
                             
-                            food = newFood;
+                            // 添加到食物数组
+                            foods.push(newFood);
                         }
                         
                         // 绘制游戏板
@@ -567,7 +770,7 @@
                                     cell.className = 'cell';
                                     cell.id = `cell-${x}-${y}`;
                                     
-                                    // 检查是否是蛇的一部分
+                                    // 检查是否是玩家蛇的一部分
                                     for (let i = 0; i < snake.length; i++) {
                                         const segment = snake[i];
                                         if (segment.x === x && segment.y === y) {
@@ -579,9 +782,26 @@
                                         }
                                     }
                                     
+                                    // 检查是否是AI蛇的一部分
+                                    if (gameMode === 'ai-battle') {
+                                        for (let i = 0; i < aiSnake.length; i++) {
+                                            const segment = aiSnake[i];
+                                            if (segment.x === x && segment.y === y) {
+                                                cell.classList.add('snake-ai');
+                                                if (i === 0) { // AI蛇头
+                                                    cell.classList.add('snake-ai-head');
+                                                }
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    
                                     // 检查是否是食物
-                                    if (food.x === x && food.y === y) {
-                                        cell.classList.add('food');
+                                    for (let food of foods) {
+                                        if (food.x === x && food.y === y) {
+                                            cell.classList.add('food');
+                                            break;
+                                        }
                                     }
                                     
                                     boardElement.appendChild(cell);
@@ -647,11 +867,191 @@
                             }
                         }
                         
-                        // 移动蛇
+                        // 移动AI蛇
+                        function moveAiSnake() {
+                            if (gameMode !== 'ai-battle' || isPaused || gameOver || !gameStarted) return;
+                            
+                            // 更新AI方向
+                            aiDirection = aiNextDirection;
+                            
+                            // 生成AI决策
+                            const aiDecision = makeAiDecision();
+                            aiNextDirection = aiDecision;
+                            
+                            // 创建新AI蛇头
+                            const aiHead = {x: aiSnake[0].x, y: aiSnake[0].y};
+                            
+                            // 根据方向移动AI蛇头
+                            switch (aiNextDirection) {
+                                case 'up':
+                                    aiHead.y--;
+                                    break;
+                                case 'down':
+                                    aiHead.y++;
+                                    break;
+                                case 'left':
+                                    aiHead.x--;
+                                    break;
+                                case 'right':
+                                    aiHead.x++;
+                                    break;
+                            }
+                            
+                            // 检查AI蛇碰撞边界
+                            if (aiHead.x < 0 || aiHead.x >= COLS || aiHead.y < 0 || aiHead.y >= ROWS) {
+                                endGame('ai');
+                                return;
+                            }
+                            
+                            // 检查AI蛇碰撞自己
+                            for (let i = 0; i < aiSnake.length; i++) {
+                                if (aiSnake[i].x === aiHead.x && aiSnake[i].y === aiHead.y) {
+                                    endGame('ai');
+                                    return;
+                                }
+                            }
+                            
+                            // 检查AI蛇碰撞玩家蛇
+                            for (let i = 0; i < snake.length; i++) {
+                                if (snake[i].x === aiHead.x && snake[i].y === aiHead.y) {
+                                    // AI主动撞击玩家，AI死亡
+                                    endGame('ai');
+                                    return;
+                                }
+                            }
+                            
+                            // 将新AI蛇头添加到蛇身
+                            aiSnake.unshift(aiHead);
+                            
+                            // 检查AI是否吃到食物
+                            let foodEaten = false;
+                            for (let i = 0; i < foods.length; i++) {
+                                if (aiHead.x === foods[i].x && aiHead.y === foods[i].y) {
+                                    // 增加AI分数
+                                    aiScore += 10;
+                                    document.getElementById('ai-score').textContent = aiScore;
+                                    document.getElementById('ai-length').textContent = aiSnake.length;
+                                    
+                                    // 播放吃食物音效
+                                    playEatSound();
+                                    
+                                    // 从数组中移除被吃掉的食物
+                                    foods.splice(i, 1);
+                                    
+                                    // 生成新食物
+                                    generateFood();
+                                    
+                                    foodEaten = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (!foodEaten) {
+                                // 没吃到食物，移除AI蛇尾
+                                aiSnake.pop();
+                            }
+                            
+                            // 重绘游戏板
+                            drawBoard();
+                        }
+
+                        // AI决策逻辑
+                        function makeAiDecision() {
+                            const aiHead = aiSnake[0];
+                            const directions = ['up', 'down', 'left', 'right'];
+                            const validDirections = [];
+                            
+                            // 过滤掉会导致碰撞的方向
+                            for (let dir of directions) {
+                                const nextPos = {x: aiHead.x, y: aiHead.y};
+                                
+                                switch (dir) {
+                                    case 'up': nextPos.y--; break;
+                                    case 'down': nextPos.y++; break;
+                                    case 'left': nextPos.x--; break;
+                                    case 'right': nextPos.x++; break;
+                                }
+                                
+                                // 检查边界
+                                if (nextPos.x < 0 || nextPos.x >= COLS || nextPos.y < 0 || nextPos.y >= ROWS) {
+                                    continue;
+                                }
+                                
+                                // 检查碰撞自己
+                                let collision = false;
+                                for (let i = 0; i < aiSnake.length; i++) {
+                                    if (aiSnake[i].x === nextPos.x && aiSnake[i].y === nextPos.y) {
+                                        collision = true;
+                                        break;
+                                    }
+                                }
+                                
+                                // 检查碰撞玩家蛇
+                                if (!collision) {
+                                    for (let i = 0; i < snake.length; i++) {
+                                        if (snake[i].x === nextPos.x && snake[i].y === nextPos.y) {
+                                            collision = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                if (!collision) {
+                                    validDirections.push(dir);
+                                }
+                            }
+                            
+                            // 如果没有有效方向，返回当前方向
+                            if (validDirections.length === 0) {
+                                return aiDirection;
+                            }
+                            
+                            // 找到最近的食物
+                            let closestFood = null;
+                            let minFoodDistance = Number.MAX_VALUE;
+                            
+                            for (let food of foods) {
+                                const distance = Math.abs(aiHead.x - food.x) + Math.abs(aiHead.y - food.y);
+                                if (distance < minFoodDistance) {
+                                    minFoodDistance = distance;
+                                    closestFood = food;
+                                }
+                            }
+                            
+                            // 如果没有食物，返回当前方向
+                            if (!closestFood) {
+                                return aiDirection;
+                            }
+                            
+                            // 计算每个方向到最近食物的距离
+                            let bestDirection = validDirections[0];
+                            let minDistance = Number.MAX_VALUE;
+                            
+                            for (let dir of validDirections) {
+                                const nextPos = {x: aiHead.x, y: aiHead.y};
+                                
+                                switch (dir) {
+                                    case 'up': nextPos.y--; break;
+                                    case 'down': nextPos.y++; break;
+                                    case 'left': nextPos.x--; break;
+                                    case 'right': nextPos.x++; break;
+                                }
+                                
+                                const distance = Math.abs(nextPos.x - closestFood.x) + Math.abs(nextPos.y - closestFood.y);
+                                if (distance < minDistance) {
+                                    minDistance = distance;
+                                    bestDirection = dir;
+                                }
+                            }
+                            
+                            return bestDirection;
+                        }
+
+                        // 移动玩家蛇
                         function moveSnake() {
                             if (isPaused || gameOver || !gameStarted) return;
                             
-                            // 更新方向（确保在游戏未暂停或结束时才更新）
+                            // 更新方向
                             direction = nextDirection;
                             
                             // 创建新蛇头
@@ -675,15 +1075,26 @@
                             
                             // 检查碰撞边界
                             if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS) {
-                                endGame();
+                                endGame('player');
                                 return;
                             }
                             
                             // 检查碰撞自己
                             for (let i = 0; i < snake.length; i++) {
                                 if (snake[i].x === head.x && snake[i].y === head.y) {
-                                    endGame();
+                                    endGame('player');
                                     return;
+                                }
+                            }
+                            
+                            // 检查碰撞AI蛇
+                            if (gameMode === 'ai-battle') {
+                                for (let i = 0; i < aiSnake.length; i++) {
+                                    if (aiSnake[i].x === head.x && aiSnake[i].y === head.y) {
+                                        // 玩家主动撞击AI，玩家死亡
+                                        endGame('player');
+                                        return;
+                                    }
                                 }
                             }
                             
@@ -694,34 +1105,44 @@
                             playMoveSound();
                             
                             // 检查是否吃到食物
-                            if (head.x === food.x && head.y === food.y) {
-                                // 增加分数
-                                score += 10;
-                                document.getElementById('score').textContent = score;
-                                
-                                // 检查是否打破高分记录
-                                if (score > highScore) {
-                                    highScore = score;
-                                    scoreManager.updateHighScore('snake', highScore);
-                                    document.getElementById('high-score').textContent = highScore;
+                            let foodEaten = false;
+                            for (let i = 0; i < foods.length; i++) {
+                                if (head.x === foods[i].x && head.y === foods[i].y) {
+                                    // 增加分数
+                                    score += 10;
+                                    document.getElementById('score').textContent = score;
+                                    
+                                    // 检查是否打破高分记录
+                                    if (score > highScore) {
+                                        highScore = score;
+                                        scoreManager.updateHighScore('snake', highScore);
+                                        document.getElementById('high-score').textContent = highScore;
+                                    }
+                                    document.getElementById('length').textContent = snake.length;
+                                    
+                                    // 播放吃食物音效
+                                    playEatSound();
+                                    
+                                    // 从数组中移除被吃掉的食物
+                                    foods.splice(i, 1);
+                                    
+                                    // 生成新食物
+                                    generateFood();
+                                    
+                                    foodEaten = true;
+                                    break;
                                 }
-                                document.getElementById('length').textContent = snake.length;
-                                
-                                // 播放吃食物音效
-                                playEatSound();
-                                
-                                // 生成新食物
-                                generateFood();
-                                
-                                // 重绘游戏板（这会包含新食物）
-                                drawBoard();
-                            } else {
+                            }
+                            
+                            if (!foodEaten) {
                                 // 没吃到食物，移除蛇尾
                                 snake.pop();
                             }
                             
-                            // 重绘游戏板
-                            drawBoard();
+                            // 移动AI蛇
+                            if (gameMode === 'ai-battle') {
+                                moveAiSnake();
+                            }
                         }
                         
                         // 开始游戏
@@ -753,7 +1174,7 @@
                         }
                         
                         // 结束游戏
-                        function endGame() {
+                        function endGame(loser) {
                             // 先设置标志位，防止在游戏结束过程中仍有操作
                             gameOver = true;
                             gameStarted = false; // 游戏结束时设置为false
@@ -763,13 +1184,48 @@
                                 gameInterval = null;
                             }
                             
+                            // 显示游戏结果
+                            showGameResult(loser);
+                            
                             // 记录游戏结果
-                            scoreManager.recordGameResult('snake', 'loss', score);
+                            if (gameMode === 'single-player') {
+                                scoreManager.recordGameResult('snake', 'loss', score);
+                            } else {
+                                if (loser === 'player') {
+                                    scoreManager.recordGameResult('snake', 'loss', score);
+                                } else if (loser === 'ai') {
+                                    scoreManager.recordGameResult('snake', 'win', score);
+                                }
+                            }
                             
                             // 播放游戏结束音效
                             playGameOverSound();
+                        }
+
+                        // 显示游戏结果
+                        function showGameResult(loser) {
+                            const resultTitle = document.getElementById('result-title');
+                            const resultMessage = document.getElementById('result-message');
                             
-                            alert(`游戏结束！得分: ${score}`);
+                            if (gameMode === 'single-player') {
+                                resultTitle.textContent = '游戏结束';
+                                resultMessage.textContent = `得分: ${score}`;
+                            } else {
+                                if (loser === 'player') {
+                                    resultTitle.textContent = '你输了！';
+                                    resultMessage.textContent = `得分: ${score} | AI得分: ${aiScore}`;
+                                } else if (loser === 'ai') {
+                                    resultTitle.textContent = '你赢了！';
+                                    resultMessage.textContent = `得分: ${score} | AI得分: ${aiScore}`;
+                                } else {
+                                    resultTitle.textContent = '平局！';
+                                    resultMessage.textContent = `得分: ${score} | AI得分: ${aiScore}`;
+                                }
+                            }
+                            
+                            // 显示游戏结果界面
+                            document.getElementById('game-interface').style.display = 'none';
+                            document.getElementById('game-result').style.display = 'block';
                         }
                         
                         // 重置游戏
@@ -782,6 +1238,48 @@
                             initGame();
                             // 重置按钮文本为'开始'
                             document.getElementById('startBtn').textContent = '开始';
+                            // 显示游戏界面
+                            document.getElementById('game-result').style.display = 'none';
+                            document.getElementById('game-interface').style.display = 'block';
+                            // 显示AI统计信息（如果是AI对战模式）
+                            if (gameMode === 'ai-battle') {
+                                document.getElementById('ai-stats').style.display = 'flex';
+                            } else {
+                                document.getElementById('ai-stats').style.display = 'none';
+                            }
+                        }
+
+                        // 开始游戏（带模式选择）
+                        function startGameWithMode() {
+                            // 隐藏模式选择界面
+                            document.getElementById('mode-selector').style.display = 'none';
+                            // 显示游戏界面
+                            document.getElementById('game-interface').style.display = 'block';
+                            // 显示AI统计信息（如果是AI对战模式）
+                            if (gameMode === 'ai-battle') {
+                                document.getElementById('ai-stats').style.display = 'flex';
+                            } else {
+                                document.getElementById('ai-stats').style.display = 'none';
+                            }
+                            // 初始化游戏
+                            initGame();
+                        }
+
+                        // 显示模式选择界面
+                        function showModeSelector() {
+                            // 清除游戏间隔
+                            if (gameInterval) {
+                                clearInterval(gameInterval);
+                                gameInterval = null;
+                            }
+                            // 重置游戏状态
+                            gameStarted = false;
+                            gameOver = false;
+                            // 隐藏游戏界面和结果界面
+                            document.getElementById('game-interface').style.display = 'none';
+                            document.getElementById('game-result').style.display = 'none';
+                            // 显示模式选择界面
+                            document.getElementById('mode-selector').style.display = 'block';
                         }
                         
                         // 键盘事件处理
@@ -868,6 +1366,53 @@
                             enableAudioOnMobile(); // 启用移动端音频
                         });
                         
+                        // 游戏模式选择事件处理
+                        document.getElementById('single-player-btn').addEventListener('click', () => {
+                            gameMode = 'single-player';
+                            startGameWithMode();
+                            enableAudioOnMobile();
+                        });
+
+                        document.getElementById('ai-battle-btn').addEventListener('click', () => {
+                            gameMode = 'ai-battle';
+                            startGameWithMode();
+                            enableAudioOnMobile();
+                        });
+
+                        // 游戏模式选择悬停效果
+                        document.getElementById('single-player-btn').addEventListener('mouseenter', () => {
+                            document.getElementById('mode-description').innerHTML = '<p>单人模式：经典的贪吃蛇游戏，控制蛇吃掉食物并避免碰撞，挑战高分记录！</p>';
+                        });
+
+                        document.getElementById('ai-battle-btn').addEventListener('mouseenter', () => {
+                            document.getElementById('mode-description').innerHTML = '<p>AI对战模式：与AI控制的贪吃蛇进行对战，谁先撞到障碍物谁就输！</p>';
+                        });
+
+                        document.getElementById('single-player-btn').addEventListener('mouseleave', () => {
+                            document.getElementById('mode-description').innerHTML = '<p>选择一个游戏模式开始游戏</p>';
+                        });
+
+                        document.getElementById('ai-battle-btn').addEventListener('mouseleave', () => {
+                            document.getElementById('mode-description').innerHTML = '<p>选择一个游戏模式开始游戏</p>';
+                        });
+
+                        // 更换模式按钮事件处理
+                        document.getElementById('change-mode-btn').addEventListener('click', () => {
+                            showModeSelector();
+                            enableAudioOnMobile();
+                        });
+
+                        // 游戏结果界面按钮事件处理
+                        document.getElementById('play-again-btn').addEventListener('click', () => {
+                            resetGame();
+                            enableAudioOnMobile();
+                        });
+
+                        document.getElementById('change-mode-result-btn').addEventListener('click', () => {
+                            showModeSelector();
+                            enableAudioOnMobile();
+                        });
+
                         // 按钮事件处理
                         document.getElementById('startBtn').addEventListener('click', () => {
                             toggleGame();

@@ -6,7 +6,7 @@
 let globalSupabaseClient = null;
 
 // 游戏数据
-const games = {
+const gameData = {
     tetris: {
         title: '俄罗斯方块',
         description: '经典益智游戏，考验你的空间思维能力',
@@ -165,7 +165,7 @@ function handleGameCardClick(card, e) {
             return;
         }
         
-        const game = games[gameId];
+        const game = gameData[gameId];
         if (!game) {
             console.error(`游戏数据不存在: ${gameId}`);
             alert('游戏数据加载失败，请刷新页面重试');
@@ -221,6 +221,35 @@ window.loadConfigAndSupabase = function() {
     document.head.appendChild(configScript);
 };
 
+// 随机选择一个游戏并跳转到该游戏页面
+function startRandomGame() {
+    try {
+        // 获取所有游戏ID
+        const gameIds = Object.keys(games);
+        
+        if (gameIds.length === 0) {
+            console.error('没有可用的游戏');
+            return;
+        }
+        
+        // 随机选择一个游戏ID
+        const randomIndex = Math.floor(Math.random() * gameIds.length);
+        const randomGameId = gameIds[randomIndex];
+        const randomGame = games[randomGameId];
+        
+        if (!randomGame || !randomGame.url) {
+            console.error(`游戏数据无效: ${randomGameId}`);
+            return;
+        }
+        
+        console.log(`随机选择游戏: ${randomGame.title} (${randomGameId})`);
+        // 跳转到游戏页面
+        window.location.href = randomGame.url;
+    } catch (error) {
+        console.error('随机选择游戏时出错:', error);
+    }
+}
+
 // 启动初始化
 initGameCardsWithRetry();
 
@@ -235,6 +264,9 @@ if (typeof window.AppConfig === 'undefined' || !window.AppConfig || !window.AppC
     // 然后尝试初始化排行榜功能
     window.initializeLeaderboard();
 }
+
+// 将函数暴露到全局，以便在HTML中调用
+window.startRandomGame = startRandomGame;
 
 // 验证Supabase连接的函数
 window.validateSupabaseConnection = async function() {

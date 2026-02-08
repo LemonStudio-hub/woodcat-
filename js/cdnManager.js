@@ -121,7 +121,7 @@ class CDNManager {
                     }
                     this.logger.warn(`${libName} 从 ${this.mirrors[mirrorName].name} 加载失败，尝试下一个镜像源`);
                 } catch (error) {
-                    this.logger.error(`${libName} 从 ${this.mirrors[mirrorName].name} 加载出错:`, error);
+                    this.logger.warn(`${libName} 从 ${this.mirrors[mirrorName].name} 加载出错:`, error);
                 }
             }
         }
@@ -138,7 +138,7 @@ class CDNManager {
                 }
                 this.logger.warn(`${libName} 从本地备份加载失败`);
             } catch (error) {
-                this.logger.error(`${libName} 从本地备份加载出错:`, error);
+                this.logger.warn(`${libName} 从本地备份加载出错:`, error);
             }
         }
         
@@ -163,23 +163,26 @@ class CDNManager {
             
             // 加载成功
             script.onload = () => {
+                script.__loaded = true;
                 this.logger.info(`脚本 ${url} 加载成功`);
                 resolve(true);
             };
             
             // 加载失败
             script.onerror = () => {
-                this.logger.error(`脚本 ${url} 加载失败`);
+                script.__loaded = true;
+                this.logger.warn(`脚本 ${url} 加载失败`);
                 resolve(false);
             };
             
-            // 加载超时
+            // 加载超时 - 减少超时时间以更快处理ORB错误
             setTimeout(() => {
                 if (!script.__loaded) {
-                    this.logger.error(`脚本 ${url} 加载超时`);
+                    script.__loaded = true;
+                    this.logger.warn(`脚本 ${url} 加载超时`);
                     resolve(false);
                 }
-            }, 10000); // 10秒超时
+            }, 5000); // 5秒超时，更快处理ORB错误
             
             document.head.appendChild(script);
         });

@@ -33,7 +33,7 @@
             padding: 15px;
             width: 100%;
             max-width: 400px;
-            height: 100vh;
+            min-height: 80vh;
             max-height: none;
             position: relative;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -85,18 +85,17 @@
             grid-template-columns: repeat(10, 1fr);
             grid-template-rows: repeat(20, 1fr); /* 20行，符合10x20网格 */
             width: 100%;
-            aspect-ratio: 0.5; /* 保持2:1的比例（宽:高） */
-            max-height: min(45vh, 400px); /* 最大高度限制 */
-            min-height: 250px; /* 最小高度保证 */
+            aspect-ratio: 1/2; /* 确保游戏板的宽高比为1:2，与10x20网格匹配 */
+            min-height: 300px; /* 增加最小高度，确保完整显示 */
+            max-height: 500px; /* 增加最大高度限制 */
             border: 2px solid #3498db;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             margin-bottom: 10px;
             padding: 2px;
             border-radius: 8px;
             position: relative;
-            overflow: hidden;
+            overflow: visible; /* 确保内容不被裁剪 */
             box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
-            aspect-ratio: 1/2; /* 确保游戏板的宽高比为1:2，与10x20网格匹配 */
         }
         
         .game-board::before {
@@ -340,10 +339,12 @@
             .game-container {
                 max-width: 420px;
                 max-height: none;
+                min-height: 85vh;
             }
             
             .game-board {
-                max-height: min(42vh, 380px);
+                min-height: 350px;
+                max-height: 400px;
             }
             
             h1 {
@@ -374,7 +375,7 @@
             
             .game-container {
                 padding: 10px;
-                height: 100vh;
+                min-height: 100vh;
                 max-height: 100vh;
                 border-radius: 0;
                 padding-top: 50px; /* 为返回按钮留出空间 */
@@ -382,8 +383,8 @@
             }
             
             .game-board {
-                max-height: min(38vh, 320px);
-                min-height: 220px;
+                min-height: 280px;
+                max-height: 350px;
             }
             
             h1 {
@@ -473,10 +474,12 @@
             .game-container {
                 max-width: 480px;
                 max-height: none;
+                min-height: 80vh;
             }
             
             .game-board {
-                max-height: min(45vh, 420px);
+                min-height: 400px;
+                max-height: 450px;
             }
             
             h1 {
@@ -502,6 +505,7 @@
                 align-items: flex-start;
                 padding: 10px;
                 padding-top: 45px;
+                min-height: 100vh;
             }
             
             h1 {
@@ -517,7 +521,8 @@
             }
             
             .game-board {
-                max-height: min(70vh, 380px);
+                min-height: 250px;
+                max-height: 380px;
                 margin-bottom: 8px;
             }
             
