@@ -105,5 +105,4 @@ body {
 /* 优化图片加载 */
 img {
   content-visibility: auto;
-  loading: lazy;
 }

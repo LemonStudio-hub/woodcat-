@@ -398,6 +398,57 @@
     <!-- 排行榜相关脚本（动态加载） -->
     <!-- 使用cdnLoader.js覆盖默认的配置和Supabase库加载方式 -->
 
+    <!-- PWA添加引导模态框 -->
+    <div class="modal-overlay" id="pwa-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加到主屏幕</h3>
+                <button class="modal-close" id="pwa-modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>您已经游玩了多个游戏，是否将木头猫游戏合集添加到主屏幕，以便更方便地访问？</p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-primary" id="pwa-yes">是</button>
+                <button class="btn-secondary" id="pwa-no">否</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设备类型选择模态框 -->
+    <div class="modal-overlay" id="device-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>选择设备类型</h3>
+                <button class="modal-close" id="device-modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>请选择您的设备类型，我们将为您提供相应的添加引导：</p>
+                <div style="display: flex; gap: 20px; justify-content: center; margin-top: 20px;">
+                    <button class="btn-primary" style="padding: 20px;" id="device-iphone">iPhone/iPad</button>
+                    <button class="btn-primary" style="padding: 20px;" id="device-android">Android</button>
+                    <button class="btn-primary" style="padding: 20px;" id="device-desktop">桌面端</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加引导模态框 -->
+    <div class="modal-overlay" id="guide-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加到主屏幕引导</h3>
+                <button class="modal-close" id="guide-modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="guide-content">
+                <!-- 引导内容将通过JavaScript动态添加 -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn-primary" id="guide-close">我知道了</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 版权声明 -->
     <div class="copyright-notice">
         <p data-i18n="copyright">&copy; 2026 木头猫 - 保留所有权利</p>
@@ -408,7 +459,7 @@
         // Register Service Worker for PWA functionality
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/service-worker.js')
+                navigator.serviceWorker.register('/public/service-worker.js')
                     .then(function(registration) {
                         console.log('Service Worker registered with scope:', registration.scope);
                     })

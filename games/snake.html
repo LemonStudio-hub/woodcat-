@@ -1169,6 +1169,9 @@
                             // 移动AI蛇
                             if (gameMode === 'ai-battle') {
                                 moveAiSnake();
+                            } else {
+                                // 单人模式下，直接重绘游戏板
+                                drawBoard();
                             }
                         }
                         

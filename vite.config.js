@@ -33,6 +33,8 @@ export default defineConfig({
         'tic-tac-toe': './games/tic-tac-toe.html',
         'memory-card': './games/memory-card.html',
         arkanoid: './games/arkanoid.html',
+        'spider-solitaire': './games/spider-solitaire.html',
+        'tank-battle': './games/tank-battle.html',
       },
       output: {
         manualChunks: {

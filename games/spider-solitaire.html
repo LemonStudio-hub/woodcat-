@@ -456,6 +456,7 @@
                 this.tableau = Array(10).fill().map(() => []);
                 this.selectedCard = null;
                 this.selectedColumn = null;
+                this.selectedCardIndex = null;
                 this.movesHistory = [];
                 this.gameOver = false;
                 
@@ -642,14 +643,16 @@
                 // 如果已经选择了一张牌，尝试移动
                 if (this.selectedCard) {
                     if (this.canMove(this.selectedCard, card)) {
-                        this.moveCard(this.selectedColumn, this.selectedCard, columnIndex, cardIndex);
+                        this.moveCard(this.selectedColumn, this.selectedCardIndex, columnIndex, cardIndex);
                     }
                     this.selectedCard = null;
                     this.selectedColumn = null;
+                    this.selectedCardIndex = null;
                 } else {
                     // 选择新牌
                     this.selectedCard = card;
                     this.selectedColumn = columnIndex;
+                    this.selectedCardIndex = cardIndex;
                 }
                 
                 this.renderBoard();
@@ -660,14 +663,15 @@
                 return fromCard.value === toCard.value - 1 && fromCard.suit === toCard.suit;
             }
             
-            moveCard(fromColumn, fromCard, toColumn, toCard) {
+            moveCard(fromColumn, fromCardIndex, toColumn, toCardIndex) {
                 // 找到要移动的牌及其下方的所有牌
                 const fromCol = this.tableau[fromColumn];
-                const cardIndex = fromCol.indexOf(fromCard);
-                const cardsToMove = fromCol.slice(cardIndex);
+                const cardsToMove = fromCol.slice(fromCardIndex);
+                const fromCard = fromCol[fromCardIndex];
+                const toCard = this.tableau[toColumn][toCardIndex];
                 
                 // 从原列移除
-                fromCol.splice(cardIndex);
+                fromCol.splice(fromCardIndex);
                 
                 // 添加到目标列
                 this.tableau[toColumn].push(...cardsToMove);

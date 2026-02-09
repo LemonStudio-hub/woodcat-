@@ -11,40 +11,7 @@
             box-sizing: border-box;
         }
         
-        /* 横屏提示样式 */
-        .landscape-warning {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #2c3e50;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .landscape-warning.show {
-            display: flex;
-        }
-        
-        .landscape-warning i {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            animation: rotateDevice 2s ease-in-out infinite;
-        }
-        
-        @keyframes rotateDevice {
-            0% { transform: rotate(0deg); }
-            50% { transform: rotate(90deg); }
-            100% { transform: rotate(0deg); }
-        }
+
         
         body {
             font-family: 'Noto Sans SC', sans-serif;
@@ -900,13 +867,7 @@
         </div>
     </div>
     
-    <!-- 横屏提示 -->
-    <div class="landscape-warning" id="landscape-warning">
-        <i>📱</i>
-        <h2>请将设备横屏</h2>
-        <p>为了获得最佳游戏体验，请将您的设备旋转至横屏模式</p>
-        <button class="device-btn secondary" id="skip-landscape-btn" style="margin-top: 20px;">跳过横屏</button>
-    </div>
+
     
     <a class="back-home" href="../index.html">←</a>
     <div class="game-container">
@@ -1026,16 +987,44 @@
     <script src="../js/logger.js"></script>
     <script src="../js/dataManager.js"></script>
     <script src="../js/scoreManager.js"></script>
+    <script src="../js/audioVibration.js"></script>
+    <script src="../js/i18n.js"></script>
+    <script>
+        // 等待i18n初始化并应用翻译
+        function waitForI18nAndApplyTranslations() {
+            let attempts = 0;
+            const maxAttempts = 10;
+            const interval = 200;
+
+            function checkI18n() {
+                attempts++;
+                if (window.i18n) {
+                    window.i18n.applyTranslations();
+                } else if (attempts < maxAttempts) {
+                    setTimeout(checkI18n, interval);
+                }
+            }
+
+            checkI18n();
+        }
+
+        // 在DOM加载完成后应用翻译
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', waitForI18nAndApplyTranslations);
+        } else {
+            waitForI18nAndApplyTranslations();
+        }
+    </script>
     <script>
         // 坦克对战游戏核心逻辑
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM加载完成，开始初始化坦克对战游戏');
             // ==========================================
             // 设备检测和横屏检测
             // ==========================================
             
             // 全局变量
             let userDeviceType = null; // 'pc', 'mobile', or null
-            let skipLandscapeCheck = false;
             
             // 检测设备类型
             function detectDevice() {
@@ -1048,30 +1037,6 @@
                     document.body.classList.remove('mobile');
                 }
                 return isMobile;
-            }
-            
-            // 检测横屏状态
-            function checkOrientation() {
-                const landscapeWarning = document.getElementById('landscape-warning');
-                const isMobile = detectDevice();
-                
-                if (skipLandscapeCheck) {
-                    landscapeWarning.classList.remove('show');
-                    return;
-                }
-                
-                if (isMobile && userDeviceType === 'mobile') {
-                    if (window.innerHeight > window.innerWidth) {
-                        // 竖屏，显示提示
-                        landscapeWarning.classList.add('show');
-                    } else {
-                        // 横屏，隐藏提示
-                        landscapeWarning.classList.remove('show');
-                    }
-                } else {
-                    // 非移动设备或用户选择了PC，始终隐藏提示
-                    landscapeWarning.classList.remove('show');
-                }
             }
             
             // 显示设备类型询问模态框
@@ -1090,33 +1055,10 @@
             function handleDeviceSelection(deviceType) {
                 userDeviceType = deviceType;
                 hideDeviceModal();
-                
-                // 根据设备类型设置
-                if (deviceType === 'pc') {
-                    // PC设备，跳过横屏检测
-                    skipLandscapeCheck = true;
-                } else if (deviceType === 'mobile') {
-                    // 移动设备，检查横屏
-                    skipLandscapeCheck = false;
-                }
-                
-                // 初始化检测
-                checkOrientation();
-            }
-            
-            // 跳过横屏检测
-            function skipLandscapeCheckFunc() {
-                skipLandscapeCheck = true;
-                document.getElementById('landscape-warning').classList.remove('show');
             }
             
             // 初始化设备检测
             detectDevice();
-            checkOrientation();
-            
-            // 监听窗口大小变化和旋转
-            window.addEventListener('resize', checkOrientation);
-            window.addEventListener('orientationchange', checkOrientation);
             
             // 设备类型询问模态框事件监听
             document.getElementById('pc-btn').addEventListener('click', () => {
@@ -1133,32 +1075,33 @@
                 userDeviceType = detectDevice() ? 'mobile' : 'pc';
             });
             
-            // 跳过横屏按钮事件监听
-            document.getElementById('skip-landscape-btn').addEventListener('click', skipLandscapeCheckFunc);
-            
             // 显示设备类型询问模态框
             showDeviceModal();
             
             // ==========================================
-            // 游戏常量和状态
-            // ==========================================
-            
-            // 游戏板尺寸
-            let BOARD_WIDTH = 0;
-            let BOARD_HEIGHT = 0;
-            
-            // 游戏状态变量
-            let gameMode = 'two-player'; // 游戏模式：two-player 或 single-player
-            let currentDifficulty = 'easy'; // 当前难度级别
-            let isGameStarted = false; // 游戏是否开始
-            let isPaused = false; // 游戏是否暂停
-            let gameInterval; // 游戏循环ID
-            let player1Score = 0; // 玩家1得分
-            let player2Score = 0; // 玩家2得分
-            let round = 1; // 当前回合
-            let gameTime = 60; // 每回合时间（秒）
-            let timeLeft = gameTime; // 剩余时间
-            let timeInterval; // 时间计时器ID
+        // 游戏常量和状态
+        // ==========================================
+        
+        // 游戏板尺寸
+        let BOARD_WIDTH = 0;
+        let BOARD_HEIGHT = 0;
+        
+        // 游戏状态变量
+        let gameMode = 'two-player'; // 游戏模式：two-player 或 single-player
+        let currentDifficulty = 'easy'; // 当前难度级别
+        let isGameStarted = false; // 游戏是否开始
+        let isPaused = false; // 游戏是否暂停
+        let gameInterval; // 游戏循环ID
+        let player1Score = 0; // 玩家1得分
+        let player2Score = 0; // 玩家2得分
+        let round = 1; // 当前回合
+        let gameTime = 60; // 每回合时间（秒）
+        let timeLeft = gameTime; // 剩余时间
+        let timeInterval; // 时间计时器ID
+        
+        // 音频相关
+        let audioContext = null;
+        let audioInitialized = false;
             
             // 坦克状态
             let tanks = [];
@@ -1173,15 +1116,70 @@
             // 游戏板元素
             const gameBoard = document.getElementById('game-board');
             
+            // 音频相关函数
+            function initAudio() {
+                if (audioInitialized) return;
+                
+                try {
+                    // 创建音频上下文
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    audioInitialized = true;
+                } catch (e) {
+                    console.log('Audio not supported');
+                    audioInitialized = false;
+                }
+            }
+            
+            // 恢复音频上下文 - 在用户交互后调用
+            function resumeAudioContext() {
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            }
+            
+            // 移动端音频初始化 - 用户交互后激活音频
+            function enableAudioOnMobile() {
+                if (audioInitialized) return;
+                
+                // 在用户交互后初始化音频
+                initAudio(); // 首先初始化音频上下文
+                
+                // 然后在后续交互中恢复音频上下文
+                document.addEventListener('touchstart', resumeAudioContext);
+                document.addEventListener('click', resumeAudioContext);
+            }
+            
+            // 创建开火音效
+            function playFireSound() {
+                if (gameAudioVibration) {
+                    gameAudioVibration.playClickSound();
+                }
+            }
+            
+            // 创建爆炸音效
+            function playExplosionSound() {
+                if (gameAudioVibration) {
+                    gameAudioVibration.playLoseSound();
+                }
+            }
+            
+            // 创建得分音效
+            function playScoreSound() {
+                if (gameAudioVibration) {
+                    gameAudioVibration.playSuccessSound();
+                }
+            }
+            
             // ==========================================
             // 初始化游戏
-            // ==========================================
+            // =========================================
             
             function initGame() {
                 // 获取游戏板尺寸
                 const rect = gameBoard.getBoundingClientRect();
-                BOARD_WIDTH = rect.width || 400; // 默认宽度
-                BOARD_HEIGHT = rect.height || 400; // 默认高度
+                BOARD_WIDTH = rect.width > 0 ? rect.width : 400; // 默认宽度
+                BOARD_HEIGHT = rect.height > 0 ? rect.height : 400; // 默认高度
                 console.log(`游戏板尺寸: ${BOARD_WIDTH}x${BOARD_HEIGHT}`);
                 
                 // 重置游戏状态
@@ -1207,6 +1205,9 @@
                 document.getElementById('startBtn').disabled = false;
                 document.getElementById('pauseBtn').disabled = true;
                 document.getElementById('resetBtn').disabled = true;
+                
+                // 初始化音频
+                initAudio();
             }
             
             function clearGameBoard() {
@@ -1343,31 +1344,83 @@
             }
             
             function createWalls() {
-                // 创建随机墙壁
-                const wallCount = Math.floor(Math.random() * 5) + 5;
+                // 增加障碍物数量并确保分布均匀
+                const wallCount = Math.floor(Math.random() * 6) + 10; // 生成10-15个墙壁
+                
+                // 使用网格系统确保均匀分布
+                const gridCols = 4;
+                const gridRows = 4;
+                const gridWidth = BOARD_WIDTH / gridCols;
+                const gridHeight = BOARD_HEIGHT / gridRows;
+                const gridUsed = Array(gridCols * gridRows).fill(false);
                 
                 for (let i = 0; i < wallCount; i++) {
-                    const wall = {
-                        element: document.createElement('div'),
-                        x: Math.random() * (BOARD_WIDTH - 60) + 30,
-                        y: Math.random() * (BOARD_HEIGHT - 60) + 30,
-                        width: Math.random() * 30 + 20,
-                        height: Math.random() * 30 + 20,
-                        health: 100
-                    };
+                    let wall;
+                    let placed = false;
                     
-                    // 避免墙壁出现在坦克初始位置
-                    if (Math.abs(wall.x - 50) < 60 && Math.abs(wall.y - BOARD_HEIGHT / 2) < 60) continue;
-                    if (Math.abs(wall.x - (BOARD_WIDTH - 90)) < 60 && Math.abs(wall.y - BOARD_HEIGHT / 2) < 60) continue;
+                    // 尝试最多10次找到合适位置
+                    for (let attempt = 0; attempt < 10; attempt++) {
+                        let gridX, gridY, gridIndex;
+                        
+                        // 优先选择未使用的网格区域
+                        if (i < gridCols * gridRows) {
+                            // 为前几个墙壁分配到不同网格
+                            gridX = i % gridCols;
+                            gridY = Math.floor(i / gridCols);
+                            gridIndex = gridY * gridCols + gridX;
+                            gridUsed[gridIndex] = true;
+                        } else {
+                            // 后续墙壁随机选择网格
+                            gridX = Math.floor(Math.random() * gridCols);
+                            gridY = Math.floor(Math.random() * gridRows);
+                            gridIndex = gridY * gridCols + gridX;
+                        }
+                        
+                        // 在选中的网格区域内生成墙壁位置
+                        const x = gridX * gridWidth + Math.random() * (gridWidth - 60) + 20;
+                        const y = gridY * gridHeight + Math.random() * (gridHeight - 60) + 20;
+                        
+                        wall = {
+                            element: document.createElement('div'),
+                            x: x,
+                            y: y,
+                            width: Math.random() * 30 + 20,
+                            height: Math.random() * 30 + 20,
+                            health: 100
+                        };
+                        
+                        // 避免墙壁出现在坦克初始位置
+                        if (Math.abs(wall.x - 50) < 60 && Math.abs(wall.y - BOARD_HEIGHT / 2) < 60) continue;
+                        if (Math.abs(wall.x - (BOARD_WIDTH - 90)) < 60 && Math.abs(wall.y - BOARD_HEIGHT / 2) < 60) continue;
+                        
+                        // 检查与其他墙壁的碰撞
+                        let collision = false;
+                        for (const existingWall of walls) {
+                            if (checkRectCollision(
+                                wall.x, wall.y, wall.width, wall.height,
+                                existingWall.x, existingWall.y, existingWall.width, existingWall.height
+                            )) {
+                                collision = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!collision) {
+                            placed = true;
+                            break;
+                        }
+                    }
                     
-                    wall.element.className = 'wall';
-                    wall.element.style.left = `${wall.x}px`;
-                    wall.element.style.top = `${wall.y}px`;
-                    wall.element.style.width = `${wall.width}px`;
-                    wall.element.style.height = `${wall.height}px`;
-                    
-                    gameBoard.appendChild(wall.element);
-                    walls.push(wall);
+                    if (placed) {
+                        wall.element.className = 'wall';
+                        wall.element.style.left = `${wall.x}px`;
+                        wall.element.style.top = `${wall.y}px`;
+                        wall.element.style.width = `${wall.width}px`;
+                        wall.element.style.height = `${wall.height}px`;
+                        
+                        gameBoard.appendChild(wall.element);
+                        walls.push(wall);
+                    }
                 }
             }
             
@@ -1432,19 +1485,21 @@
                 if (tank1.isPlayer) {
                     // 移动控制
                     if (keys['w']) {
-                        moveTank(tank1, 0);
+                        moveTank(tank1, 270);
                     } else if (keys['s']) {
-                        moveTank(tank1, 180);
+                        moveTank(tank1, 90);
                     }
                     if (keys['a']) {
-                        moveTank(tank1, 270);
+                        moveTank(tank1, 180);
                     } else if (keys['d']) {
-                        moveTank(tank1, 90);
+                        moveTank(tank1, 0);
                     }
                     
                     // 炮塔控制
                     if (keys['q']) {
                         tank1.turretDirection -= 5;
+                        // 角度归一化，确保值在 0-360 度之间
+                        tank1.turretDirection = (tank1.turretDirection + 360) % 360;
                         tank1.turret.style.transform = `translate(0, -50%) rotate(${tank1.turretDirection}deg)`;
                         // 添加旋转动画
                         tank1.turret.classList.add('rotating');
@@ -1453,6 +1508,8 @@
                         }, 200);
                     } else if (keys['e']) {
                         tank1.turretDirection += 5;
+                        // 角度归一化，确保值在 0-360 度之间
+                        tank1.turretDirection = (tank1.turretDirection + 360) % 360;
                         tank1.turret.style.transform = `translate(0, -50%) rotate(${tank1.turretDirection}deg)`;
                         // 添加旋转动画
                         tank1.turret.classList.add('rotating');
@@ -1473,19 +1530,21 @@
                 if (tank2.isPlayer) {
                     // 移动控制
                     if (player2Keys['ArrowUp']) {
-                        moveTank(tank2, 0);
+                        moveTank(tank2, 270);
                     } else if (player2Keys['ArrowDown']) {
-                        moveTank(tank2, 180);
+                        moveTank(tank2, 90);
                     }
                     if (player2Keys['ArrowLeft']) {
-                        moveTank(tank2, 270);
+                        moveTank(tank2, 180);
                     } else if (player2Keys['ArrowRight']) {
-                        moveTank(tank2, 90);
+                        moveTank(tank2, 0);
                     }
                     
                     // 炮塔控制
                     if (player2Keys['[']) {
                         tank2.turretDirection -= 5;
+                        // 角度归一化，确保值在 0-360 度之间
+                        tank2.turretDirection = (tank2.turretDirection + 360) % 360;
                         tank2.turret.style.transform = `translate(0, -50%) rotate(${tank2.turretDirection}deg)`;
                         // 添加旋转动画
                         tank2.turret.classList.add('rotating');
@@ -1494,6 +1553,8 @@
                         }, 200);
                     } else if (player2Keys[']']) {
                         tank2.turretDirection += 5;
+                        // 角度归一化，确保值在 0-360 度之间
+                        tank2.turretDirection = (tank2.turretDirection + 360) % 360;
                         tank2.turret.style.transform = `translate(0, -50%) rotate(${tank2.turretDirection}deg)`;
                         // 添加旋转动画
                         tank2.turret.classList.add('rotating');
@@ -1516,6 +1577,7 @@
                 tank.element.style.transform = `rotate(${tank.direction}deg)`;
                 
                 // 计算移动向量
+                // 调整角度计算，确保方向正确
                 const radians = (direction * Math.PI) / 180;
                 const dx = Math.cos(radians) * tank.speed;
                 const dy = Math.sin(radians) * tank.speed;
@@ -1581,6 +1643,9 @@
                 
                 gameBoard.appendChild(bullet.element);
                 bullets.push(bullet);
+                
+                // 播放开火音效
+                playFireSound();
             }
             
             function updateBullets() {
@@ -1638,11 +1703,17 @@
                             // 创建爆炸效果
                             createExplosion(bullet.x, bullet.y);
                             
+                            // 播放爆炸音效
+                            playExplosionSound();
+                            
                             // 检查坦克是否被摧毁
                             if (tank.health <= 0) {
                                 // 增加击中者得分
                                 bullet.owner.score += 10;
                                 updateScores();
+                                
+                                // 播放得分音效
+                                playScoreSound();
                                 
                                 // 重置坦克位置
                                 resetTank(tank);
@@ -1716,6 +1787,8 @@
                 
                 // 旋转炮塔朝向玩家
                 aiTank.turretDirection = angle;
+                // 角度归一化，确保值在 0-360 度之间
+                aiTank.turretDirection = (aiTank.turretDirection + 360) % 360;
                 aiTank.turret.style.transform = `translate(0, -50%) rotate(${aiTank.turretDirection}deg)`;
                 // 添加旋转动画
                 aiTank.turret.classList.add('rotating');
@@ -1833,8 +1906,8 @@
             function startRound() {
                 // 重新获取游戏板尺寸，确保准确性
                 const rect = gameBoard.getBoundingClientRect();
-                BOARD_WIDTH = rect.width || 400;
-                BOARD_HEIGHT = rect.height || 400;
+                BOARD_WIDTH = rect.width > 0 ? rect.width : 400;
+                BOARD_HEIGHT = rect.height > 0 ? rect.height : 400;
                 console.log(`开始回合 - 游戏板尺寸: ${BOARD_WIDTH}x${BOARD_HEIGHT}`);
                 
                 // 清除游戏板
@@ -1942,6 +2015,9 @@
             
             // 开始按钮
             document.getElementById('startBtn').addEventListener('click', () => {
+                // 启用音频（移动端需要用户交互后才能播放音频）
+                enableAudioOnMobile();
+                
                 if (!isGameStarted) {
                     isGameStarted = true;
                     startRound();
@@ -2040,10 +2116,14 @@
                             break;
                         case 'rotate-left':
                             tank1.turretDirection -= 15;
+                            // 角度归一化，确保值在 0-360 度之间
+                            tank1.turretDirection = (tank1.turretDirection + 360) % 360;
                             tank1.turret.style.transform = `translate(0, -50%) rotate(${tank1.turretDirection}deg)`;
                             break;
                         case 'rotate-right':
                             tank1.turretDirection += 15;
+                            // 角度归一化，确保值在 0-360 度之间
+                            tank1.turretDirection = (tank1.turretDirection + 360) % 360;
                             tank1.turret.style.transform = `translate(0, -50%) rotate(${tank1.turretDirection}deg)`;
                             break;
                     }
