@@ -1576,6 +1576,12 @@
                 tank.direction = direction;
                 tank.element.style.transform = `rotate(${tank.direction}deg)`;
                 
+                // 同步更新炮塔方向，使其与坦克移动方向一致
+                tank.turretDirection = direction;
+                // 角度归一化，确保值在 0-360 度之间
+                tank.turretDirection = (tank.turretDirection + 360) % 360;
+                tank.turret.style.transform = `translate(0, -50%) rotate(${tank.turretDirection}deg)`;
+                
                 // 计算移动向量
                 // 调整角度计算，确保方向正确
                 const radians = (direction * Math.PI) / 180;
