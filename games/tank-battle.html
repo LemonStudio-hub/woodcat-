@@ -1498,6 +1498,8 @@
                     // 炮塔控制
                     if (keys['q']) {
                         tank1.turretDirection -= 5;
+                        // 角度归一化，确保值在 0-360 度之间
+                        tank1.turretDirection = (tank1.turretDirection + 360) % 360;
                         tank1.turret.style.transform = `translate(0, -50%) rotate(${tank1.turretDirection}deg)`;
                         // 添加旋转动画
                         tank1.turret.classList.add('rotating');
@@ -1506,6 +1508,8 @@
                         }, 200);
                     } else if (keys['e']) {
                         tank1.turretDirection += 5;
+                        // 角度归一化，确保值在 0-360 度之间
+                        tank1.turretDirection = (tank1.turretDirection + 360) % 360;
                         tank1.turret.style.transform = `translate(0, -50%) rotate(${tank1.turretDirection}deg)`;
                         // 添加旋转动画
                         tank1.turret.classList.add('rotating');
@@ -1539,6 +1543,8 @@
                     // 炮塔控制
                     if (player2Keys['[']) {
                         tank2.turretDirection -= 5;
+                        // 角度归一化，确保值在 0-360 度之间
+                        tank2.turretDirection = (tank2.turretDirection + 360) % 360;
                         tank2.turret.style.transform = `translate(0, -50%) rotate(${tank2.turretDirection}deg)`;
                         // 添加旋转动画
                         tank2.turret.classList.add('rotating');
@@ -1547,6 +1553,8 @@
                         }, 200);
                     } else if (player2Keys[']']) {
                         tank2.turretDirection += 5;
+                        // 角度归一化，确保值在 0-360 度之间
+                        tank2.turretDirection = (tank2.turretDirection + 360) % 360;
                         tank2.turret.style.transform = `translate(0, -50%) rotate(${tank2.turretDirection}deg)`;
                         // 添加旋转动画
                         tank2.turret.classList.add('rotating');
@@ -1779,6 +1787,8 @@
                 
                 // 旋转炮塔朝向玩家
                 aiTank.turretDirection = angle;
+                // 角度归一化，确保值在 0-360 度之间
+                aiTank.turretDirection = (aiTank.turretDirection + 360) % 360;
                 aiTank.turret.style.transform = `translate(0, -50%) rotate(${aiTank.turretDirection}deg)`;
                 // 添加旋转动画
                 aiTank.turret.classList.add('rotating');
@@ -2106,10 +2116,14 @@
                             break;
                         case 'rotate-left':
                             tank1.turretDirection -= 15;
+                            // 角度归一化，确保值在 0-360 度之间
+                            tank1.turretDirection = (tank1.turretDirection + 360) % 360;
                             tank1.turret.style.transform = `translate(0, -50%) rotate(${tank1.turretDirection}deg)`;
                             break;
                         case 'rotate-right':
                             tank1.turretDirection += 15;
+                            // 角度归一化，确保值在 0-360 度之间
+                            tank1.turretDirection = (tank1.turretDirection + 360) % 360;
                             tank1.turret.style.transform = `translate(0, -50%) rotate(${tank1.turretDirection}deg)`;
                             break;
                     }
