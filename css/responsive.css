@@ -1,266 +1,68 @@
 /* 木头猫游戏合集 - 响应式设计优化 */
 /* 在这里补充一些媒体查询以增强响应式效果 */
 
-:root {
-    /* 响应式断点 */
-    --breakpoint-sm: 576px;
-    --breakpoint-md: 768px;
-    --breakpoint-lg: 992px;
-    --breakpoint-xl: 1200px;
-    --breakpoint-xxl: 1400px;
+@media (max-width: 1024px) {
+    .games-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+    }
+    
+    .hero h2 {
+        font-size: 2.2rem;
+    }
 }
 
-/* 平板设备 (最小768px) */
-@media (min-width: 768px) {
-    .container {
-        max-width: 1200px;
-        padding: 0 20px;
-    }
-    
+@media (max-width: 768px) {
     .header {
-        padding: 20px 0;
-        margin-bottom: 30px;
-    }
-    
-    .header-content {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 20px;
-    }
-    
-    .header.scrolled {
-        padding: 15px 0;
+        flex-wrap: wrap;
     }
     
     .logo {
-        margin-bottom: 0;
-        text-align: left;
-    }
-    
-    .logo h1 {
-        font-size: var(--font-size-3xl);
-        letter-spacing: var(--letter-spacing-tight);
-    }
-    
-    .logo .slogan {
-        font-size: var(--font-size-md);
-        margin-left: 2px;
-    }
-    
-    .nav-container {
-        width: auto;
-        gap: 20px;
-        justify-content: center;
-    }
-    
-    .mobile-menu-btn {
-        display: none;
+        order: 1;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 15px;
     }
     
     .nav {
-        display: block;
-        width: auto;
+        order: 3;
+        width: 100%;
+        margin-top: 15px;
+        display: none; /* 默认隐藏，通过JS控制显示 */
     }
     
     .nav ul {
-        display: flex;
-        flex-direction: row;
-        gap: 15px;
-        padding: 0;
-        background: transparent;
-        border-radius: 0;
-        box-shadow: none;
-        position: static;
-        margin: 0;
-        animation: none;
-        align-items: center;
-        border: none;
-    }
-    
-    .nav ul li {
-        display: flex;
+        flex-direction: column;
+        gap: 10px;
         align-items: center;
     }
     
-    .nav ul li.lang-switcher {
-        border-top: none;
-        margin-top: 0;
-        padding: 0;
-    }
-    
-    .nav a {
-        display: inline-block;
-        padding: 10px 18px;
-        background: transparent;
-        text-align: initial;
-        border-radius: 25px;
-        font-size: var(--font-size-md);
-        border: 1px solid transparent;
-    }
-    
-    .nav a:hover {
-        transform: translateY(-3px);
-    }
-    
-    .nav a.active {
-        box-shadow: var(--shadow-medium);
-    }
-    
-    .lang-btn {
-        padding: 8px 16px;
-        font-size: var(--font-size-sm);
+    .mobile-menu-btn {
+        order: 2;
     }
     
     .hero {
-        padding: 40px;
-        margin-bottom: 40px;
+        margin-bottom: 30px;
     }
     
     .hero h2 {
-        font-size: var(--font-size-3xl);
-        margin-bottom: 15px;
+        font-size: 2rem;
     }
     
     .hero p {
-        max-width: 600px;
-        margin: 0 auto 25px;
-        font-size: var(--font-size-lg);
+        font-size: 1.1rem;
     }
     
-    .btn-primary, .btn-secondary {
-        display: inline-block;
-        width: auto;
-        margin: 0 10px;
-        max-width: none;
+    .games-section h3 {
+        font-size: 1.7rem;
     }
     
     .games-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 20px;
-    }
-    
-    /* 平板设备游戏卡片优化 */
-    @media (min-width: 768px) and (max-width: 1023px) {
-        .games-grid {
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 18px;
-        }
-        
-        .game-card {
-            padding: 22px 15px;
-        }
-    }
-    
-    .game-card {
-        padding: 25px;
-        min-height: auto;
-    }
-    
-    .game-icon {
-        font-size: 2.5rem;
-        margin-bottom: 15px;
-    }
-    
-    .game-card h4 {
-        font-size: var(--font-size-xl);
-        margin-bottom: 8px;
-    }
-    
-    .game-card p {
-        font-size: var(--font-size-sm);
-        margin-bottom: 15px;
-    }
-    
-    .features {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-    }
-    
-    .feature-icon {
-        font-size: 2.5rem;
-        margin-bottom: 15px;
-    }
-    
-    .feature-card h3 {
-        font-size: var(--font-size-xl);
-        margin-bottom: 10px;
-    }
-    
-    .feature-card p {
-        font-size: var(--font-size-sm);
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 18px;
     }
 }
 
-/* 桌面设备 (最小1024px) */
-@media (min-width: 1024px) {
-    .header {
-        padding: 25px 0;
-    }
-    
-    .header.scrolled {
-        padding: 18px 0;
-    }
-    
-    .logo h1 {
-        font-size: var(--font-size-4xl);
-    }
-    
-    .nav ul {
-        gap: 20px;
-    }
-    
-    .nav a {
-        padding: 12px 22px;
-        font-size: var(--font-size-md);
-    }
-    
-    .lang-btn {
-        padding: 10px 20px;
-        font-size: var(--font-size-sm);
-    }
-    
-    .games-grid {
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    }
-    
-    .hero h2 {
-        font-size: var(--font-size-4xl);
-    }
-    
-    .hero p {
-        font-size: var(--font-size-xl);
-    }
-    
-    .game-card {
-        padding: 30px;
-    }
-    
-    .game-icon {
-        font-size: 3rem;
-        margin-bottom: 15px;
-    }
-    
-    .game-card h4 {
-        font-size: var(--font-size-2xl);
-    }
-    
-    .features {
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    }
-    
-    .feature-icon {
-        font-size: 3rem;
-    }
-    
-    .feature-card {
-        padding: 25px;
-    }
-}
-
-/* 小屏手机 (最大480px) */
 @media (max-width: 480px) {
     .container {
         padding: 0 10px;
@@ -271,33 +73,19 @@
     }
     
     .logo h1 {
-        font-size: var(--font-size-2xl);
-    }
-    
-    .logo .slogan {
-        font-size: var(--font-size-sm);
-    }
-    
-    .hero {
-        padding: 20px 10px;
-        margin-bottom: 25px;
+        font-size: 22px;
     }
     
     .hero h2 {
-        font-size: var(--font-size-2xl);
+        font-size: 1.7rem;
     }
     
     .hero p {
-        font-size: var(--font-size-md);
-    }
-    
-    .games-section {
-        margin-bottom: 25px;
+        font-size: 1rem;
     }
     
     .games-section h3 {
-        font-size: var(--font-size-xl);
-        margin-bottom: 15px;
+        font-size: 1.5rem;
     }
     
     .games-grid {
@@ -307,168 +95,58 @@
     
     .game-card {
         padding: 20px 15px;
-        min-height: 140px;
+    }
+    
+    .game-icon {
+        font-size: 2.2rem;
+    }
+    
+    .game-card h4 {
+        font-size: 1.1rem;
+    }
+    
+    .game-card p {
+        font-size: 0.9rem;
+    }
+    
+    .footer {
+        padding: 20px 0;
+    }
+}
+
+@media (max-width: 360px) {
+    .hero h2 {
+        font-size: 1.5rem;
     }
     
     .game-icon {
         font-size: 2rem;
-        margin-bottom: 10px;
-    }
-    
-    .game-card h4 {
-        font-size: var(--font-size-lg);
-        margin-bottom: 5px;
-    }
-    
-    .game-card p {
-        font-size: var(--font-size-sm);
-        margin-bottom: 10px;
-    }
-    
-    .difficulty, .players {
-        padding: 3px 8px;
-        font-size: var(--font-size-xs);
-    }
-    
-    .features {
-        gap: 12px;
-        margin-bottom: 25px;
-    }
-    
-    .feature-card {
-        padding: 18px 12px;
-    }
-    
-    .feature-icon {
-        font-size: 1.8rem;
-        margin-bottom: 8px;
-    }
-    
-    .feature-card h3 {
-        font-size: var(--font-size-md);
-        margin-bottom: 6px;
-    }
-    
-    .feature-card p {
-        font-size: var(--font-size-xs);
-    }
-    
-    .btn-primary, .btn-secondary {
-        padding: 12px 16px;
-        font-size: var(--font-size-md);
-        min-height: 44px;
-    }
-}
-
-/* 超小屏手机 (最大360px) */
-@media (max-width: 360px) {
-    .hero h2 {
-        font-size: var(--font-size-xl);
-    }
-    
-    .game-icon {
-        font-size: 1.8rem;
     }
     
     .game-card {
         padding: 18px 12px;
     }
-    
-    .game-card h4 {
-        font-size: var(--font-size-md);
+}
+
+/* 针对平板设备的优化 */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .games-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
     
-    .game-card p {
-        font-size: var(--font-size-xs);
+    .nav ul {
+        gap: 15px;
     }
 }
 
 /* 横屏手机优化 */
 @media (max-height: 500px) and (orientation: landscape) {
-    .header {
-        padding: 10px 0;
-    }
-    
-    .header-content {
-        flex-direction: row;
-        align-items: center;
-    }
-    
-    .logo {
-        margin-bottom: 0;
-        text-align: left;
-    }
-    
-    .logo h1 {
-        font-size: var(--font-size-xl);
-        margin-bottom: 2px;
-    }
-    
-    .logo .slogan {
-        font-size: var(--font-size-xs);
-    }
-    
-    .games-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 12px;
-    }
-    
-    .game-card {
-        padding: 15px 10px;
-        min-height: 120px;
-    }
-    
-    .game-icon {
-        font-size: 1.5rem;
-        margin-bottom: 6px;
-    }
-    
-    .game-card h4 {
-        font-size: var(--font-size-sm);
-        margin-bottom: 3px;
-    }
-    
-    .game-card p {
-        font-size: var(--font-size-xs);
-        margin-bottom: 6px;
-    }
-    
-    .features {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 12px;
-    }
-    
-    .feature-card {
-        padding: 15px 10px;
-    }
-    
-    .feature-icon {
-        font-size: 1.5rem;
-        margin-bottom: 6px;
-    }
-    
-    .feature-card h3 {
-        font-size: var(--font-size-sm);
-        margin-bottom: 4px;
-    }
-    
-    .feature-card p {
-        font-size: var(--font-size-xs);
+    .hero h2 {
+        font-size: 1.8rem;
     }
     
     .hero {
         margin-bottom: 20px;
-        padding: 20px 10px;
-    }
-    
-    .hero h2 {
-        font-size: var(--font-size-xl);
-    }
-    
-    .hero p {
-        font-size: var(--font-size-sm);
     }
 }
 
@@ -479,15 +157,11 @@
     }
     
     .hero h2 {
-        font-size: var(--font-size-4xl);
+        font-size: 3rem;
     }
     
     .games-grid {
         grid-template-columns: repeat(4, 1fr);
-    }
-    
-    .features {
-        grid-template-columns: repeat(3, 1fr);
     }
 }
 
@@ -497,134 +171,18 @@
         width: 95%;
         height: 80vh;
         margin: 10vh auto;
-        max-width: 95%;
     }
     
-    .modal-header {
-        padding: 15px;
-    }
-    
-    .modal-header h3 {
-        font-size: var(--font-size-lg);
-    }
-    
-    .modal-body {
-        padding: 15px;
-    }
-    
-    .form-group input {
-        padding: 10px;
-        font-size: var(--font-size-md);
-    }
-    
-    .modal-actions {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .modal-actions .btn-primary, .modal-actions .btn-secondary {
-        width: 100%;
-        margin: 0;
+    .close {
+        top: 10px;
+        right: 10px;
+        width: 30px;
+        height: 30px;
+        font-size: 24px;
     }
     
     #gameContainer {
         padding: 15px;
-    }
-}
-
-/* 暗色模式支持 */
-@media (prefers-color-scheme: dark) {
-    body {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-        color: #e0e6ed;
-    }
-    
-    .game-card {
-        background: #2c3e50;
-        border-color: #34495e;
-        color: #e0e6ed;
-    }
-    
-    .game-card:hover {
-        border-color: #3498db;
-    }
-    
-    .modal-content {
-        background: #2c3e50;
-        color: #e0e6ed;
-    }
-    
-    .game-placeholder {
-        background: #34495e;
-        color: #e0e6ed;
-    }
-    
-    .header {
-        border-bottom-color: #34495e;
-        background: rgba(44, 62, 80, 0.9);
-    }
-    
-    .footer {
-        border-top-color: #34495e;
-    }
-    
-    .nav ul {
-        background: #2c3e50;
-        border-color: #34495e;
-    }
-    
-    .nav a {
-        color: #e0e6ed;
-        background: #34495e;
-        border-color: #4a637a;
-    }
-    
-    .nav a:hover, .nav a.active {
-        background: linear-gradient(135deg, #3498db, #2980b9);
-        border-color: #3498db;
-    }
-    
-    .feature-card {
-        background: #2c3e50;
-        border-color: #34495e;
-        color: #e0e6ed;
-    }
-    
-    .feature-card h3 {
-        color: #e0e6ed;
-    }
-    
-    .feature-card p {
-        color: #b0b8c1;
-    }
-    
-    .btn-secondary {
-        background: linear-gradient(135deg, #34495e, #2c3e50);
-        color: #e0e6ed;
-        border-color: #4a637a;
-    }
-    
-    .btn-secondary:hover {
-        background: linear-gradient(135deg, #2c3e50, #34495e);
-        border-color: #3498db;
-    }
-    
-    .mobile-menu-btn {
-        background: #34495e;
-        border-color: #4a637a;
-    }
-    
-    .mobile-menu-btn span {
-        background: #e0e6ed;
-    }
-    
-    .mobile-menu-btn.active {
-        background: rgba(52, 152, 219, 0.2);
-        border-color: #3498db;
-    }
-    
-    .mobile-menu-btn.active span {
-        background: #3498db;
     }
 }
 

@@ -2,28 +2,27 @@
 
 /* 减少动画以提高性能 */
 @media (max-width: 768px) {
-  /* 只禁用非必要的动画，保留关键的交互反馈 */
-  .header::before,
-  .game-card::after,
-  .feature-card::after,
-  .btn-primary::after,
-  .btn-secondary::after {
+  * {
     -webkit-transition: none !important;
     -moz-transition: none !important;
     -o-transition: none !important;
     transition: none !important;
+    -webkit-animation: none !important;
+    -moz-animation: none !important;
+    -o-animation: none !important;
+    animation: none !important;
   }
 
   /* 保持关键动画，但简化它们 */
-  .game-card, .mobile-menu-btn, .nav a, .btn-primary, .btn-secondary {
-    -webkit-transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-    -moz-transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-    -o-transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  .game-container, .game-card {
+    -webkit-transition: transform 0.2s ease !important;
+    -moz-transition: transform 0.2s ease !important;
+    -o-transition: transform 0.2s ease !important;
+    transition: transform 0.2s ease !important;
   }
 
   /* 确保游戏卡片和菜单按钮可以正常接收触摸事件 */
-  .game-card, .mobile-menu-btn, .nav a, .btn-primary, .btn-secondary {
+  .game-card, .mobile-menu-btn {
     touch-action: manipulation;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
@@ -40,7 +39,7 @@
 /* 移动端优化的布局 */
 @media (max-width: 768px) {
   .container {
-    padding: 0 10px;
+    padding: 10px;
     max-width: 100vw;
     overflow-x: hidden;
   }
@@ -52,21 +51,15 @@
   
   .game-card {
     padding: 15px;
-    margin: 0;
-    min-height: 140px;
+    margin: 8px;
   }
   
   .header {
-    padding: 15px 0;
-  }
-  
-  .header-content {
-    padding: 0 10px;
+    padding: 10px;
   }
   
   .hero {
     padding: 20px 10px;
-    margin-bottom: 25px;
   }
   
   /* 优化游戏画布大小以适应移动设备 */
@@ -77,88 +70,16 @@
   
   /* 优化按钮大小以适应触摸操作 */
   .btn-primary, .btn-secondary {
-    padding: 14px 20px;
+    padding: 12px 20px;
     font-size: 16px; /* 确保触摸目标足够大 */
-    min-height: 48px; /* 符合触摸目标最小尺寸建议 */
-    width: 100%;
-    max-width: 280px;
-  }
-  
-  /* 优化模态框在移动端的显示 */
-  .modal-content {
-    width: 95%;
-    max-width: 95%;
-    max-height: 85vh;
-    margin: 7.5vh auto;
-  }
-  
-  /* 优化输入框大小以适应触摸操作 */
-  .form-group input {
-    padding: 12px;
-    font-size: 16px;
-    min-height: 48px;
-  }
-}
-
-/* 小屏手机 (最大480px) 优化 */
-@media (max-width: 480px) {
-  .games-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-  
-  .game-card {
-    padding: 12px;
-    min-height: 120px;
-  }
-  
-  .game-icon {
-    font-size: 1.8rem;
-    margin-bottom: 8px;
-  }
-  
-  .game-card h4 {
-    font-size: 1rem;
-    margin-bottom: 4px;
-  }
-  
-  .game-card p {
-    font-size: 0.8rem;
-    margin-bottom: 8px;
-  }
-  
-  .difficulty, .players {
-    padding: 2px 6px;
-    font-size: 0.7rem;
-  }
-  
-  .features {
-    gap: 10px;
-  }
-  
-  .feature-card {
-    padding: 12px;
-  }
-  
-  .feature-icon {
-    font-size: 1.5rem;
-    margin-bottom: 6px;
-  }
-  
-  .feature-card h3 {
-    font-size: 0.9rem;
-    margin-bottom: 4px;
-  }
-  
-  .feature-card p {
-    font-size: 0.75rem;
+    min-height: 44px; /* 符合触摸目标最小尺寸建议 */
   }
 }
 
 /* 额外的移动端性能优化 */
 @media (max-width: 768px) {
   /* 减少阴影和复杂的CSS效果 */
-  .game-card, .modal-content, .feature-card, .header {
+  .game-card, .modal-content {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important; /* 简化阴影 */
     border: 1px solid #eee !important; /* 简化边框 */
   }
@@ -166,106 +87,11 @@
   /* 优化滚动性能 */
   body {
     -webkit-overflow-scrolling: touch;
-    overflow-x: hidden;
   }
   
   /* 启用硬件加速的简单变换 */
-  .game-card, .header, .mobile-menu-btn {
+  .game-card, .header {
     will-change: transform;
-    transform: translateZ(0);
-  }
-  
-  /* 减少重绘和回流 */
-  .nav ul {
-    position: fixed;
-    top: 70px;
-    left: 0;
-    right: 0;
-    z-index: 99;
-    max-height: calc(100vh - 80px);
-    overflow-y: auto;
-  }
-  
-  /* 优化触摸目标大小 */
-  a, button, .game-card {
-    min-height: 44px;
-    min-width: 44px;
-  }
-}
-
-/* 横屏模式优化 */
-@media (orientation: landscape) and (max-width: 767px) {
-  .header {
-    padding: 10px 0;
-  }
-  
-  .header-content {
-    flex-direction: row;
-    align-items: center;
-  }
-  
-  .logo {
-    margin-bottom: 0;
-    text-align: left;
-  }
-  
-  .logo h1 {
-    font-size: 1.2rem;
-    margin-bottom: 2px;
-  }
-  
-  .logo .slogan {
-    font-size: 0.7rem;
-  }
-  
-  .games-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 8px;
-  }
-  
-  .game-card {
-    padding: 10px;
-    min-height: 100px;
-  }
-  
-  .game-icon {
-    font-size: 1.2rem;
-    margin-bottom: 4px;
-  }
-  
-  .game-card h4 {
-    font-size: 0.8rem;
-    margin-bottom: 2px;
-  }
-  
-  .game-card p {
-    font-size: 0.7rem;
-    margin-bottom: 4px;
-  }
-  
-  .features {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 8px;
-  }
-  
-  .feature-card {
-    padding: 10px;
-  }
-  
-  .feature-icon {
-    font-size: 1.2rem;
-    margin-bottom: 4px;
-  }
-  
-  .feature-card h3 {
-    font-size: 0.8rem;
-    margin-bottom: 2px;
-  }
-  
-  .feature-card p {
-    font-size: 0.7rem;
   }
 }
 
@@ -279,50 +105,4 @@ body {
 /* 优化图片加载 */
 img {
   content-visibility: auto;
-  loading: lazy;
-  max-width: 100%;
-  height: auto;
-}
-
-/* 优化移动端性能的通用规则 */
-@media (max-width: 768px) {
-  /* 禁用不必要的背景效果 */
-  .logo::before {
-    display: none;
-  }
-  
-  /* 简化渐变效果 */
-  .btn-primary,
-  .btn-secondary,
-  .nav a:hover,
-  .nav a.active {
-    background: #3498db !important;
-  }
-  
-  /* 优化JavaScript执行性能 */
-  /* 减少DOM操作，使用事件委托 */
-  /* 延迟加载非关键脚本 */
-}
-
-/* 提升移动端可访问性 */
-@media (max-width: 768px) {
-  /* 确保足够的颜色对比度 */
-  .game-card h4,
-  .feature-card h3,
-  .hero h2 {
-    color: #2c3e50 !important;
-  }
-  
-  /* 确保文本大小足够大 */
-  body {
-    font-size: 16px;
-  }
-  
-  /* 提供清晰的焦点状态 */
-  a:focus,
-  button:focus,
-  input:focus {
-    outline: 2px solid #3498db;
-    outline-offset: 2px;
-  }
 }

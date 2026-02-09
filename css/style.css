@@ -1,83 +1,6 @@
 /* 木头猫游戏合集 - 样式表 */
 /* 移动端优先的响应式设计 */
 
-:root {
-    /* 主色调 */
-    --primary-color: #3498db;
-    --primary-dark: #2980b9;
-    --primary-light: #74b9ff;
-    
-    /* 辅助色 */
-    --secondary-color: #9b59b6;
-    --secondary-dark: #8e44ad;
-    --secondary-light: #bb8fce;
-    
-    /* 功能色 */
-    --success-color: #2ecc71;
-    --warning-color: #f39c12;
-    --danger-color: #e74c3c;
-    --info-color: #1abc9c;
-    
-    /* 中性色 */
-    --bg-color: #f8f9fa;
-    --card-bg: #ffffff;
-    --text-primary: #2c3e50;
-    --text-secondary: #7f8c8d;
-    --text-tertiary: #95a5a6;
-    --border-color: #e0e0e0;
-    --shadow-light: 0 2px 8px rgba(0,0,0,0.05);
-    --shadow-medium: 0 4px 12px rgba(0,0,0,0.1);
-    --shadow-heavy: 0 8px 24px rgba(0,0,0,0.15);
-    
-    /* 间距 */
-    --spacing-xs: 4px;
-    --spacing-sm: 8px;
-    --spacing-md: 16px;
-    --spacing-lg: 24px;
-    --spacing-xl: 32px;
-    --spacing-xxl: 48px;
-    
-    /* 圆角 */
-    --radius-sm: 4px;
-    --radius-md: 8px;
-    --radius-lg: 16px;
-    --radius-full: 50%;
-    
-    /* 过渡 */
-    --transition-fast: 0.2s ease;
-    --transition-normal: 0.3s ease;
-    --transition-slow: 0.5s ease;
-    
-    /* 字体大小 */
-    --font-size-xs: 0.75rem;
-    --font-size-sm: 0.875rem;
-    --font-size-md: 1rem;
-    --font-size-lg: 1.125rem;
-    --font-size-xl: 1.25rem;
-    --font-size-2xl: 1.5rem;
-    --font-size-3xl: 1.875rem;
-    --font-size-4xl: 2.25rem;
-    --font-size-5xl: 3rem;
-    
-    /* 字体权重 */
-    --font-weight-light: 300;
-    --font-weight-normal: 400;
-    --font-weight-medium: 500;
-    --font-weight-semibold: 600;
-    --font-weight-bold: 700;
-    
-    /* 行高 */
-    --line-height-tight: 1.2;
-    --line-height-normal: 1.4;
-    --line-height-relaxed: 1.6;
-    --line-height-loose: 1.8;
-    
-    /* 字间距 */
-    --letter-spacing-tight: -0.025em;
-    --letter-spacing-normal: 0;
-    --letter-spacing-wide: 0.025em;
-}
-
 * {
     margin: 0;
     padding: 0;
@@ -85,67 +8,10 @@
 }
 
 body {
-    font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    background: var(--bg-color);
-    color: var(--text-primary);
-    line-height: var(--line-height-relaxed);
-    overflow-x: hidden;
-    font-size: var(--font-size-md);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-/* 标题样式 */
-h1, h2, h3, h4, h5, h6 {
-    font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    font-weight: var(--font-weight-bold);
-    line-height: var(--line-height-tight);
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-md);
-    letter-spacing: var(--letter-spacing-tight);
-}
-
-h1 {
-    font-size: var(--font-size-4xl);
-}
-
-h2 {
-    font-size: var(--font-size-3xl);
-}
-
-h3 {
-    font-size: var(--font-size-2xl);
-}
-
-h4 {
-    font-size: var(--font-size-xl);
-}
-
-h5 {
-    font-size: var(--font-size-lg);
-}
-
-h6 {
-    font-size: var(--font-size-md);
-}
-
-/* 段落样式 */
-p {
-    margin-bottom: var(--spacing-md);
-    line-height: var(--line-height-relaxed);
-    color: var(--text-secondary);
-}
-
-/* 链接样式 */
-a {
-    color: var(--primary-color);
-    text-decoration: none;
-    transition: color var(--transition-normal);
-}
-
-a:hover {
-    color: var(--primary-dark);
-    text-decoration: underline;
+    font-family: 'Noto Sans SC', sans-serif;
+    background: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
 }
 
 .container {
@@ -161,33 +27,20 @@ a:hover {
     flex-direction: column;
     align-items: center;
     padding: 15px 0;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid #eee;
     margin-bottom: 20px;
-    background: var(--card-bg);
-    box-shadow: var(--shadow-light);
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     position: sticky;
     top: 0;
     z-index: 100;
-    transition: all var(--transition-normal);
+    transition: all 0.3s ease;
     width: 100%;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
-
-.header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--info-color));
 }
 
 .header.scrolled {
     padding: 10px 0;
-    box-shadow: var(--shadow-medium);
-    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .header-content {
@@ -204,52 +57,25 @@ a:hover {
 .logo {
     text-align: center;
     margin-bottom: 15px;
-    transition: all var(--transition-normal);
-    position: relative;
-    z-index: 1;
-}
-
-.logo::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 120px;
-    height: 120px;
-    background: radial-gradient(circle, rgba(52,152,219,0.1) 0%, rgba(52,152,219,0) 70%);
-    border-radius: 50%;
-    z-index: -1;
-    transition: all var(--transition-normal);
-}
-
-.logo:hover::before {
-    width: 140px;
-    height: 140px;
-    background: radial-gradient(circle, rgba(52,152,219,0.15) 0%, rgba(52,152,219,0) 70%);
+    transition: all 0.3s ease;
 }
 
 .logo h1 {
-    font-size: var(--font-size-2xl);
-    margin-bottom: var(--spacing-xs);
-    font-weight: var(--font-weight-bold);
-    letter-spacing: var(--letter-spacing-tight);
-    transition: all var(--transition-normal);
-    line-height: var(--line-height-tight);
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    display: inline-block;
+    color: #2c3e50;
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    transition: all 0.3s ease;
+    line-height: 1.2;
 }
 
 .logo .slogan {
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-normal);
-    transition: all var(--transition-normal);
-    line-height: var(--line-height-normal);
-    margin-bottom: 0;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    font-weight: 400;
+    transition: all 0.3s ease;
+    line-height: 1.4;
 }
 
 /* 小屏手机文本优化 */
@@ -293,9 +119,9 @@ a:hover {
     flex-direction: column;
     gap: 8px;
     padding: 15px;
-    background: var(--card-bg);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-medium);
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     position: absolute;
     top: 100%;
     left: 0;
@@ -303,19 +129,16 @@ a:hover {
     margin: 10px 0;
     animation: slideDown 0.3s ease-out;
     z-index: 100;
-    border: 1px solid var(--border-color);
 }
 
 @keyframes slideDown {
     from {
         opacity: 0;
         transform: translateY(-10px);
-        box-shadow: var(--shadow-light);
     }
     to {
         opacity: 1;
         transform: translateY(0);
-        box-shadow: var(--shadow-medium);
     }
 }
 
@@ -370,19 +193,16 @@ a:hover {
 .nav a {
     display: block;
     text-decoration: none;
-    color: var(--text-primary);
-    font-weight: var(--font-weight-medium);
+    color: #34495e;
+    font-weight: 500;
     padding: 12px 16px;
-    border-radius: var(--radius-md);
-    background: var(--bg-color);
+    border-radius: 6px;
+    background: #f8f9fa;
     text-align: center;
-    transition: all var(--transition-normal);
-    font-size: var(--font-size-md);
+    transition: all 0.3s ease;
+    font-size: 1rem;
     position: relative;
     overflow: hidden;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-    border: 1px solid var(--border-color);
 }
 
 .nav a::before {
@@ -393,7 +213,7 @@ a:hover {
     width: 100%;
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(52, 152, 219, 0.1), transparent);
-    transition: left var(--transition-slow);
+    transition: left 0.5s ease;
 }
 
 .nav a:hover::before {
@@ -401,31 +221,27 @@ a:hover {
 }
 
 .feedback-menu-item a {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    background: linear-gradient(135deg, #3498db, #2980b9);
     color: white;
-    box-shadow: var(--shadow-light);
-    border-color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
 }
 
 .feedback-menu-item a:hover {
-    background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+    background: linear-gradient(135deg, #2980b9, #1f618d);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
-    border-color: var(--primary-dark);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
 }
 
 .nav a:hover,
 .nav a.active {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    background: linear-gradient(135deg, #3498db, #2980b9);
     color: white;
     transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
-    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
 }
 
 .nav a.active {
-    font-weight: var(--font-weight-semibold);
-    box-shadow: var(--shadow-medium);
+    font-weight: 600;
 }
 
 .connection-status-item {
@@ -465,15 +281,15 @@ a:hover {
     flex-direction: column;
     cursor: pointer;
     padding: 5px;
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
     width: 52px;
     height: 52px;
     justify-content: center;
     align-items: center;
-    transition: all var(--transition-normal);
-    box-shadow: var(--shadow-light);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     position: relative;
     z-index: 101;
     -webkit-tap-highlight-color: transparent;
@@ -484,45 +300,62 @@ a:hover {
 .mobile-menu-btn:active {
     transform: scale(0.95);
     transition: transform 0.1s;
-    background: var(--bg-color);
+    background: #f0f4f8;
+}
+
+/* 导航链接触控优化 */
+.nav a {
+    display: block;
+    text-decoration: none;
+    color: #34495e;
+    font-weight: 500;
+    padding: 12px 16px;
+    border-radius: 6px;
+    background: #f8f9fa;
+    text-align: center;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+/* 导航链接触摸反馈 */
+.nav a:active {
+    transform: scale(0.98);
+    transition: transform 0.1s;
 }
 
 .mobile-menu-btn:hover {
-    background: var(--bg-color);
+    background: #f8f9fa;
     transform: scale(1.05);
-    box-shadow: var(--shadow-medium);
 }
 
 .mobile-menu-btn.active {
-    border-color: var(--primary-color);
-    background: rgba(52, 152, 219, 0.1);
-    box-shadow: var(--shadow-medium);
+    border-color: #3498db;
+    background: #e8f4fd;
 }
 
 .mobile-menu-btn span {
     width: 28px;
     height: 3px;
-    background: var(--text-primary);
+    background: #34495e;
     margin: 3px 0;
-    transition: all var(--transition-normal);
+    transition: all 0.3s ease;
     border-radius: 2px;
-    position: relative;
-    z-index: 1;
 }
 
 .mobile-menu-btn.active span:nth-child(1) {
     transform: rotate(45deg) translate(5px, 5px);
-    background: var(--primary-color);
 }
 
 .mobile-menu-btn.active span:nth-child(2) {
     opacity: 0;
-    transform: scale(0);
 }
 
 .mobile-menu-btn.active span:nth-child(3) {
     transform: rotate(-45deg) translate(7px, -7px);
-    background: var(--primary-color);
 }
 
 /* 英雄区域 - 移动端优先 */
@@ -536,118 +369,74 @@ a:hover {
 }
 
 .hero h2 {
-    font-size: var(--font-size-3xl);
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-md);
-    font-weight: var(--font-weight-bold);
-    line-height: var(--line-height-tight);
-    letter-spacing: var(--letter-spacing-tight);
+    font-size: 1.5rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
 }
 
 .hero p {
-    color: var(--text-secondary);
-    margin: 0 0 var(--spacing-lg);
-    font-size: var(--font-size-lg);
-    line-height: var(--line-height-relaxed);
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
+    color: #7f8c8d;
+    margin: 0 0 20px;
+    font-size: 1rem;
 }
 
 /* 按钮样式 - 移动端优先 */
-.btn-primary, .btn-secondary {
+.btn-primary,
+.btn-secondary {
     display: block;
     width: 100%;
     max-width: 250px;
     margin: 10px auto;
     padding: 14px 20px;
     text-decoration: none;
-    border-radius: var(--radius-md);
-    font-weight: var(--font-weight-medium);
-    transition: all var(--transition-normal);
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s;
     border: none;
     cursor: pointer;
-    font-size: var(--font-size-md);
+    font-size: 1rem;
     text-align: center;
     min-height: 48px;
     line-height: 1.4;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
-    position: relative;
-    overflow: hidden;
-    z-index: 1;
 }
 
 /* 触摸反馈效果 */
-.btn-primary:active, .btn-secondary:active {
+.btn-primary:active,
+.btn-secondary:active {
     transform: scale(0.98);
     transition: transform 0.1s;
 }
 
 /* 小屏手机按钮优化 */
 @media (max-width: 480px) {
-    .btn-primary, .btn-secondary {
+    .btn-primary,
+    .btn-secondary {
         padding: 16px 20px;
         min-height: 52px;
-        font-size: var(--font-size-lg);
+        font-size: 1.05rem;
     }
 }
 
-/* 按钮背景渐变效果 */
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    background: #3498db;
     color: white;
-    box-shadow: var(--shadow-light);
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-medium);
-}
-
-.btn-primary::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left var(--transition-slow);
-    z-index: -1;
-}
-
-.btn-primary:hover::after {
-    left: 100%;
+    background: #2980b9;
+    transform: translateY(-2px);
 }
 
 .btn-secondary {
-    background: linear-gradient(135deg, var(--card-bg), var(--border-color));
-    color: var(--text-primary);
-    box-shadow: var(--shadow-light);
+    background: #ecf0f1;
+    color: #2c3e50;
 }
 
 .btn-secondary:hover {
-    background: linear-gradient(135deg, var(--border-color), var(--card-bg));
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-medium);
-}
-
-.btn-secondary::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(52,152,219,0.1), transparent);
-    transition: left var(--transition-slow);
-    z-index: -1;
-}
-
-.btn-secondary:hover::after {
-    left: 100%;
+    background: #d5dbdb;
+    transform: translateY(-2px);
 }
 
 /* 游戏区域 - 移动端优先 */
@@ -697,23 +486,20 @@ a:hover {
 }
 
 .game-card {
-    background: var(--card-bg);
-    border-radius: var(--radius-md);
+    background: #fff;
+    border-radius: 8px;
     padding: 20px 15px;
     text-align: center;
     cursor: pointer;
-    transition: all var(--transition-normal);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-light);
+    transition: all 0.3s;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     min-height: 160px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
-    position: relative;
-    overflow: hidden;
-    z-index: 1;
 }
 
 /* 游戏卡片触摸反馈 */
@@ -723,6 +509,11 @@ a:hover {
 }
 
 /* 确保游戏卡片有足够的点击区域 */
+.game-card {
+    position: relative;
+    overflow: hidden;
+}
+
 .game-card::before {
     content: '';
     position: absolute;
@@ -733,73 +524,39 @@ a:hover {
     z-index: 0;
 }
 
-/* 游戏卡片悬停效果 */
 .game-card:hover {
     transform: translateY(-5px);
-    box-shadow: var(--shadow-medium);
-    border-color: var(--primary-color);
-}
-
-/* 游戏卡片背景渐变效果 */
-.game-card::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(52,152,219,0.1), transparent);
-    transition: left var(--transition-slow);
-    z-index: -1;
-}
-
-.game-card:hover::after {
-    left: 100%;
-}
-
-/* 游戏卡片内容层级 */
-.game-card > * {
-    position: relative;
-    z-index: 1;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-color: #3498db;
 }
 
 .game-icon {
-    font-size: 2.5rem;
-    margin-bottom: 15px;
-    transition: all var(--transition-normal);
-    display: inline-block;
-}
-
-.game-card:hover .game-icon {
-    transform: scale(1.1) rotate(5deg);
+    font-size: 2rem;
+    margin-bottom: 10px;
 }
 
 .game-card h4 {
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-sm);
-    font-size: var(--font-size-xl);
-    line-height: var(--line-height-tight);
-    min-height: 2rem;
+    color: #2c3e50;
+    margin-bottom: 5px;
+    font-size: 1.1rem;
+    line-height: 1.3;
+    min-height: 1.8rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: var(--font-weight-semibold);
-    transition: all var(--transition-normal);
-    letter-spacing: var(--letter-spacing-tight);
 }
 
 .game-card p {
-    color: var(--text-secondary);
-    margin-bottom: var(--spacing-md);
-    font-size: var(--font-size-sm);
-    line-height: var(--line-height-normal);
+    color: #7f8c8d;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    line-height: 1.5;
     min-height: 3rem;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 0 10px;
-    transition: all var(--transition-normal);
+    padding: 0 5px;
 }
 
 /* 游戏卡片文本优化 */
@@ -830,46 +587,28 @@ a:hover {
 .game-meta {
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: wrap;
-    margin-top: auto;
-    padding-top: 10px;
 }
 
 .difficulty, .players {
-    padding: 4px 12px;
-    border-radius: 20px;
+    padding: 3px 6px;
+    border-radius: 10px;
     font-size: 0.75rem;
     font-weight: 500;
-    transition: all var(--transition-normal);
-    box-shadow: var(--shadow-light);
 }
 
 .difficulty {
     color: white;
 }
 
-.easy { 
-    background: var(--success-color);
-}
-
-.medium { 
-    background: var(--warning-color);
-}
-
-.hard { 
-    background: var(--danger-color);
-}
+.easy { background: #2ecc71; }
+.medium { background: #f39c12; }
+.hard { background: #e74c3c; }
 
 .players {
-    background: var(--primary-color);
+    background: #3498db;
     color: white;
-}
-
-.game-card:hover .difficulty,
-.game-card:hover .players {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
 }
 
 /* 特色区域 - 移动端优先 */
@@ -907,85 +646,28 @@ a:hover {
 }
 
 .feature-card {
-    background: var(--card-bg);
-    padding: 25px 20px;
-    border-radius: var(--radius-md);
+    background: #fff;
+    padding: 20px 15px;
+    border-radius: 8px;
     text-align: center;
-    box-shadow: var(--shadow-light);
-    border: 1px solid var(--border-color);
-    transition: all var(--transition-normal);
-    position: relative;
-    overflow: hidden;
-    z-index: 1;
-}
-
-.feature-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-    z-index: 2;
-}
-
-.feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-medium);
-    border-color: var(--primary-color);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
 }
 
 .feature-icon {
-    font-size: 2.5rem;
-    margin-bottom: 15px;
-    transition: all var(--transition-normal);
-    display: inline-block;
-    position: relative;
-    z-index: 1;
-}
-
-.feature-card:hover .feature-icon {
-    transform: scale(1.1);
+    font-size: 2rem;
+    margin-bottom: 10px;
 }
 
 .feature-card h3 {
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-sm);
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-semibold);
-    transition: all var(--transition-normal);
-    position: relative;
-    z-index: 1;
-    line-height: var(--line-height-tight);
-    letter-spacing: var(--letter-spacing-tight);
+    color: #2c3e50;
+    margin-bottom: 8px;
+    font-size: 1.1rem;
 }
 
 .feature-card p {
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    line-height: var(--line-height-normal);
-    transition: all var(--transition-normal);
-    position: relative;
-    z-index: 1;
-    margin-bottom: 0;
-}
-
-/* 特色卡片背景渐变效果 */
-.feature-card::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(52,152,219,0.1), transparent);
-    transition: left var(--transition-slow);
-    z-index: 0;
-}
-
-.feature-card:hover::after {
-    left: 100%;
+    color: #7f8c8d;
+    font-size: 0.9rem;
 }
 
 /* 版权声明 */
@@ -1000,48 +682,6 @@ a:hover {
 
 .copyright-notice p {
     margin: 0;
-}
-
-/* 设备类型选择按钮容器 */
-.device-buttons {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    margin-top: 20px;
-}
-
-/* 设备类型选择按钮 */
-.device-buttons .btn-primary {
-    padding: 20px;
-    flex: 1;
-    max-width: 120px;
-}
-
-/* 响应式调整 */
-@media (max-width: 480px) {
-    .device-buttons {
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-    }
-    
-    .device-buttons .btn-primary {
-        width: 100%;
-        max-width: none;
-    }
-}
-
-/* 屏幕阅读器专用类 */
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
 }
 
 /* 平板设备 (最小768px) */
