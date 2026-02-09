@@ -312,12 +312,13 @@
     <!-- 维护公告模态框 -->
     <div class="maintenance-modal" id="maintenanceModal">
         <div class="maintenance-content">
-            <div class="maintenance-icon">🔧</div>
-            <h2 class="maintenance-title" data-i18n="leaderboard.maintenance.title">排行榜功能维护中</h2>
+            <div class="maintenance-icon">⚠️</div>
+            <h2 class="maintenance-title" data-i18n="leaderboard.maintenance.title">排行榜功能不稳定提示</h2>
             <p class="maintenance-message" data-i18n="leaderboard.maintenance.message">
-                尊敬的玩家，排行榜功能目前正在进行维护升级，预计很快就会恢复正常。感谢您的理解和支持！
+                排行榜功能目前处于不稳定状态，如您在使用过程中遇到任何问题，请及时反馈给我们。感谢您的理解和支持！
             </p>
-            <a href="./index.html" class="maintenance-btn" data-i18n="btn.back">返回主页面</a>
+            <button class="maintenance-btn" id="closeMaintenanceModal" data-i18n="btn.continue">继续使用</button>
+            <a href="./index.html" class="maintenance-btn" data-i18n="btn.back" style="margin-top: 10px;">返回主页面</a>
         </div>
     </div>
     
@@ -408,7 +409,18 @@
 
         // 初始化语言切换器
         waitForI18n();
-        
+
+        // 关闭维护公告模态框
+        document.getElementById('closeMaintenanceModal')?.addEventListener('click', function() {
+            const modal = document.getElementById('maintenanceModal');
+            if (modal) {
+                modal.style.opacity = '0';
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', async () => {
             const leaderboardsContainer = document.getElementById('leaderboards');
             const resetAllBtn = document.getElementById('resetAllBtn');
