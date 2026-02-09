@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>木头猫 - 小游戏合集</title>
     <!-- PWA Meta Tags -->
-    <meta name="description" content="A collection of classic games with modern web technologies">
-    <meta name="keywords" content="games, classic games, web games, woodcat, tetris, snake, minesweeper, 2048">
+    <meta name="description" content="木头猫游戏合集 - 轻松愉快的游戏时光，提供多种经典休闲游戏供您选择">
+    <meta name="keywords" content="游戏,休闲游戏,木头猫,俄罗斯方块,贪吃蛇,扫雷,2048,在线游戏">
     <meta name="theme-color" content="#3498db">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Woodcat Games">
-    <meta name="application-name" content="Woodcat Game Collection">
+    <meta name="apple-mobile-web-app-title" content="木头猫游戏">
+    <meta name="application-name" content="木头猫游戏合集">
     <meta name="msapplication-TileColor" content="#3498db">
     <meta name="msapplication-config" content="/browserconfig.xml">
     <!-- Favicon and Icons -->
@@ -25,8 +25,71 @@
     <link rel="preload" href="css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
     <noscript><link rel="stylesheet" href="css/style.css"></noscript>
+    <style>
+        /* 无障碍焦点样式 */
+        :focus-visible {
+            outline: 2px solid #3498db;
+            outline-offset: 2px;
+        }
+        
+        /* 减少动画对于 prefers-reduced-motion 的用户 */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+        
+        /* 确保足够的颜色对比度 */
+        .game-card h4,
+        .feature-card h3,
+        .hero h2 {
+            color: #2c3e50;
+        }
+        
+        /* 加载动画 */
+        .loading-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        .loading-animation.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
+    <!-- 加载动画 -->
+    <div class="loading-animation" id="loadingAnimation">
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <span class="sr-only">页面加载中</span>
+    </div>
+
     <div class="container">
         <!-- 头部 -->
         <header class="header">
@@ -36,183 +99,184 @@
                     <p class="slogan" data-i18n="site.slogan">发现有趣的小游戏</p>
                 </div>
                 <div class="nav-container">
-                    <nav class="nav">
+                    <nav class="nav" aria-label="主导航">
                         <ul>
-                            <li><a href="#" class="active" data-i18n="nav.home">首页</a></li>
+                            <li><a href="#" class="active" aria-current="page" data-i18n="nav.home">首页</a></li>
                             <li><a href="#games" data-i18n="nav.games">游戏</a></li>
                             <li><a href="leaderboard.html" data-i18n="nav.leaderboard">排行榜</a></li>
                             <li class="lang-switcher">
-                                <button class="lang-btn" id="langToggle" title="Switch Language">
-                                    <span id="langIcon">🌐</span>
+                                <button type="button" class="lang-btn" id="langToggle" aria-expanded="false" aria-controls="langMenu" aria-label="切换语言">
+                                    <span id="langIcon" aria-hidden="true">🌐</span>
                                     <span id="langText">RU</span>
                                 </button>
                             </li>
                         </ul>
                     </nav>
-                    <div class="mobile-menu-btn">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
+                    <button type="button" class="mobile-menu-btn" aria-expanded="false" aria-controls="nav" aria-label="打开菜单">
+                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true"></span>
+                    </button>
                 </div>
             </div>
         </header>
 
         <!-- 主要内容 -->
         <main class="main">
-            <section class="hero">
-                <h2 data-i18n="hero.title">欢迎来到木头猫游戏世界</h2>
+            <section class="hero" aria-labelledby="hero-title">
+                <h2 id="hero-title" data-i18n="hero.title">欢迎来到木头猫游戏世界</h2>
                 <p data-i18n="hero.description">在这里，您可以找到各种经典有趣的小游戏，随时随地享受游戏的乐趣。</p>
                 <div class="cta-buttons">
-                    <button class="btn-primary" onclick="startRandomGame()" data-i18n="hero.startGame">开始游戏</button>
+                    <button type="button" class="btn-primary" onclick="startRandomGame()" data-i18n="hero.startGame" aria-label="开始随机游戏">开始游戏</button>
                 </div>
             </section>
 
-            <section class="games-section" id="games">
-                <h3 data-i18n="section.games">精选游戏</h3>
+            <section class="games-section" id="games" aria-labelledby="games-title">
+                <h3 id="games-title" data-i18n="section.games">精选游戏</h3>
                 <div class="games-grid">
-                    <div class="game-card" data-game="tetris" role="button" tabindex="0">
-                        <div class="game-icon">🧩</div>
-                        <h4 data-i18n="game.tetris">俄罗斯方块</h4>
-                        <p data-i18n="game.tetris.desc">经典益智游戏</p>
-                        <div class="game-meta">
+                    <button type="button" class="game-card" data-game="tetris" aria-label="俄罗斯方块 - 经典益智游戏">
+                        <span class="game-icon" aria-hidden="true">🧩</span>
+                        <span data-i18n="game.tetris">俄罗斯方块</span>
+                        <span data-i18n="game.tetris.desc">经典益智游戏</span>
+                        <span class="game-meta">
                             <span class="difficulty easy" data-i18n="difficulty.easy">简单</span>
                             <span class="players" data-i18n="players.1">1人</span>
-                        </div>
-                    </div>
-                    <div class="game-card" data-game="snake" role="button" tabindex="0">
-                        <div class="game-icon">🐍</div>
-                        <h4 data-i18n="game.snake">贪吃蛇</h4>
-                        <p data-i18n="game.snake.desc">怀旧经典玩法</p>
-                        <div class="game-meta">
+                        </span>
+                    </button>
+                    <button type="button" class="game-card" data-game="snake" aria-label="贪吃蛇 - 怀旧经典玩法">
+                        <span class="game-icon" aria-hidden="true">🐍</span>
+                        <span data-i18n="game.snake">贪吃蛇</span>
+                        <span data-i18n="game.snake.desc">怀旧经典玩法</span>
+                        <span class="game-meta">
                             <span class="difficulty medium" data-i18n="difficulty.medium">中等</span>
                             <span class="players" data-i18n="players.1">1人</span>
-                        </div>
-                    </div>
-                    <div class="game-card" data-game="minesweeper" role="button" tabindex="0">
-                        <div class="game-icon">💣</div>
-                        <h4 data-i18n="game.minesweeper">扫雷</h4>
-                        <p data-i18n="game.minesweeper.desc">挑战逻辑思维</p>
-                        <div class="game-meta">
+                        </span>
+                    </button>
+                    <button type="button" class="game-card" data-game="minesweeper" aria-label="扫雷 - 挑战逻辑思维">
+                        <span class="game-icon" aria-hidden="true">💣</span>
+                        <span data-i18n="game.minesweeper">扫雷</span>
+                        <span data-i18n="game.minesweeper.desc">挑战逻辑思维</span>
+                        <span class="game-meta">
                             <span class="difficulty hard" data-i18n="difficulty.hard">困难</span>
                             <span class="players" data-i18n="players.1">1人</span>
-                        </div>
-                    </div>
-                    <div class="game-card" data-game="2048" role="button" tabindex="0">
-                        <div class="game-icon">🔢</div>
-                        <h4 data-i18n="game.2048">2048</h4>
-                        <p data-i18n="game.2048.desc">数字合并挑战</p>
-                        <div class="game-meta">
+                        </span>
+                    </button>
+                    <button type="button" class="game-card" data-game="2048" aria-label="2048 - 数字合并挑战">
+                        <span class="game-icon" aria-hidden="true">🔢</span>
+                        <span data-i18n="game.2048">2048</span>
+                        <span data-i18n="game.2048.desc">数字合并挑战</span>
+                        <span class="game-meta">
                             <span class="difficulty medium" data-i18n="difficulty.medium">中等</span>
                             <span class="players" data-i18n="players.1">1人</span>
-                        </div>
-                    </div>
-                    <div class="game-card" data-game="chess" role="button" tabindex="0">
-                        <div class="game-icon">♟️</div>
-                        <h4 data-i18n="game.chess">国际象棋</h4>
-                        <p data-i18n="game.chess.desc">策略对战游戏</p>
-                        <div class="game-meta">
+                        </span>
+                    </button>
+                    <button type="button" class="game-card" data-game="chess" aria-label="国际象棋 - 策略对战游戏">
+                        <span class="game-icon" aria-hidden="true">♟️</span>
+                        <span data-i18n="game.chess">国际象棋</span>
+                        <span data-i18n="game.chess.desc">策略对战游戏</span>
+                        <span class="game-meta">
                             <span class="difficulty hard" data-i18n="difficulty.hard">困难</span>
                             <span class="players" data-i18n="players.2">2人</span>
-                        </div>
-                    </div>
-                    <div class="game-card" data-game="checkers" role="button" tabindex="0">
-                        <div class="game-icon">⚪</div>
-                        <h4 data-i18n="game.checkers">跳棋</h4>
-                        <p data-i18n="game.checkers.desc">经典双人对战</p>
-                        <div class="game-meta">
+                        </span>
+                    </button>
+                    <button type="button" class="game-card" data-game="checkers" aria-label="跳棋 - 经典双人对战">
+                        <span class="game-icon" aria-hidden="true">⚪</span>
+                        <span data-i18n="game.checkers">跳棋</span>
+                        <span data-i18n="game.checkers.desc">经典双人对战</span>
+                        <span class="game-meta">
                             <span class="difficulty medium" data-i18n="difficulty.medium">中等</span>
                             <span class="players" data-i18n="players.2">2人</span>
-                        </div>
-                    </div>
-                    <div class="game-card" data-game="tic-tac-toe" role="button" tabindex="0">
-                        <div class="game-icon">❌</div>
-                        <h4 data-i18n="game.tic-tac-toe">井字棋</h4>
-                        <p data-i18n="game.tic-tac-toe.desc">经典策略游戏</p>
-                        <div class="game-meta">
+                        </span>
+                    </button>
+                    <button type="button" class="game-card" data-game="tic-tac-toe" aria-label="井字棋 - 经典策略游戏">
+                        <span class="game-icon" aria-hidden="true">❌</span>
+                        <span data-i18n="game.tic-tac-toe">井字棋</span>
+                        <span data-i18n="game.tic-tac-toe.desc">经典策略游戏</span>
+                        <span class="game-meta">
                             <span class="difficulty easy" data-i18n="difficulty.easy">简单</span>
                             <span class="players" data-i18n="players.2">2人</span>
-                        </div>
-                    </div>
-                    <div class="game-card" data-game="memory-card" role="button" tabindex="0">
-                        <div class="game-icon">🃏</div>
-                        <h4 data-i18n="game.memory-card">记忆卡牌</h4>
-                        <p data-i18n="game.memory-card.desc">考验记忆能力</p>
-                        <div class="game-meta">
+                        </span>
+                    </button>
+                    <button type="button" class="game-card" data-game="memory-card" aria-label="记忆卡牌 - 考验记忆能力">
+                        <span class="game-icon" aria-hidden="true">🃏</span>
+                        <span data-i18n="game.memory-card">记忆卡牌</span>
+                        <span data-i18n="game.memory-card.desc">考验记忆能力</span>
+                        <span class="game-meta">
                             <span class="difficulty medium" data-i18n="difficulty.medium">中等</span>
                             <span class="players" data-i18n="players.1">1人</span>
-                        </div>
-                    </div>
-                    <div class="game-card" data-game="arkanoid" role="button" tabindex="0">
-                        <div class="game-icon">⚾</div>
-                        <h4 data-i18n="game.arkanoid">打砖块</h4>
-                        <p data-i18n="game.arkanoid.desc">经典街机游戏</p>
-                        <div class="game-meta">
+                        </span>
+                    </button>
+                    <button type="button" class="game-card" data-game="arkanoid" aria-label="打砖块 - 经典街机游戏">
+                        <span class="game-icon" aria-hidden="true">⚾</span>
+                        <span data-i18n="game.arkanoid">打砖块</span>
+                        <span data-i18n="game.arkanoid.desc">经典街机游戏</span>
+                        <span class="game-meta">
                             <span class="difficulty medium" data-i18n="difficulty.medium">中等</span>
                             <span class="players" data-i18n="players.1">1人</span>
-                        </div>
-                    </div>
-                    <div class="game-card" data-game="spider-solitaire" role="button" tabindex="0">
-                        <div class="game-icon">🕷️</div>
-                        <h4 data-i18n="game.spider-solitaire">蜘蛛卡牌</h4>
-                        <p data-i18n="game.spider-solitaire.desc">经典纸牌游戏</p>
-                        <div class="game-meta">
+                        </span>
+                    </button>
+                    <button type="button" class="game-card" data-game="spider-solitaire" aria-label="蜘蛛卡牌 - 经典纸牌游戏">
+                        <span class="game-icon" aria-hidden="true">🕷️</span>
+                        <span data-i18n="game.spider-solitaire">蜘蛛卡牌</span>
+                        <span data-i18n="game.spider-solitaire.desc">经典纸牌游戏</span>
+                        <span class="game-meta">
                             <span class="difficulty hard" data-i18n="difficulty.hard">困难</span>
                             <span class="players" data-i18n="players.1">1人</span>
-                        </div>
-                    </div>
-                    <div class="game-card" data-game="tank-battle" role="button" tabindex="0">
-                        <div class="game-icon">🎖️</div>
-                        <h4 data-i18n="game.tank-battle">坦克对战</h4>
-                        <p data-i18n="game.tank-battle.desc">多人对战游戏</p>
-                        <div class="game-meta">
+                        </span>
+                    </button>
+                    <button type="button" class="game-card" data-game="tank-battle" aria-label="坦克对战 - 多人对战游戏">
+                        <span class="game-icon" aria-hidden="true">🎖️</span>
+                        <span data-i18n="game.tank-battle">坦克对战</span>
+                        <span data-i18n="game.tank-battle.desc">多人对战游戏</span>
+                        <span class="game-meta">
                             <span class="difficulty medium" data-i18n="difficulty.medium">中等</span>
                             <span class="players" data-i18n="players.2">2人</span>
-                        </div>
-                    </div>
+                        </span>
+                    </button>
                 </div>
-                                </section>
+            </section>
 
-            <section class="features">
-                <div class="feature-card">
-                    <div class="feature-icon">🎮</div>
+            <section class="features" aria-labelledby="features-title">
+                <h3 id="features-title" class="sr-only">网站特色</h3>
+                <aside class="feature-card" aria-label="丰富游戏">
+                    <div class="feature-icon" aria-hidden="true">🎮</div>
                     <h3 data-i18n="feature.richGames">丰富游戏</h3>
                     <p data-i18n="feature.richGames.desc">涵盖各类经典游戏，满足不同玩家的喜好</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📱</div>
+                </aside>
+                <aside class="feature-card" aria-label="响应式设计">
+                    <div class="feature-icon" aria-hidden="true">📱</div>
                     <h3 data-i18n="feature.responsive">响应式设计</h3>
                     <p data-i18n="feature.responsive.desc">完美适配桌面、平板和手机设备</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">⭐</div>
+                </aside>
+                <aside class="feature-card" aria-label="持续更新">
+                    <div class="feature-icon" aria-hidden="true">⭐</div>
                     <h3 data-i18n="feature.updates">持续更新</h3>
                     <p data-i18n="feature.updates.desc">定期添加新游戏，保持新鲜感</p>
-                </div>
+                </aside>
             </section>
 
             <!-- 排行榜部分 -->
-            <section class="leaderboard-section" id="leaderboard">
-                <h3 data-i18n="section.leaderboard">排行榜</h3>
+            <section class="leaderboard-section" id="leaderboard" aria-labelledby="leaderboard-title">
+                <h3 id="leaderboard-title" data-i18n="section.leaderboard">排行榜</h3>
                 <div class="leaderboard-container">
-                    <table class="leaderboard-table">
+                    <table class="leaderboard-table" aria-label="游戏排行榜">
                         <thead>
                             <tr>
-                                <th data-i18n="leaderboard.rank">排名</th>
-                                <th data-i18n="leaderboard.player">玩家</th>
-                                <th data-i18n="leaderboard.score">分数</th>
-                                <th data-i18n="leaderboard.game">游戏</th>
-                                <th data-i18n="leaderboard.date">日期</th>
+                                <th scope="col" data-i18n="leaderboard.rank">排名</th>
+                                <th scope="col" data-i18n="leaderboard.player">玩家</th>
+                                <th scope="col" data-i18n="leaderboard.score">分数</th>
+                                <th scope="col" data-i18n="leaderboard.game">游戏</th>
+                                <th scope="col" data-i18n="leaderboard.date">日期</th>
                             </tr>
                         </thead>
                         <tbody id="leaderboard-body">
                             <!-- 排行榜数据将通过JavaScript动态加载 -->
                         </tbody>
                     </table>
-                    <div class="leaderboard-loading" id="leaderboard-loading">
+                    <div class="leaderboard-loading" id="leaderboard-loading" aria-live="polite">
                         <p data-i18n="leaderboard.loading">正在加载排行榜...</p>
                     </div>
-                    <div class="leaderboard-empty" id="leaderboard-empty" style="display: none;">
+                    <div class="leaderboard-empty" id="leaderboard-empty" aria-live="polite">
                         <p data-i18n="leaderboard.empty">暂无排行榜数据</p>
                     </div>
                 </div>
@@ -221,11 +285,11 @@
     </div>
 
     <!-- 排行榜提交模态框 -->
-    <div id="score-modal" class="modal-overlay" style="display: none;">
+    <div id="score-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 data-i18n="modal.submitScore">提交分数</h3>
-                <span class="modal-close" id="score-modal-close">&times;</span>
+                <button type="button" class="modal-close" id="score-modal-close" aria-label="关闭">&times;</button>
             </div>
             <div class="modal-body">
                 <p data-i18n="modal.yourScore">您的分数: <span id="current-score">0</span></p>
@@ -235,22 +299,22 @@
                     <input type="text" id="player-name" maxlength="20" data-i18n-placeholder="modal.placeholder" placeholder="输入昵称">
                 </div>
                 <div class="modal-actions">
-                    <button id="submit-score-btn" class="btn-primary" data-i18n="modal.submit">提交分数</button>
-                    <button id="cancel-score-btn" class="btn-secondary" data-i18n="modal.cancel">取消</button>
+                    <button type="button" id="submit-score-btn" class="btn-primary" data-i18n="modal.submit">提交分数</button>
+                    <button type="button" id="cancel-score-btn" class="btn-secondary" data-i18n="modal.cancel">取消</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- 俄语公告模态框 -->
-    <div id="russian-notice-modal" class="modal-overlay russian-notice-modal" style="display: none;">
+    <div id="russian-notice-modal" class="modal-overlay russian-notice-modal">
         <div class="modal-content russian-notice-content">
             <div class="modal-header russian-notice-header">
                 <h3 data-i18n="russianNotice.title">重要公告</h3>
-                <span class="modal-close" id="russian-notice-close">&times;</span>
+                <button type="button" class="modal-close" id="russian-notice-close" aria-label="关闭">&times;</button>
             </div>
             <div class="modal-body russian-notice-body">
-                <div class="notice-icon">📢</div>
+                <div class="notice-icon" aria-hidden="true">📢</div>
                 <p class="notice-text" data-i18n="russianNotice.content">
                     本网站与 woodcat.io 无任何关联。我们是一个独立的小游戏合集网站，与其他任何使用类似名称的网站无关。
                 </p>
@@ -259,7 +323,7 @@
                 </div>
             </div>
             <div class="modal-footer russian-notice-footer">
-                <button id="russian-notice-confirm" class="btn-primary" data-i18n="russianNotice.confirm">我明白了</button>
+                <button type="button" id="russian-notice-confirm" class="btn-primary" data-i18n="russianNotice.confirm">我明白了</button>
             </div>
         </div>
     </div>
@@ -397,6 +461,57 @@
     </script>
     <!-- 排行榜相关脚本（动态加载） -->
     <!-- 使用cdnLoader.js覆盖默认的配置和Supabase库加载方式 -->
+
+    <!-- PWA添加引导模态框 -->
+    <div class="modal-overlay" id="pwa-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加到主屏幕</h3>
+                <button type="button" class="modal-close" id="pwa-modal-close" aria-label="关闭">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>您已经游玩了多个游戏，是否将木头猫游戏合集添加到主屏幕，以便更方便地访问？</p>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-primary" id="pwa-yes">是</button>
+                <button type="button" class="btn-secondary" id="pwa-no">否</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设备类型选择模态框 -->
+    <div class="modal-overlay" id="device-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>选择设备类型</h3>
+                <button type="button" class="modal-close" id="device-modal-close" aria-label="关闭">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>请选择您的设备类型，我们将为您提供相应的添加引导：</p>
+                <div class="device-buttons">
+                    <button type="button" class="btn-primary" id="device-iphone">iPhone/iPad</button>
+                    <button type="button" class="btn-primary" id="device-android">Android</button>
+                    <button type="button" class="btn-primary" id="device-desktop">桌面端</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加引导模态框 -->
+    <div class="modal-overlay" id="guide-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加到主屏幕引导</h3>
+                <button type="button" class="modal-close" id="guide-modal-close" aria-label="关闭">&times;</button>
+            </div>
+            <div class="modal-body" id="guide-content">
+                <!-- 引导内容将通过JavaScript动态添加 -->
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-primary" id="guide-close">我知道了</button>
+            </div>
+        </div>
+    </div>
 
     <!-- 版权声明 -->
     <div class="copyright-notice">
