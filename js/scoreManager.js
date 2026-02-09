@@ -29,7 +29,8 @@ class ScoreManager {
             'minesweeper': { name: '扫雷', scoreType: 'time' },
             '2048': { name: '2048', scoreType: 'points' },
             'tic-tac-toe': { name: '井字棋', scoreType: 'win_rate' },
-            'memory-card': { name: '记忆翻牌', scoreType: 'time' }
+            'memory-card': { name: '记忆翻牌', scoreType: 'time' },
+            'tank-battle': { name: '坦克对战', scoreType: 'points' }
         };
     }
 
