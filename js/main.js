@@ -61,6 +61,11 @@ const gameData = {
         title: '坦克对战',
         description: '多人对战游戏，控制坦克击败对手',
         url: 'games/tank-battle.html'
+    },
+    'tank-battle-phaser': {
+        title: '坦克大战',
+        description: '现代化坦克对战游戏，支持移动端操作',
+        url: 'games/tank-battle-phaser/index.html'
     }
 };
 
@@ -570,6 +575,7 @@ window.initializeNonLeaderboardFeatures = function() {
         
         if (window.innerWidth > 768) {
             // 桌面端：始终显示导航，隐藏反馈项（如果存在）
+            navList.classList.remove('show'); // 移除show类
             navList.style.display = 'flex'; // 桌面端使用flex显示
             navList.style.flexDirection = 'row'; // 桌面端水平排列
             const existingFeedbackItem = document.querySelector('.feedback-menu-item');
@@ -580,7 +586,8 @@ window.initializeNonLeaderboardFeatures = function() {
             mobileMenuBtn && mobileMenuBtn.classList.remove('active');
         } else {
             // 移动端：默认隐藏，仅在点击按钮时显示
-            navList.style.display = 'none';
+            navList.classList.remove('show'); // 移除show类
+            navList.style.display = ''; // 恢复默认样式
             mobileMenuBtn && mobileMenuBtn.classList.remove('active');
         }
     }
@@ -589,21 +596,54 @@ window.initializeNonLeaderboardFeatures = function() {
     const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
 
     if (mobileMenuBtn) {
-        // 添加触摸事件支持（移动端优化）
-        mobileMenuBtn.addEventListener('touchstart', function() {
-            // 记录触摸开始时间
-            this.touchStartTime = Date.now();
-        }, { passive: true });
+            // 添加触摸事件支持（移动端优化）
+            mobileMenuBtn.addEventListener('touchstart', function() {
+                // 记录触摸开始时间
+                this.touchStartTime = Date.now();
+            }, { passive: true });
 
-        // 添加触摸结束事件
-        mobileMenuBtn.addEventListener('touchend', function(e) {
-            // 如果触摸时间小于300ms，则认为是点击
-            const touchDuration = Date.now() - this.touchStartTime;
+            // 添加触摸结束事件
+            mobileMenuBtn.addEventListener('touchend', function(e) {
+                // 如果触摸时间小于300ms，则认为是点击
+                const touchDuration = Date.now() - this.touchStartTime;
 
-            if (touchDuration < 300) {
-                // 阻止默认行为和事件冒泡
-                e.preventDefault();
-                e.stopPropagation();
+                if (touchDuration < 300) {
+                    // 阻止默认行为和事件冒泡
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const nav = document.querySelector('.nav');
+                    const navList = nav.querySelector('ul');
+
+                    // 检查当前窗口大小
+                    if (window.innerWidth <= 768) { // 移动端
+                        // 检查当前显示状态
+                        if (navList.classList.contains('show')) {
+                            // 菜单当前显示，需要隐藏
+                            navList.classList.remove('show');
+                            this.classList.remove('active');
+                        } else {
+                            // 菜单当前隐藏，需要显示
+                            navList.classList.add('show');
+                            this.classList.add('active'); // 添加active类来实现动画效果
+
+                            // 检查是否已经添加了反馈项，避免重复添加
+                            const existingFeedbackItem = navList.querySelector('.feedback-menu-item');
+                            if (!existingFeedbackItem) {
+                                const feedbackItem = document.createElement('li');
+                                feedbackItem.className = 'feedback-menu-item';
+                                feedbackItem.innerHTML = '<a href="feedback.html">反馈与支持</a>';
+                                navList.appendChild(feedbackItem);
+                            }
+                        }
+                    }
+                }
+            }, { passive: false });
+
+            // 保留原有的点击事件（桌面端）
+            mobileMenuBtn.addEventListener('click', function(e) {
+                e.preventDefault(); // 防止默认行为
+                e.stopPropagation(); // 阻止事件冒泡
 
                 const nav = document.querySelector('.nav');
                 const navList = nav.querySelector('ul');
@@ -611,14 +651,13 @@ window.initializeNonLeaderboardFeatures = function() {
                 // 检查当前窗口大小
                 if (window.innerWidth <= 768) { // 移动端
                     // 检查当前显示状态
-                    if (navList.style.display === 'flex' || getComputedStyle(navList).display === 'flex') {
+                    if (navList.classList.contains('show')) {
                         // 菜单当前显示，需要隐藏
-                        navList.style.display = 'none';
+                        navList.classList.remove('show');
                         this.classList.remove('active');
                     } else {
                         // 菜单当前隐藏，需要显示
-                        navList.style.display = 'flex';
-                        navList.style.flexDirection = 'column';
+                        navList.classList.add('show');
                         this.classList.add('active'); // 添加active类来实现动画效果
 
                         // 检查是否已经添加了反馈项，避免重复添加
@@ -631,56 +670,22 @@ window.initializeNonLeaderboardFeatures = function() {
                         }
                     }
                 }
-            }
-        }, { passive: false });
-
-        // 保留原有的点击事件（桌面端）
-        mobileMenuBtn.addEventListener('click', function(e) {
-            e.preventDefault(); // 防止默认行为
-            e.stopPropagation(); // 阻止事件冒泡
-
-            const nav = document.querySelector('.nav');
-            const navList = nav.querySelector('ul');
-
-            // 检查当前窗口大小
-            if (window.innerWidth <= 768) { // 移动端
-                // 检查当前显示状态
-                if (navList.style.display === 'flex' || getComputedStyle(navList).display === 'flex') {
-                    // 菜单当前显示，需要隐藏
-                    navList.style.display = 'none';
-                    this.classList.remove('active');
-                } else {
-                    // 菜单当前隐藏，需要显示
-                    navList.style.display = 'flex';
-                    navList.style.flexDirection = 'column';
-                    this.classList.add('active'); // 添加active类来实现动画效果
-
-                    // 检查是否已经添加了反馈项，避免重复添加
-                    const existingFeedbackItem = navList.querySelector('.feedback-menu-item');
-                    if (!existingFeedbackItem) {
-                        const feedbackItem = document.createElement('li');
-                        feedbackItem.className = 'feedback-menu-item';
-                        feedbackItem.innerHTML = '<a href="feedback.html">反馈与支持</a>';
-                        navList.appendChild(feedbackItem);
-                    }
-                }
-            }
-        });
-        
-        // 点击菜单外部关闭菜单（仅在移动端）
-        document.addEventListener('click', function(e) {
-            const nav = document.querySelector('.nav');
-            const navList = nav.querySelector('ul');
+            });
             
-            if (window.innerWidth <= 768 && 
-                !mobileMenuBtn.contains(e.target) && 
-                navList && navList.style.display === 'flex' && 
-                !nav.contains(e.target)) {
-                navList.style.display = 'none';
-                mobileMenuBtn.classList.remove('active');
-            }
-        });
-    }
+            // 点击菜单外部关闭菜单（仅在移动端）
+            document.addEventListener('click', function(e) {
+                const nav = document.querySelector('.nav');
+                const navList = nav.querySelector('ul');
+                
+                if (window.innerWidth <= 768 && 
+                    !mobileMenuBtn.contains(e.target) && 
+                    navList && navList.classList.contains('show') && 
+                    !nav.contains(e.target)) {
+                    navList.classList.remove('show');
+                    mobileMenuBtn.classList.remove('active');
+                }
+            });
+        }
     
     // 页面加载时和窗口大小改变时更新导航显示
     updateNavDisplay();

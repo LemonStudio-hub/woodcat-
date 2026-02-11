@@ -35,6 +35,7 @@ export default defineConfig({
         arkanoid: './games/arkanoid.html',
         'spider-solitaire': './games/spider-solitaire.html',
         'tank-battle': './games/tank-battle.html',
+        'tank-battle-phaser': './games/tank-battle-phaser/index.html',
       },
       output: {
         manualChunks: {
@@ -66,7 +67,7 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
-    strictPort: true,
+    strictPort: false,
     host: true,
     hmr: {
       overlay: false,
