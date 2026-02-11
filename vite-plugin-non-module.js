@@ -3,9 +3,12 @@
  * 在构建过程中自动为非模块化的script标签添加type="module"属性
  */
 
+const processMarker = '<!-- [nonModulePlugin] Processed -->';
+
 export function nonModulePlugin() {
   return {
     name: 'nonModulePlugin',
+    enforce: 'pre',
     transformIndexHtml(html, { path }) {
       // 只处理HTML文件
       if (!path.endsWith('.html')) {
@@ -13,51 +16,36 @@ export function nonModulePlugin() {
       }
 
       // 检查是否已经处理过
-      if (html.includes('[nonModulePlugin]')) {
+      if (html.includes('[nonModulePlugin]') || html.includes(processMarker)) {
         return html;
       }
 
-      // 记录处理开始
-      const processMarker = `<!-- [nonModulePlugin] Processed -->`;
-      if (html.includes(processMarker)) {
-        return html;
-      }
-
-      // 替换所有script标签，添加type="module"
+      // 替换所有非模块化的script标签，添加type="module"
+      // 正则表达式匹配：script标签，包含src属性，可能包含其他属性
       const processedHtml = html.replace(
-        /<script\s+src\s*=\s*["']([^"']*)["'][^>]*><\/script>/gi,
-        (match, src) => {
+        /<script\s+([^>]*?)src\s*=\s*["']([^"']*)["']([^>]*?)>\s*<\/script>/gi,
+        (match, beforeSrc, src, afterSrc) => {
+          const allAttrs = (beforeSrc + afterSrc).trim();
+          
           // 如果已经有type="module"，不修改
-          if (match.includes('type="module"') || match.includes("type='module'")) {
+          if (allAttrs.includes('type="module"') || allAttrs.includes("type='module'")) {
             return match;
           }
-          // 如果是外部CDN资源，不添加module
-          if (src.startsWith('http') || src.startsWith('//')) {
+          // 如果是外部CDN资源或data: URI，不添加module
+          if (src.startsWith('http') || src.startsWith('//') || src.startsWith('data:')) {
             return match;
           }
           // 为本地资源添加module属性
-          return `<script type="module" src="${src}"></script>`;
+          return `<script type="module" ${beforeSrc.trim()} src="${src}" ${afterSrc.trim()}></script>`;
         }
       );
 
-      return processedHtml;
-    },
-    generateBundle(options, bundle) {
-      // 在生成bundle后处理HTML文件
-      for (const [fileName, fileInfo] of Object.entries(bundle)) {
-        if (fileInfo.type === 'asset' && fileName.endsWith('.html')) {
-          let content = fileInfo.source;
-          
-          // 添加处理标记
-          if (!content.includes(processMarker)) {
-            content = content.replace('</body>', `${processMarker}</body>`);
-          }
-          
-          fileInfo.source = content;
-        }
+      // 添加处理标记
+      if (!processedHtml.includes(processMarker)) {
+        return processedHtml.replace('</body>', `${processMarker}</body>`);
       }
+
+      return processedHtml;
     }
   };
 }
-
-const processMarker = '<!-- [nonModulePlugin] Processed -->';

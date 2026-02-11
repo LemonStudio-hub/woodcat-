@@ -7,7 +7,7 @@
     <h1>Logger Test</h1>
     <div id="test-results"></div>
     
-    <script src="js/logger.js"></script>
+    <script type="module"  src="js/logger.js" ></script>
     <script>
         function logResult(message) {
             const div = document.getElementById('test-results');
@@ -26,42 +26,42 @@
         logResult('Logger test completed');
     </script>
     
-    <script src="js/audioVibration.js"></script>
+    <script type="module"  src="js/audioVibration.js" ></script>
     <script>
         logResult('After audioVibration.js: Logger exists - ' + (window.Logger ? 'Yes' : 'No'));
     </script>
     
-    <script src="js/dataManager.js"></script>
+    <script type="module"  src="js/dataManager.js" ></script>
     <script>
         logResult('After dataManager.js: Logger exists - ' + (window.Logger ? 'Yes' : 'No'));
     </script>
     
-    <script src="js/scoreManager.js"></script>
+    <script type="module"  src="js/scoreManager.js" ></script>
     <script>
         logResult('After scoreManager.js: Logger exists - ' + (window.Logger ? 'Yes' : 'No'));
     </script>
     
-    <script src="js/cdnManager.js"></script>
+    <script type="module"  src="js/cdnManager.js" ></script>
     <script>
         logResult('After cdnManager.js: Logger exists - ' + (window.Logger ? 'Yes' : 'No'));
     </script>
     
-    <script src="js/modal.js"></script>
+    <script type="module"  src="js/modal.js" ></script>
     <script>
         logResult('After modal.js: Logger exists - ' + (window.Logger ? 'Yes' : 'No'));
     </script>
     
-    <script src="js/i18n.js"></script>
+    <script type="module"  src="js/i18n.js" ></script>
     <script>
         logResult('After i18n.js: Logger exists - ' + (window.Logger ? 'Yes' : 'No'));
     </script>
     
-    <script src="js/main.js"></script>
+    <script type="module"  src="js/main.js" ></script>
     <script>
         logResult('After main.js: Logger exists - ' + (window.Logger ? 'Yes' : 'No'));
     </script>
     
-    <script src="js/cdnLoader.js"></script>
+    <script type="module"  src="js/cdnLoader.js" ></script>
     <script>
         logResult('After cdnLoader.js: Logger exists - ' + (window.Logger ? 'Yes' : 'No'));
     </script>
