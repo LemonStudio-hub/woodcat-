@@ -1,6 +1,87 @@
 // 木头猫游戏合集 - JavaScript功能
 
-// 使用全局Logger对象（由logger.js提供）
+// 默认Logger实现，防止在logger.js加载之前使用Logger对象时出现错误
+if (typeof Logger === 'undefined') {
+    window.Logger = {
+        log: console.log.bind(console),
+        info: console.info.bind(console),
+        warn: console.warn.bind(console),
+        error: console.error.bind(console)
+    };
+}
+
+// 默认gameDataManager实现，防止在dataManager.js加载之前使用时出现错误
+if (typeof gameDataManager === 'undefined') {
+    window.gameDataManager = {
+        saveData: async function(gameName, dataType, data) {
+            try {
+                const key = `woodcat_${gameName}_${dataType}`;
+                localStorage.setItem(key, JSON.stringify(data));
+                return true;
+            } catch (error) {
+                console.error('保存数据失败:', error);
+                return false;
+            }
+        },
+        loadData: async function(gameName, dataType, defaultValue = null) {
+            try {
+                const key = `woodcat_${gameName}_${dataType}`;
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : defaultValue;
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                return defaultValue;
+            }
+        },
+        getAllGameData: async function() {
+            try {
+                const allData = {};
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('woodcat_')) {
+                        try {
+                            allData[key] = JSON.parse(localStorage.getItem(key));
+                        } catch (error) {
+                            console.error(`解析数据失败: ${key}`, error);
+                        }
+                    }
+                }
+                return allData;
+            } catch (error) {
+                console.error('获取所有游戏数据失败:', error);
+                return {};
+            }
+        }
+    };
+}
+
+// 默认scoreManager实现，防止在scoreManager.js加载之前使用时出现错误
+if (typeof scoreManager === 'undefined') {
+    window.scoreManager = {
+        getHighScore: async function(gameName) {
+            try {
+                const data = await gameDataManager.loadData(gameName, 'highScore');
+                return data || 0;
+            } catch (error) {
+                console.error('获取最高分失败:', error);
+                return 0;
+            }
+        },
+        updateHighScore: async function(gameName, score) {
+            try {
+                const currentHighScore = await this.getHighScore(gameName);
+                if (score > currentHighScore) {
+                    await gameDataManager.saveData(gameName, 'highScore', score);
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error('更新最高分失败:', error);
+                return false;
+            }
+        }
+    };
+}
 
 // 定义全局变量用于存储supabase客户端
 let globalSupabaseClient = null;
@@ -235,7 +316,7 @@ window.loadConfigAndSupabase = function() {
 function startRandomGame() {
     try {
         // 获取所有游戏ID
-        const gameIds = Object.keys(games);
+        const gameIds = Object.keys(gameData);
         
         if (gameIds.length === 0) {
             console.error('没有可用的游戏');
@@ -245,7 +326,7 @@ function startRandomGame() {
         // 随机选择一个游戏ID
         const randomIndex = Math.floor(Math.random() * gameIds.length);
         const randomGameId = gameIds[randomIndex];
-        const randomGame = games[randomGameId];
+        const randomGame = gameData[randomGameId];
         
         if (!randomGame || !randomGame.url) {
             console.error(`游戏数据无效: ${randomGameId}`);
@@ -739,7 +820,7 @@ function checkForScoreSubmission() {
         
         // 显示分数提交模态框
         currentScoreSpan.textContent = currentScore;
-        currentGameSpan.textContent = games[currentGame]?.title || currentGame;
+        currentGameSpan.textContent = gameData[currentGame]?.title || currentGame;
         scoreModal.style.display = 'flex';
         playerNameInput.focus();
         
@@ -772,7 +853,7 @@ function checkForScoreSubmission() {
                     const insertData = {
                         player_name: playerName,
                         score: currentScore,
-                        game: games[currentGame]?.title || currentGame,
+                        game: gameData[currentGame]?.title || currentGame,
                         created_at: new Date().toISOString()
                     };
                     

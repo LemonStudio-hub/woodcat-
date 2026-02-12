@@ -9,6 +9,7 @@
     <meta name="keywords" content="games, classic games, web games, woodcat, tetris, snake, minesweeper, 2048">
     <meta name="theme-color" content="#3498db">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Woodcat Games">
     <meta name="application-name" content="Woodcat Game Collection">
@@ -468,7 +469,7 @@
         // Register Service Worker for PWA functionality
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/public/service-worker.js')
+                navigator.serviceWorker.register('/service-worker.js')
                     .then(function(registration) {
                         console.log('Service Worker registered with scope:', registration.scope);
                     })
