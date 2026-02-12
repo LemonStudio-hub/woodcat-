@@ -46,11 +46,37 @@ function findAllHtmlFiles(dir) {
 function fixSingleHtmlFile(filePath) {
   let content = fs.readFileSync(filePath, 'utf8');
   
+  // 移除Vite添加的错误资源引用
+  content = content.replace(/<link rel="modulepreload"[^>]+>/gi, '');
+  content = content.replace(/<script type="module" src="\/games\/assets\/[^>]+><\/script>/gi, '');
+  content = content.replace(/<link rel="stylesheet" href="\/games\/css\/[^>]+>/gi, '');
+  
   // 恢复被注释掉的脚本标签
   content = content.replace(
     /<!--\s*NON_MODULE_SCRIPT:\s*([^>]+)\s*-->/gi,
     '<script src="$1"></script>'
   );
+  
+  // 为游戏页面添加必要的脚本引用
+  if (filePath.includes('\\games\\') || filePath.includes('/games/')) {
+    // 移除所有现有的脚本引用，然后重新添加
+    content = content.replace(/<script src="\.\.\/js\/[^>]+><\/script>/gi, '');
+    
+    // 在body标签结束前添加脚本引用
+    // 找到Vite插件注释的位置，如果没有则直接在body结束标签前添加
+    const viteCommentIndex = content.indexOf('<!-- [nonModulePlugin] Processed -->');
+    const bodyEndIndex = content.indexOf('</body>');
+    
+    if (viteCommentIndex !== -1 && viteCommentIndex < bodyEndIndex) {
+      // 在Vite插件注释之前添加脚本标签
+      const scriptTags = `    <script src="../js/logger.js" defer></script>\n    <script src="../js/dataManager.js" defer></script>\n    <script src="../js/scoreManager.js" defer></script>\n    <script src="../js/audioVibration.js" defer></script>\n    <script src="../js/i18n.js" defer></script>\n    <script src="../js/gameFamiliarity.js" defer></script>\n    <script src="../js/lib/hammer.min.js" defer></script>\n`;
+      content = content.substring(0, viteCommentIndex) + scriptTags + content.substring(viteCommentIndex);
+    } else if (bodyEndIndex !== -1) {
+      // 直接在body结束标签前添加脚本标签
+      const scriptTags = `    <script src="../js/logger.js" defer></script>\n    <script src="../js/dataManager.js" defer></script>\n    <script src="../js/scoreManager.js" defer></script>\n    <script src="../js/audioVibration.js" defer></script>\n    <script src="../js/i18n.js" defer></script>\n    <script src="../js/gameFamiliarity.js" defer></script>\n    <script src="../js/lib/hammer.min.js" defer></script>\n`;
+      content = content.substring(0, bodyEndIndex) + scriptTags + content.substring(bodyEndIndex);
+    }
+  }
   
   fs.writeFileSync(filePath, content);
   console.log(`已修复: ${filePath}`);
