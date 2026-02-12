@@ -84,8 +84,8 @@ class I18n {
                 'game.memory-card.desc': '考验记忆能力',
                 'game.arkanoid.desc': '经典街机游戏',
                 'game.spider-solitaire.desc': '经典纸牌游戏',
-                'game.tank-battle': '坦克大战',
-                'game.tank-battle.desc': '经典坦克对战游戏',
+                'game.tank-battle-phaser': '坦克大战',
+                'game.tank-battle-phaser.desc': '经典射击对战游戏',
                 
                 // 蜘蛛卡牌游戏
                 'spiderSolitaire.title': '蜘蛛卡牌',
@@ -309,8 +309,8 @@ class I18n {
                 'game.memory-card.desc': 'Проверьте память',
                 'game.arkanoid.desc': 'Классическая аркадная игра',
                 'game.spider-solitaire.desc': 'Классическая карточная игра',
-                'game.tank-battle': 'Битва танков',
-                'game.tank-battle.desc': 'Классическая игра с танками',
+                'game.tank-battle-phaser': 'Битва танков',
+                'game.tank-battle-phaser.desc': 'Классическая игра с танками',
                 
                 // 蜘蛛卡牌游戏
                 'spiderSolitaire.title': 'Пасьянс Паутина',

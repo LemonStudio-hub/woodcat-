@@ -138,11 +138,6 @@ const gameData = {
         description: '经典纸牌游戏，通过排序将卡牌按花色顺序排列',
         url: 'games/spider-solitaire.html'
     },
-    'tank-battle': {
-        title: '坦克对战',
-        description: '多人对战游戏，控制坦克击败对手',
-        url: 'games/tank-battle.html'
-    },
     'tank-battle-phaser': {
         title: '坦克大战',
         description: '现代化坦克对战游戏，支持移动端操作',
