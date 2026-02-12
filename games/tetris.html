@@ -38,7 +38,7 @@
             padding: 20px;
             width: 100%;
             max-width: 420px;
-            min-height: 85vh;
+            min-height: 90vh;
             max-height: none;
             position: relative;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -94,11 +94,11 @@
         .game-board {
             display: grid;
             grid-template-columns: repeat(10, 1fr);
-            grid-template-rows: repeat(10, 1fr);
+            grid-template-rows: repeat(20, 1fr);
             width: 100%;
-            aspect-ratio: 1/1;
-            min-height: 300px;
-            max-height: 420px;
+            aspect-ratio: 1/2;
+            min-height: 400px;
+            max-height: 500px;
             border: 3px solid #667eea;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             margin-bottom: 12px;
@@ -121,7 +121,7 @@
             background-image: 
                 linear-gradient(rgba(102, 126, 234, 0.15) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(102, 126, 234, 0.15) 1px, transparent 1px);
-            background-size: calc(100% / 10) calc(100% / 10);
+            background-size: calc(100% / 10) calc(100% / 20);
             pointer-events: none;
             z-index: 0;
             border-radius: 9px;
@@ -428,8 +428,8 @@
             }
             
             .game-board {
-                min-height: 340px;
-                max-height: 400px;
+                min-height: 400px;
+                max-height: 500px;
                 border-radius: 12px;
                 flex-shrink: 0;
             }
@@ -553,8 +553,8 @@
             }
             
             .game-board {
-                min-height: 400px;
-                max-height: 480px;
+                min-height: 450px;
+                max-height: 550px;
             }
             
             h1 {
@@ -615,11 +615,11 @@
             }
             
             .game-board {
-                min-height: 300px;
-                max-height: 380px;
+                min-height: 350px;
+                max-height: 450px;
                 margin-bottom: 8px;
                 flex: 1;
-                max-width: 380px;
+                max-width: 400px;
                 margin-right: 15px;
             }
             
@@ -942,9 +942,9 @@
             // 游戏常量和状态
             // ==========================================
             
-            // 游戏网格尺寸 - 10列×10行
+            // 游戏网格尺寸 - 10列×20行（标准俄罗斯方块尺寸）
             const COLS = 10;
-            const ROWS = 10;
+            const ROWS = 20;
             
             // 游戏状态变量
             let board = [];           // 游戏板数据
