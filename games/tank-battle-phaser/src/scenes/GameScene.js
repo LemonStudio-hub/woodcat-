@@ -971,7 +971,7 @@ export default class GameScene extends Phaser.Scene {
         let bullet = this.bulletPool.find(b => !b.active);
         if (!bullet) {
             // 如果对象池为空，创建新子弹（限制最大数量）
-            if (this.bulletPool.length >= 50) {
+            if (this.bulletPool.length >= 80) {
                 console.warn('子弹对象池已满，跳过创建');
                 return;
             }
@@ -1361,8 +1361,8 @@ export default class GameScene extends Phaser.Scene {
         this.particlePool = [];
         this.textPool = [];
         
-        // 预创建子弹对象（限制数量）
-        const bulletPoolSize = this.isMobile ? 20 : 30;
+        // 预创建子弹对象（增加数量以支持更多粒子效果）
+        const bulletPoolSize = this.isMobile ? 30 : 50;
         for (let i = 0; i < bulletPoolSize; i++) {
             const bullet = this.physics.add.sprite(0, 0, 'bullet')
                 .setScale(0.2)
@@ -1375,8 +1375,8 @@ export default class GameScene extends Phaser.Scene {
             }
         }
         
-        // 预创建粒子对象（限制数量）
-        const particlePoolSize = this.isMobile ? 30 : 50;
+        // 预创建粒子对象（增加数量以支持丰富的粒子效果）
+        const particlePoolSize = this.isMobile ? 80 : 150;
         for (let i = 0; i < particlePoolSize; i++) {
             const particle = this.add.image(0, 0, 'bullet')
                 .setScale(0.1)
@@ -1389,7 +1389,7 @@ export default class GameScene extends Phaser.Scene {
     showDamageEffect(x, y) {
         // 从对象池获取或创建伤害文本
         let damageText = this.textPool.find(text => !text.active);
-        if (!damageText && this.textPool.length < 20) {
+        if (!damageText && this.textPool.length < 30) {
             damageText = this.add.text(0, 0, `-30`, {
                 fontFamily: 'Noto Sans SC',
                 fontSize: '24px',
@@ -1413,11 +1413,11 @@ export default class GameScene extends Phaser.Scene {
             
             this.tweens.add({
                 targets: damageText,
-                y: damageText.y - 60,
+                y: damageText.y - 80,
                 alpha: 0,
-                scale: 1.5,
-                rotation: Math.PI / 4,
-                duration: 1000,
+                scale: 1.8,
+                rotation: Math.PI / 6,
+                duration: 1200,
                 ease: 'Cubic.easeOut',
                 onComplete: () => {
                     if (damageText) {
@@ -1427,13 +1427,13 @@ export default class GameScene extends Phaser.Scene {
             });
         }
         
-        // 移动端减少粒子数量
-        const particleCount = this.isMobile ? 3 : 6;
+        // 恢复并增强粒子效果数量
+        const particleCount = this.isMobile ? 8 : 12;
         
-        // 粒子效果
+        // 粒子效果 - 增强版
         for (let i = 0; i < particleCount; i++) {
             let particle = this.particlePool.find(p => !p.active);
-            if (!particle && this.particlePool.length < 100) {
+            if (!particle && this.particlePool.length < 150) {
                 particle = this.add.image(0, 0, 'bullet')
                     .setScale(0.1)
                     .setActive(false)
@@ -1444,24 +1444,24 @@ export default class GameScene extends Phaser.Scene {
             if (!particle) continue;
             
             const angle = (i / particleCount) * Math.PI * 2;
-            const distance = Phaser.Math.Between(20, 40);
+            const distance = Phaser.Math.Between(25, 50);
             const particleX = x + Math.cos(angle) * distance;
             const particleY = y + Math.sin(angle) * distance;
             
             particle.setPosition(x, y)
                 .setActive(true)
                 .setVisible(true)
-                .setAlpha(0.8)
-                .setScale(0.1)
-                .setTint(0xff4444);
+                .setAlpha(1)
+                .setScale(0.15)
+                .setTint(0xff6666);
             
             this.tweens.add({
                 targets: particle,
                 x: particleX,
                 y: particleY,
-                scale: 0.2 + Math.random() * 0.1,
+                scale: 0.3 + Math.random() * 0.2,
                 alpha: 0,
-                duration: 500 + Math.random() * 300,
+                duration: 600 + Math.random() * 400,
                 ease: 'Cubic.easeOut',
                 onComplete: () => {
                     if (particle) {
@@ -1471,6 +1471,65 @@ export default class GameScene extends Phaser.Scene {
                 }
             });
         }
+        
+        // 添加火花效果 - 增强版
+        const sparkCount = this.isMobile ? 4 : 8;
+        for (let i = 0; i < sparkCount; i++) {
+            let spark = this.particlePool.find(p => !p.active);
+            if (!spark && this.particlePool.length < 150) {
+                spark = this.add.image(0, 0, 'bullet')
+                    .setScale(0.05)
+                    .setActive(false)
+                    .setVisible(false);
+                this.particlePool.push(spark);
+            }
+            
+            if (!spark) continue;
+            
+            const angle = (i / sparkCount) * Math.PI * 2;
+            const distance = Phaser.Math.Between(40, 80);
+            const sparkX = x + Math.cos(angle) * distance;
+            const sparkY = y + Math.sin(angle) * distance;
+            
+            spark.setPosition(x, y)
+                .setActive(true)
+                .setVisible(true)
+                .setAlpha(1)
+                .setScale(0.08)
+                .setTint(0xffff88);
+            
+            this.tweens.add({
+                targets: spark,
+                x: sparkX,
+                y: sparkY,
+                scale: 0,
+                alpha: 0,
+                duration: 400 + Math.random() * 300,
+                ease: 'Cubic.easeOut',
+                onComplete: () => {
+                    if (spark) {
+                        spark.setActive(false).setVisible(false);
+                        spark.clearTint();
+                    }
+                }
+            });
+        }
+        
+        // 添加光晕效果
+        const glow = this.add.graphics();
+        glow.fillStyle(0xff6666, 0.4);
+        glow.fillCircle(x, y, 30);
+        
+        this.tweens.add({
+            targets: glow,
+            scale: 2,
+            alpha: 0,
+            duration: 500,
+            ease: 'Cubic.easeOut',
+            onComplete: () => {
+                glow.destroy();
+            }
+        });
     }
     
     showExplosionEffect(x, y) {
@@ -1480,40 +1539,41 @@ export default class GameScene extends Phaser.Scene {
         // 爆炸振动
         this.vibrate([100, 50, 100]);
         
-        // 创建主爆炸效果
+        // 创建主爆炸效果 - 增强版
         const explosion = this.add.image(x, y, 'explosion')
             .setScale(0.5)
-            .setAlpha(1);
+            .setAlpha(1)
+            .setTint(0xffaa00);
         
         this.tweens.add({
             targets: explosion,
-            scale: 2.5,
+            scale: 3.5,
             alpha: 0,
-            duration: 600,
+            duration: 800,
             ease: 'Cubic.easeOut',
             onComplete: () => {
                 explosion.destroy();
             }
         });
         
-        // 移动端减少冲击波效果
-        const shockwaveCount = this.isMobile ? 1 : 3;
+        // 恢复并增强爆炸冲击波效果
+        const shockwaveCount = this.isMobile ? 3 : 5;
         
-        // 爆炸冲击波效果
         for (let i = 0; i < shockwaveCount; i++) {
             const shockwave = this.add.graphics();
-            const initialRadius = 10 + i * 20;
-            const finalRadius = 100 + i * 50;
+            const initialRadius = 10 + i * 15;
+            const finalRadius = 80 + i * 40;
             
-            shockwave.lineStyle(2 - i * 0.5, 0xffffff - i * 0x333333, 1 - i * 0.3);
+            const colors = [0xffffff, 0xffaa00, 0xff6600, 0xff3300, 0xff0000];
+            shockwave.lineStyle(3 - i * 0.4, colors[i % colors.length], 1 - i * 0.15);
             shockwave.strokeCircle(x, y, initialRadius);
             
             this.tweens.add({
                 targets: shockwave,
                 scale: finalRadius / initialRadius,
                 alpha: 0,
-                duration: 600,
-                delay: i * 100,
+                duration: 700,
+                delay: i * 80,
                 ease: 'Cubic.easeOut',
                 onComplete: () => {
                     shockwave.destroy();
@@ -1521,13 +1581,12 @@ export default class GameScene extends Phaser.Scene {
             });
         }
         
-        // 移动端减少爆炸粒子效果
-        const particleCount = this.isMobile ? 5 : 12;
+        // 恢复并增强爆炸粒子效果
+        const particleCount = this.isMobile ? 8 : 20;
         
-        // 爆炸粒子效果
         for (let i = 0; i < particleCount; i++) {
             let particle = this.particlePool.find(p => !p.active);
-            if (!particle && this.particlePool.length < 100) {
+            if (!particle && this.particlePool.length < 150) {
                 particle = this.add.image(0, 0, 'smoke')
                     .setScale(0.2)
                     .setActive(false)
@@ -1538,24 +1597,24 @@ export default class GameScene extends Phaser.Scene {
             if (!particle) continue;
             
             const angle = (i / particleCount) * Math.PI * 2;
-            const distance = Phaser.Math.Between(60, 120);
+            const distance = Phaser.Math.Between(70, 150);
             const particleX = x + Math.cos(angle) * distance;
             const particleY = y + Math.sin(angle) * distance;
             
             particle.setPosition(x, y)
                 .setActive(true)
                 .setVisible(true)
-                .setAlpha(0.8)
-                .setScale(0.2)
-                .setTint(0xffffff - Math.floor(Math.random() * 0x444444));
+                .setAlpha(1)
+                .setScale(0.25)
+                .setTint(0xffffff - Math.floor(Math.random() * 0x222222));
             
             this.tweens.add({
                 targets: particle,
                 x: particleX,
                 y: particleY,
-                scale: 0.5 + Math.random() * 0.8,
+                scale: 0.6 + Math.random() * 0.8,
                 alpha: 0,
-                duration: 800 + Math.random() * 400,
+                duration: 900 + Math.random() * 500,
                 ease: 'Cubic.easeOut',
                 onComplete: () => {
                     if (particle) {
@@ -1566,13 +1625,12 @@ export default class GameScene extends Phaser.Scene {
             });
         }
         
-        // 移动端减少火焰粒子效果
-        const fireParticleCount = this.isMobile ? 3 : 8;
+        // 恢复并增强火焰粒子效果
+        const fireParticleCount = this.isMobile ? 5 : 12;
         
-        // 火焰粒子效果
         for (let i = 0; i < fireParticleCount; i++) {
             let fireParticle = this.particlePool.find(p => !p.active);
-            if (!fireParticle && this.particlePool.length < 100) {
+            if (!fireParticle && this.particlePool.length < 150) {
                 fireParticle = this.add.image(0, 0, 'bullet')
                     .setScale(0.1)
                     .setActive(false)
@@ -1583,24 +1641,27 @@ export default class GameScene extends Phaser.Scene {
             if (!fireParticle) continue;
             
             const angle = (i / fireParticleCount) * Math.PI * 2;
-            const distance = Phaser.Math.Between(30, 60);
+            const distance = Phaser.Math.Between(40, 90);
             const particleX = x + Math.cos(angle) * distance;
             const particleY = y + Math.sin(angle) * distance;
+            
+            const fireColors = [0xff6600, 0xff8800, 0xffaa00, 0xffcc00, 0xff4400];
+            const fireColor = fireColors[Math.floor(Math.random() * fireColors.length)];
             
             fireParticle.setPosition(x, y)
                 .setActive(true)
                 .setVisible(true)
                 .setAlpha(1)
-                .setScale(0.1)
-                .setTint(0xff6600 + Math.floor(Math.random() * 0x333300));
+                .setScale(0.15)
+                .setTint(fireColor);
             
             this.tweens.add({
                 targets: fireParticle,
                 x: particleX,
                 y: particleY,
-                scale: 0.3 + Math.random() * 0.2,
+                scale: 0.4 + Math.random() * 0.3,
                 alpha: 0,
-                duration: 400 + Math.random() * 200,
+                duration: 500 + Math.random() * 300,
                 ease: 'Cubic.easeOut',
                 onComplete: () => {
                     if (fireParticle) {
@@ -1611,8 +1672,24 @@ export default class GameScene extends Phaser.Scene {
             });
         }
         
+        // 添加爆炸闪光效果
+        const flash = this.add.graphics();
+        flash.fillStyle(0xffaa00, 0.5);
+        flash.fillCircle(x, y, 50);
+        
+        this.tweens.add({
+            targets: flash,
+            scale: 3,
+            alpha: 0,
+            duration: 400,
+            ease: 'Cubic.easeOut',
+            onComplete: () => {
+                flash.destroy();
+            }
+        });
+        
         // 添加地面震动效果
-        this.cameras.main.shake(300, 0.01);
+        this.cameras.main.shake(400, 0.015);
     }
     
     updateHealthBar(playerType, health) {
@@ -1734,22 +1811,30 @@ export default class GameScene extends Phaser.Scene {
     showLevelCompleteEffect(x, y) {
         // 增强关卡完成特效
         
-        // 添加庆祝文字效果
+        // 添加庆祝文字效果 - 增强版
         const levelUpText = this.add.text(x, y - 50, '关卡完成!', {
             fontFamily: 'Noto Sans SC',
-            fontSize: '36px',
+            fontSize: '40px',
             fill: '#2ecc71',
             stroke: '#000000',
-            strokeThickness: 3,
-            fontWeight: 'bold'
+            strokeThickness: 4,
+            fontWeight: 'bold',
+            shadow: {
+                offsetX: 3,
+                offsetY: 3,
+                color: '#000',
+                blur: 5,
+                stroke: true,
+                fill: true
+            }
         }).setOrigin(0.5).setAlpha(0).setScale(0.5);
         
         this.tweens.add({
             targets: levelUpText,
             alpha: 1,
-            scale: 1.2,
-            duration: 500,
-            ease: 'Cubic.easeOut',
+            scale: 1.3,
+            duration: 600,
+            ease: 'Elastic.easeOut',
             yoyo: true,
             repeat: 1,
             onComplete: () => {
@@ -1757,13 +1842,12 @@ export default class GameScene extends Phaser.Scene {
             }
         });
         
-        // 移动端减少彩色粒子效果
-        const particleCount = this.isMobile ? 8 : 20;
+        // 恢复并增强彩色粒子效果
+        const particleCount = this.isMobile ? 15 : 30;
         
-        // 彩色粒子效果
         for (let i = 0; i < particleCount; i++) {
             let particle = this.particlePool.find(p => !p.active);
-            if (!particle && this.particlePool.length < 100) {
+            if (!particle && this.particlePool.length < 150) {
                 particle = this.add.image(0, 0, 'explosion')
                     .setScale(0.3)
                     .setActive(false)
@@ -1774,19 +1858,22 @@ export default class GameScene extends Phaser.Scene {
             if (!particle) continue;
             
             const angle = (i / particleCount) * Math.PI * 2;
-            const distance = Phaser.Math.Between(150, 250);
+            const distance = Phaser.Math.Between(150, 300);
             const particleX = x + Math.cos(angle) * distance;
             const particleY = y + Math.sin(angle) * distance;
             
-            // 彩色粒子
-            const colors = [0x3498db, 0x2ecc71, 0xe74c3c, 0xf39c12, 0x9b59b6];
+            // 丰富的彩色粒子
+            const colors = [
+                0x3498db, 0x2ecc71, 0xe74c3c, 0xf39c12, 0x9b59b6,
+                0x1abc9c, 0xe67e22, 0x34495e, 0x16a085, 0x27ae60
+            ];
             const color = colors[Math.floor(Math.random() * colors.length)];
             
             particle.setPosition(x, y)
                 .setActive(true)
                 .setVisible(true)
-                .setAlpha(0.8)
-                .setScale(0.3)
+                .setAlpha(1)
+                .setScale(0.35)
                 .setTint(color);
             
             this.tweens.add({
@@ -1795,7 +1882,7 @@ export default class GameScene extends Phaser.Scene {
                 y: particleY,
                 scale: 0,
                 alpha: 0,
-                duration: 1000 + Math.random() * 500,
+                duration: 1200 + Math.random() * 600,
                 ease: 'Cubic.easeOut',
                 onComplete: () => {
                     if (particle) {
@@ -1806,18 +1893,17 @@ export default class GameScene extends Phaser.Scene {
             });
         }
         
-        // 移动端减少中心爆炸效果
-        const fireworkCount = this.isMobile ? 3 : 8;
+        // 恢复并增强中心爆炸效果
+        const fireworkCount = this.isMobile ? 6 : 12;
         
-        // 中心爆炸效果
         for (let i = 0; i < fireworkCount; i++) {
             const firework = this.add.image(x, y, 'explosion')
-                .setScale(0.2)
+                .setScale(0.25)
                 .setAlpha(1)
                 .setTint(0xffffff);
             
             const angle = (i / fireworkCount) * Math.PI * 2;
-            const distance = Phaser.Math.Between(80, 120);
+            const distance = Phaser.Math.Between(100, 180);
             const fireworkX = x + Math.cos(angle) * distance;
             const fireworkY = y + Math.sin(angle) * distance;
             
@@ -1825,9 +1911,10 @@ export default class GameScene extends Phaser.Scene {
                 targets: firework,
                 x: fireworkX,
                 y: fireworkY,
-                scale: 0.6,
+                scale: 0.8,
                 alpha: 0,
-                duration: 600,
+                duration: 800,
+                delay: i * 50,
                 ease: 'Cubic.easeOut',
                 onComplete: () => {
                     firework.destroy();
@@ -1835,18 +1922,62 @@ export default class GameScene extends Phaser.Scene {
             });
         }
         
-        // 添加背景闪烁效果
+        // 添加星形粒子效果
+        const starCount = this.isMobile ? 8 : 16;
+        for (let i = 0; i < starCount; i++) {
+            const star = this.add.image(x, y, 'explosion')
+                .setScale(0.2)
+                .setAlpha(1)
+                .setTint(0xffff00);
+            
+            const angle = (i / starCount) * Math.PI * 2;
+            const distance = Phaser.Math.Between(200, 350);
+            const starX = x + Math.cos(angle) * distance;
+            const starY = y + Math.sin(angle) * distance;
+            
+            this.tweens.add({
+                targets: star,
+                x: starX,
+                y: starY,
+                scale: 0.5,
+                alpha: 0,
+                duration: 1500,
+                delay: i * 80,
+                ease: 'Bounce.easeOut',
+                onComplete: () => {
+                    star.destroy();
+                }
+            });
+        }
+        
+        // 添加增强背景闪烁效果
         const flash = this.add.graphics();
-        flash.fillStyle(0xffffff, 0.3);
+        flash.fillStyle(0x2ecc71, 0.4);
         flash.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
         
         this.tweens.add({
             targets: flash,
             alpha: 0,
-            duration: 800,
+            duration: 1000,
             ease: 'Cubic.easeOut',
             onComplete: () => {
                 flash.destroy();
+            }
+        });
+        
+        // 添加光环效果
+        const halo = this.add.graphics();
+        halo.lineStyle(5, 0x2ecc71, 0.6);
+        halo.strokeCircle(x, y, 50);
+        
+        this.tweens.add({
+            targets: halo,
+            scale: 5,
+            alpha: 0,
+            duration: 1200,
+            ease: 'Cubic.easeOut',
+            onComplete: () => {
+                halo.destroy();
             }
         });
     }
