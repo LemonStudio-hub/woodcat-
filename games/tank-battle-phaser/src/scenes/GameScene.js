@@ -501,32 +501,52 @@ export default class GameScene extends Phaser.Scene {
         
         // 创建虚拟摇杆背景
         const joystickBackground = this.add.graphics();
-        joystickBackground.fillStyle(0x222222, 0.5);
+        joystickBackground.fillStyle(0x222222, 0.6);
+        joystickBackground.lineStyle(2, 0x444444, 1);
         joystickBackground.fillCircle(joystickX, joystickY, joystickSize);
+        joystickBackground.strokeCircle(joystickX, joystickY, joystickSize);
         joystickBackground.setScrollFactor(0);
         
+        // 添加摇杆方向指示
+        const joystickCenter = this.add.circle(joystickX, joystickY, joystickSize * 0.3, 0x555555, 0.5);
+        joystickCenter.setScrollFactor(0);
+        
         // 创建虚拟摇杆
-        this.joystick = this.add.circle(joystickX, joystickY, joystickHandleSize, 0x3498db, 0.8);
+        this.joystick = this.add.circle(joystickX, joystickY, joystickHandleSize, 0x3498db, 0.9);
+        this.joystick.setStrokeStyle(2, 0x2980b9);
         this.joystick.setScrollFactor(0);
         this.joystick.setInteractive({ cursor: 'pointer' });
         
-        // 创建攻击按钮
+        // 添加摇杆阴影效果
+        this.joystick.shadowColor = '#000000';
+        this.joystick.shadowBlur = 10;
+        this.joystick.shadowOffsetX = 2;
+        this.joystick.shadowOffsetY = 2;
+        
+        // 创建攻击按钮背景
         const attackButtonBackground = this.add.graphics();
-        attackButtonBackground.fillStyle(0x222222, 0.5);
+        attackButtonBackground.fillStyle(0x222222, 0.6);
+        attackButtonBackground.lineStyle(3, 0x444444, 1);
         attackButtonBackground.fillCircle(attackButtonX, attackButtonY, attackButtonSize);
+        attackButtonBackground.strokeCircle(attackButtonX, attackButtonY, attackButtonSize);
         attackButtonBackground.setScrollFactor(0);
         
-        this.attackButton = this.add.circle(attackButtonX, attackButtonY, attackButtonHandleSize, 0xe74c3c, 0.8);
+        // 创建攻击按钮
+        this.attackButton = this.add.circle(attackButtonX, attackButtonY, attackButtonHandleSize, 0xe74c3c, 0.95);
+        this.attackButton.setStrokeStyle(3, 0xc0392b);
         this.attackButton.setScrollFactor(0);
         this.attackButton.setInteractive({ cursor: 'pointer' });
         
-        // 添加攻击按钮文本
-        this.attackText = this.add.text(attackButtonX, attackButtonY, '开火', {
-            fontFamily: 'Noto Sans SC',
-            fontSize: Math.max(12, 14 * controlScale) + 'px',
-            fill: '#ffffff',
-            stroke: '#000000',
-            strokeThickness: Math.max(1, 1 * controlScale),
+        // 添加攻击按钮阴影效果
+        this.attackButton.shadowColor = '#000000';
+        this.attackButton.shadowBlur = 12;
+        this.attackButton.shadowOffsetX = 3;
+        this.attackButton.shadowOffsetY = 3;
+        
+        // 添加攻击按钮图标
+        this.attackIcon = this.add.text(attackButtonX, attackButtonY, '🎯', {
+            fontFamily: 'Arial',
+            fontSize: Math.max(18, 22 * controlScale) + 'px',
             align: 'center'
         }).setOrigin(0.5).setScrollFactor(0);
         
@@ -556,14 +576,44 @@ export default class GameScene extends Phaser.Scene {
         this.attackButton.on('pointerdown', () => {
             if (this.player1 && this.player1.alive && !this.isPaused) {
                 this.fireBullet(this.player1, this.player1.turret.rotation);
-                // 按钮按下效果
+                // 按钮按下效果 - 缩小
                 this.tweens.add({
-                    targets: this.attackButton,
-                    scale: 0.9,
-                    duration: 100,
-                    yoyo: true
+                    targets: [this.attackButton, this.attackIcon],
+                    scale: 0.85,
+                    duration: 80,
+                    ease: 'Cubic.easeOut'
+                });
+                // 添加闪光效果
+                const flash = this.add.circle(attackButtonX, attackButtonY, attackButtonHandleSize * 1.5, 0xff6b6b, 0.8);
+                flash.setScrollFactor(0);
+                this.tweens.add({
+                    targets: flash,
+                    scale: 2,
+                    alpha: 0,
+                    duration: 300,
+                    onComplete: () => flash.destroy()
                 });
             }
+        });
+        
+        // 攻击按钮释放效果
+        this.attackButton.on('pointerup', () => {
+            this.tweens.add({
+                targets: [this.attackButton, this.attackIcon],
+                scale: 1,
+                duration: 100,
+                ease: 'Back.easeOut'
+            });
+        });
+        
+        // 攻击按钮移出效果
+        this.attackButton.on('pointerout', () => {
+            this.tweens.add({
+                targets: [this.attackButton, this.attackIcon],
+                scale: 1,
+                duration: 100,
+                ease: 'Back.easeOut'
+            });
         });
         
         // 保存控制配置以便在updateMobileControls中使用
@@ -606,12 +656,21 @@ export default class GameScene extends Phaser.Scene {
             // 设置速度
             this.physics.velocityFromRotation(moveAngle, moveSpeed, this.player1.body.velocity);
             
-            // 自动炮塔朝向
-            this.player1.turret.rotation = moveAngle;
+            // 保存当前移动方向，用于开火
+            this.player1.lastMoveAngle = moveAngle;
         } else {
             // 停止移动
             this.player1.setVelocity(0);
             this.player1.setAngularVelocity(0);
+        }
+        
+        // 始终更新炮塔位置和旋转
+        this.player1.turret.x = this.player1.x;
+        this.player1.turret.y = this.player1.y;
+        
+        // 如果有保存的移动方向，使用它来设置炮塔方向
+        if (this.player1.lastMoveAngle !== undefined) {
+            this.player1.turret.rotation = this.player1.lastMoveAngle;
         }
     }
     
