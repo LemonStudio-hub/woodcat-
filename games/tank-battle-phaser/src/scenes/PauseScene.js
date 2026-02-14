@@ -7,7 +7,7 @@ export default class PauseScene extends Phaser.Scene {
     
     create() {
         // 创建半透明背景
-        this.add.rectangle(
+        const background = this.add.rectangle(
             this.cameras.main.centerX,
             this.cameras.main.centerY,
             this.cameras.main.width,
@@ -16,78 +16,144 @@ export default class PauseScene extends Phaser.Scene {
             0.7
         );
         
-        // 创建暂停标题
+        // 背景进入动画
+        background.setAlpha(0);
+        this.tweens.add({
+            targets: background,
+            alpha: 0.7,
+            duration: 300,
+            ease: 'Cubic.easeOut'
+        });
+        
+        // 创建暂停标题 - 增强视觉效果
         const title = this.add.text(this.cameras.main.centerX, 150, '游戏暂停', {
             fontFamily: 'Noto Sans SC',
             fontSize: '48px',
-            fill: '#3498db'
+            fill: '#3498db',
+            stroke: '#000000',
+            strokeThickness: 4,
+            fontStyle: 'bold',
+            shadow: {
+                offsetX: 3,
+                offsetY: 3,
+                color: '#000',
+                blur: 5,
+                stroke: true,
+                fill: true
+            }
         }).setOrigin(0.5);
         
-        // 按钮样式
-        const buttonStyle = {
-            fontFamily: 'Noto Sans SC',
-            fontSize: '24px',
-            fill: '#ffffff'
-        };
+        // 标题动画
+        title.setAlpha(0);
+        title.setScale(0.5);
+        this.tweens.add({
+            targets: title,
+            alpha: 1,
+            scale: 1,
+            duration: 500,
+            delay: 100,
+            ease: 'Elastic.easeOut'
+        });
         
-        // 继续游戏按钮
-        const resumeButton = this.add.text(this.cameras.main.centerX, 250, '继续游戏', buttonStyle)
-            .setOrigin(0.5)
-            .setInteractive()
-            .on('pointerdown', () => {
-                this.resumeGame();
-            })
-            .on('pointerover', () => {
-                resumeButton.setFill('#3498db');
-            })
-            .on('pointerout', () => {
-                resumeButton.setFill('#ffffff');
-            });
+        // 按钮配置
+        const buttons = [
+            { text: '继续游戏', y: 250, action: () => this.resumeGame() },
+            { text: '重新开始', y: 320, action: () => this.restartGame() },
+            { text: '返回主菜单', y: 390, action: () => this.returnToMenu() },
+            { text: '设置', y: 460, action: () => this.showSettings() }
+        ];
         
-        // 重新开始按钮
-        const restartButton = this.add.text(this.cameras.main.centerX, 320, '重新开始', buttonStyle)
-            .setOrigin(0.5)
-            .setInteractive()
-            .on('pointerdown', () => {
-                this.restartGame();
-            })
-            .on('pointerover', () => {
-                restartButton.setFill('#3498db');
-            })
-            .on('pointerout', () => {
-                restartButton.setFill('#ffffff');
-            });
-        
-        // 返回主菜单按钮
-        const menuButton = this.add.text(this.cameras.main.centerX, 390, '返回主菜单', buttonStyle)
-            .setOrigin(0.5)
-            .setInteractive()
-            .on('pointerdown', () => {
-                this.returnToMenu();
-            })
-            .on('pointerover', () => {
-                menuButton.setFill('#3498db');
-            })
-            .on('pointerout', () => {
-                menuButton.setFill('#ffffff');
-            });
-        
-        // 设置按钮
-        const settingsButton = this.add.text(this.cameras.main.centerX, 460, '设置', buttonStyle)
-            .setOrigin(0.5)
-            .setInteractive()
-            .on('pointerdown', () => {
-                this.showSettings();
-            })
-            .on('pointerover', () => {
-                settingsButton.setFill('#3498db');
-            })
-            .on('pointerout', () => {
-                settingsButton.setFill('#ffffff');
-            });
+        // 创建按钮
+        this.menuButtons = [];
+        buttons.forEach((config, index) => {
+            const button = this.createMenuButton(
+                config.text,
+                this.cameras.main.centerX,
+                config.y,
+                config.action,
+                index * 100
+            );
+            this.menuButtons.push(button);
+        });
         
         // 背景装饰
         this.createBackgroundDecorations();
+    }
+    
+    createMenuButton(text, x, y, callback, delay) {
+        // 创建按钮背景
+        const buttonBg = this.add.graphics();
+        buttonBg.fillStyle(0x16213e, 0.8);
+        buttonBg.fillRoundedRect(x - 100, y - 25, 200, 50, 10);
+        buttonBg.lineStyle(2, 0x3498db, 1);
+        buttonBg.strokeRoundedRect(x - 100, y - 25, 200, 50, 10);
+        buttonBg.setAlpha(0);
+        
+        // 创建按钮文本
+        const buttonText = this.add.text(x, y, text, {
+            fontFamily: 'Noto Sans SC',
+            fontSize: '24px',
+            fill: '#ffffff',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+        
+        buttonText.setAlpha(0);
+        
+        // 按钮进入动画
+        this.tweens.add({
+            targets: [buttonBg, buttonText],
+            alpha: 1,
+            duration: 300,
+            delay: delay,
+            ease: 'Cubic.easeOut'
+        });
+        
+        // 按钮交互
+        const buttonContainer = this.add.container(x, y, [buttonBg, buttonText]);
+        
+        buttonBg.setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                // 按钮按下效果
+                this.tweens.add({
+                    targets: buttonContainer,
+                    scale: 0.95,
+                    duration: 100,
+                    ease: 'Cubic.easeOut',
+                    onComplete: () => {
+                        callback();
+                    }
+                });
+            })
+            .on('pointerover', () => {
+                this.tweens.add({
+                    targets: buttonBg,
+                    fillStyle: 0x0f3460,
+                    duration: 200
+                });
+                buttonBg.clear();
+                buttonBg.fillStyle(0x0f3460, 0.9);
+                buttonBg.fillRoundedRect(x - 100, y - 25, 200, 50, 10);
+                buttonBg.lineStyle(2, 0x3498db, 1);
+                buttonBg.strokeRoundedRect(x - 100, y - 25, 200, 50, 10);
+                
+                buttonText.setFill('#3498db');
+            })
+            .on('pointerout', () => {
+                this.tweens.add({
+                    targets: buttonBg,
+                    fillStyle: 0x16213e,
+                    duration: 200
+                });
+                buttonBg.clear();
+                buttonBg.fillStyle(0x16213e, 0.8);
+                buttonBg.fillRoundedRect(x - 100, y - 25, 200, 50, 10);
+                buttonBg.lineStyle(2, 0x3498db, 1);
+                buttonBg.strokeRoundedRect(x - 100, y - 25, 200, 50, 10);
+                
+                buttonText.setFill('#ffffff');
+            });
+        
+        return { bg: buttonBg, text: buttonText, container: buttonContainer };
     }
     
     createBackgroundDecorations() {
