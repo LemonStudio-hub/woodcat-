@@ -16,6 +16,11 @@ export default class GameScene extends Phaser.Scene {
         this.gameStarted = false;
         this.gameTime = 0;
         this.isPaused = false;
+        this.bulletPool = [];
+        this.particlePool = [];
+        this.textPool = [];
+        this.healthBarElements = [];
+        this.lastHealthBarUpdate = 0;
     }
     
     create() {
@@ -375,15 +380,18 @@ export default class GameScene extends Phaser.Scene {
         const healthBarHeight = 35 * uiScale;
         const textSize = 16 * uiScale;
         
+        const elements = [];
+        
         // 创建生命值背景（军事风格）
         const healthBarBackground = this.add.graphics();
         healthBarBackground.fillStyle(0x16213e, 0.8);
         healthBarBackground.fillRoundedRect(x, y, healthBarWidth, healthBarHeight, 5);
         healthBarBackground.lineStyle(2 * uiScale, 0x0f3460, 1);
         healthBarBackground.strokeRoundedRect(x, y, healthBarWidth, healthBarHeight, 5);
+        elements.push(healthBarBackground);
         
         // 创建生命值文本
-        this.add.text(x + 12 * uiScale, y + 8 * uiScale, `${label}:`, {
+        const labelText = this.add.text(x + 12 * uiScale, y + 8 * uiScale, `${label}:`, {
             fontFamily: 'Noto Sans SC',
             fontSize: textSize,
             fill: '#ffffff',
@@ -391,6 +399,7 @@ export default class GameScene extends Phaser.Scene {
             strokeThickness: 2,
             fontWeight: 'bold'
         });
+        elements.push(labelText);
         
         // 创建生命值条背景
         const barBackground = this.add.graphics();
@@ -398,6 +407,7 @@ export default class GameScene extends Phaser.Scene {
         barBackground.fillRoundedRect(x + 90 * uiScale, y + 7 * uiScale, 120 * uiScale, 20 * uiScale, 3);
         barBackground.lineStyle(1 * uiScale, 0x0f3460, 1);
         barBackground.strokeRoundedRect(x + 90 * uiScale, y + 7 * uiScale, 120 * uiScale, 20 * uiScale, 3);
+        elements.push(barBackground);
         
         // 创建生命值条
         const healthBar = this.add.graphics();
@@ -406,6 +416,7 @@ export default class GameScene extends Phaser.Scene {
         healthBar.fillRoundedRect(x + 90 * uiScale, y + 7 * uiScale, barWidth, 20 * uiScale, 3);
         healthBar.lineStyle(1 * uiScale, 0xffffff, 1);
         healthBar.strokeRoundedRect(x + 90 * uiScale, y + 7 * uiScale, barWidth, 20 * uiScale, 3);
+        elements.push(healthBar);
         
         // 添加生命值条动画
         this.tweens.add({
@@ -425,6 +436,7 @@ export default class GameScene extends Phaser.Scene {
             align: 'right',
             fontWeight: 'bold'
         });
+        elements.push(healthText);
         
         // 添加生命值变化动画
         this.tweens.add({
@@ -435,7 +447,7 @@ export default class GameScene extends Phaser.Scene {
             ease: 'Cubic.easeOut'
         });
         
-        return healthText;
+        return elements;
     }
     
     setupControls() {
@@ -958,7 +970,11 @@ export default class GameScene extends Phaser.Scene {
         // 从对象池获取子弹
         let bullet = this.bulletPool.find(b => !b.active);
         if (!bullet) {
-            // 如果对象池为空，创建新子弹
+            // 如果对象池为空，创建新子弹（限制最大数量）
+            if (this.bulletPool.length >= 50) {
+                console.warn('子弹对象池已满，跳过创建');
+                return;
+            }
             bullet = this.physics.add.sprite(0, 0, 'bullet')
                 .setScale(0.2)
                 .setActive(false)
@@ -977,6 +993,11 @@ export default class GameScene extends Phaser.Scene {
             this.bulletGroup.add(bullet);
         }
         
+        // 检查子弹是否已在数组中，避免重复添加
+        if (!this.bullets.includes(bullet)) {
+            this.bullets.push(bullet);
+        }
+        
         // 重置子弹属性
         bullet.setPosition(tank.x, tank.y)
             .setRotation(angle)
@@ -989,15 +1010,6 @@ export default class GameScene extends Phaser.Scene {
         bullet.damage = isEnemy ? 20 : 30;
         bullet.owner = tank;
         bullet.isEnemy = isEnemy;
-        
-        console.log('创建子弹:', {
-            isEnemy: isEnemy,
-            damage: bullet.damage,
-            owner: tank?.constructor?.name
-        });
-        
-        // 添加到子弹数组
-        this.bullets.push(bullet);
         
         // 播放开火音效
         this.playSound('fire');
@@ -1340,12 +1352,18 @@ export default class GameScene extends Phaser.Scene {
     }
     
     initObjectPools() {
+        // 如果已经初始化过，跳过
+        if (this.bulletPool.length > 0 || this.particlePool.length > 0) {
+            return;
+        }
+        
         this.bulletPool = [];
         this.particlePool = [];
         this.textPool = [];
         
-        // 预创建子弹对象
-        for (let i = 0; i < 20; i++) {
+        // 预创建子弹对象（限制数量）
+        const bulletPoolSize = this.isMobile ? 20 : 30;
+        for (let i = 0; i < bulletPoolSize; i++) {
             const bullet = this.physics.add.sprite(0, 0, 'bullet')
                 .setScale(0.2)
                 .setActive(false)
@@ -1357,8 +1375,9 @@ export default class GameScene extends Phaser.Scene {
             }
         }
         
-        // 预创建粒子对象
-        for (let i = 0; i < 30; i++) {
+        // 预创建粒子对象（限制数量）
+        const particlePoolSize = this.isMobile ? 30 : 50;
+        for (let i = 0; i < particlePoolSize; i++) {
             const particle = this.add.image(0, 0, 'bullet')
                 .setScale(0.1)
                 .setActive(false)
@@ -1370,7 +1389,7 @@ export default class GameScene extends Phaser.Scene {
     showDamageEffect(x, y) {
         // 从对象池获取或创建伤害文本
         let damageText = this.textPool.find(text => !text.active);
-        if (!damageText) {
+        if (!damageText && this.textPool.length < 20) {
             damageText = this.add.text(0, 0, `-30`, {
                 fontFamily: 'Noto Sans SC',
                 fontSize: '24px',
@@ -1384,32 +1403,37 @@ export default class GameScene extends Phaser.Scene {
             this.textPool.push(damageText);
         }
         
-        damageText.setPosition(x, y)
-            .setActive(true)
-            .setVisible(true)
-            .setAlpha(1)
-            .setScale(1)
-            .setRotation(0);
-        
-        this.tweens.add({
-            targets: damageText,
-            y: damageText.y - 60,
-            alpha: 0,
-            scale: 1.5,
-            rotation: Math.PI / 4,
-            duration: 1000,
-            ease: 'Cubic.easeOut',
-            onComplete: () => {
-                if (damageText) {
-                    damageText.setActive(false).setVisible(false);
+        if (damageText) {
+            damageText.setPosition(x, y)
+                .setActive(true)
+                .setVisible(true)
+                .setAlpha(1)
+                .setScale(1)
+                .setRotation(0);
+            
+            this.tweens.add({
+                targets: damageText,
+                y: damageText.y - 60,
+                alpha: 0,
+                scale: 1.5,
+                rotation: Math.PI / 4,
+                duration: 1000,
+                ease: 'Cubic.easeOut',
+                onComplete: () => {
+                    if (damageText) {
+                        damageText.setActive(false).setVisible(false);
+                    }
                 }
-            }
-        });
+            });
+        }
         
-        // 增强伤害特效粒子效果
-        for (let i = 0; i < 6; i++) {
+        // 移动端减少粒子数量
+        const particleCount = this.isMobile ? 3 : 6;
+        
+        // 粒子效果
+        for (let i = 0; i < particleCount; i++) {
             let particle = this.particlePool.find(p => !p.active);
-            if (!particle) {
+            if (!particle && this.particlePool.length < 100) {
                 particle = this.add.image(0, 0, 'bullet')
                     .setScale(0.1)
                     .setActive(false)
@@ -1417,7 +1441,9 @@ export default class GameScene extends Phaser.Scene {
                 this.particlePool.push(particle);
             }
             
-            const angle = i * Math.PI / 3;
+            if (!particle) continue;
+            
+            const angle = (i / particleCount) * Math.PI * 2;
             const distance = Phaser.Math.Between(20, 40);
             const particleX = x + Math.cos(angle) * distance;
             const particleY = y + Math.sin(angle) * distance;
@@ -1441,46 +1467,6 @@ export default class GameScene extends Phaser.Scene {
                     if (particle) {
                         particle.setActive(false).setVisible(false);
                         particle.clearTint();
-                    }
-                }
-            });
-        }
-        
-        // 添加火花效果
-        for (let i = 0; i < 4; i++) {
-            let spark = this.particlePool.find(p => !p.active);
-            if (!spark) {
-                spark = this.add.image(0, 0, 'bullet')
-                    .setScale(0.05)
-                    .setActive(false)
-                    .setVisible(false);
-                this.particlePool.push(spark);
-            }
-            
-            const angle = i * Math.PI / 2;
-            const distance = Phaser.Math.Between(30, 60);
-            const sparkX = x + Math.cos(angle) * distance;
-            const sparkY = y + Math.sin(angle) * distance;
-            
-            spark.setPosition(x, y)
-                .setActive(true)
-                .setVisible(true)
-                .setAlpha(1)
-                .setScale(0.05)
-                .setTint(0xffff44);
-            
-            this.tweens.add({
-                targets: spark,
-                x: sparkX,
-                y: sparkY,
-                scale: 0,
-                alpha: 0,
-                duration: 300 + Math.random() * 200,
-                ease: 'Cubic.easeOut',
-                onComplete: () => {
-                    if (spark) {
-                        spark.setActive(false).setVisible(false);
-                        spark.clearTint();
                     }
                 }
             });
@@ -1510,8 +1496,11 @@ export default class GameScene extends Phaser.Scene {
             }
         });
         
-        // 增强爆炸冲击波效果
-        for (let i = 0; i < 3; i++) {
+        // 移动端减少冲击波效果
+        const shockwaveCount = this.isMobile ? 1 : 3;
+        
+        // 爆炸冲击波效果
+        for (let i = 0; i < shockwaveCount; i++) {
             const shockwave = this.add.graphics();
             const initialRadius = 10 + i * 20;
             const finalRadius = 100 + i * 50;
@@ -1532,10 +1521,13 @@ export default class GameScene extends Phaser.Scene {
             });
         }
         
-        // 增强爆炸粒子效果
-        for (let i = 0; i < 12; i++) {
+        // 移动端减少爆炸粒子效果
+        const particleCount = this.isMobile ? 5 : 12;
+        
+        // 爆炸粒子效果
+        for (let i = 0; i < particleCount; i++) {
             let particle = this.particlePool.find(p => !p.active);
-            if (!particle) {
+            if (!particle && this.particlePool.length < 100) {
                 particle = this.add.image(0, 0, 'smoke')
                     .setScale(0.2)
                     .setActive(false)
@@ -1543,7 +1535,9 @@ export default class GameScene extends Phaser.Scene {
                 this.particlePool.push(particle);
             }
             
-            const angle = (i / 12) * Math.PI * 2;
+            if (!particle) continue;
+            
+            const angle = (i / particleCount) * Math.PI * 2;
             const distance = Phaser.Math.Between(60, 120);
             const particleX = x + Math.cos(angle) * distance;
             const particleY = y + Math.sin(angle) * distance;
@@ -1572,10 +1566,13 @@ export default class GameScene extends Phaser.Scene {
             });
         }
         
-        // 添加火焰粒子效果
-        for (let i = 0; i < 8; i++) {
+        // 移动端减少火焰粒子效果
+        const fireParticleCount = this.isMobile ? 3 : 8;
+        
+        // 火焰粒子效果
+        for (let i = 0; i < fireParticleCount; i++) {
             let fireParticle = this.particlePool.find(p => !p.active);
-            if (!fireParticle) {
+            if (!fireParticle && this.particlePool.length < 100) {
                 fireParticle = this.add.image(0, 0, 'bullet')
                     .setScale(0.1)
                     .setActive(false)
@@ -1583,7 +1580,9 @@ export default class GameScene extends Phaser.Scene {
                 this.particlePool.push(fireParticle);
             }
             
-            const angle = (i / 8) * Math.PI * 2;
+            if (!fireParticle) continue;
+            
+            const angle = (i / fireParticleCount) * Math.PI * 2;
             const distance = Phaser.Math.Between(30, 60);
             const particleX = x + Math.cos(angle) * distance;
             const particleY = y + Math.sin(angle) * distance;
@@ -1627,33 +1626,18 @@ export default class GameScene extends Phaser.Scene {
         
         this.lastHealthBarUpdate = now;
         
-        console.log('updateHealthBar 调用:', playerType, health);
+        // 保存旧的生命值条引用，避免每次遍历所有children
+        if (!this.healthBarElements) {
+            this.healthBarElements = [];
+        }
         
-        // 清除旧的生命值条和相关图形对象
-        const children = this.children.getChildren();
-        const toRemove = [];
-        
-        children.forEach(child => {
-            if (child) {
-                // 检查是否是生命值条相关元素
-                const hasPlayerLabel = child.text && (child.text.includes('玩家1') || child.text.includes('玩家2'));
-                const isHealthBar = child.type === 'Graphics' && 
-                                   child.x >= 10 * 0.7 && child.x <= 400 && 
-                                   child.y >= this.cameras.main.height - 120;
-                
-                if (hasPlayerLabel || isHealthBar) {
-                    console.log('移除旧的生命值条元素:', child.text || 'Graphics');
-                    toRemove.push(child);
-                }
-            }
-        });
-        
-        // 销毁所有需要移除的元素
-        toRemove.forEach(child => {
+        // 销毁旧的生命值条
+        this.healthBarElements.forEach(child => {
             if (child && child.active) {
                 child.destroy();
             }
         });
+        this.healthBarElements = [];
         
         // 根据屏幕尺寸计算UI元素大小
         const screenWidth = this.cameras.main.width;
@@ -1664,11 +1648,13 @@ export default class GameScene extends Phaser.Scene {
         const healthBarY = this.cameras.main.height - 80 * uiScale;
         const healthBarWidth = 200 * uiScale;
         
-        // 创建新的生命值条
+        // 创建新的生命值条并保存引用
         if (playerType === 'player1') {
-            this.createHealthBar(uiPadding + textPadding, healthBarY, '玩家1', health, 0x3498db, uiScale);
+            const elements = this.createHealthBar(uiPadding + textPadding, healthBarY, '玩家1', health, 0x3498db, uiScale);
+            this.healthBarElements.push(...elements);
         } else if (playerType === 'player2') {
-            this.createHealthBar(screenWidth - healthBarWidth - uiPadding - textPadding, healthBarY, '玩家2', health, 0xe74c3c, uiScale);
+            const elements = this.createHealthBar(screenWidth - healthBarWidth - uiPadding - textPadding, healthBarY, '玩家2', health, 0xe74c3c, uiScale);
+            this.healthBarElements.push(...elements);
         }
     }
     
@@ -1771,10 +1757,13 @@ export default class GameScene extends Phaser.Scene {
             }
         });
         
-        // 添加彩色粒子效果
-        for (let i = 0; i < 20; i++) {
+        // 移动端减少彩色粒子效果
+        const particleCount = this.isMobile ? 8 : 20;
+        
+        // 彩色粒子效果
+        for (let i = 0; i < particleCount; i++) {
             let particle = this.particlePool.find(p => !p.active);
-            if (!particle) {
+            if (!particle && this.particlePool.length < 100) {
                 particle = this.add.image(0, 0, 'explosion')
                     .setScale(0.3)
                     .setActive(false)
@@ -1782,7 +1771,9 @@ export default class GameScene extends Phaser.Scene {
                 this.particlePool.push(particle);
             }
             
-            const angle = (i / 20) * Math.PI * 2;
+            if (!particle) continue;
+            
+            const angle = (i / particleCount) * Math.PI * 2;
             const distance = Phaser.Math.Between(150, 250);
             const particleX = x + Math.cos(angle) * distance;
             const particleY = y + Math.sin(angle) * distance;
@@ -1815,14 +1806,17 @@ export default class GameScene extends Phaser.Scene {
             });
         }
         
-        // 添加中心爆炸效果
-        for (let i = 0; i < 8; i++) {
+        // 移动端减少中心爆炸效果
+        const fireworkCount = this.isMobile ? 3 : 8;
+        
+        // 中心爆炸效果
+        for (let i = 0; i < fireworkCount; i++) {
             const firework = this.add.image(x, y, 'explosion')
                 .setScale(0.2)
                 .setAlpha(1)
                 .setTint(0xffffff);
             
-            const angle = (i / 8) * Math.PI * 2;
+            const angle = (i / fireworkCount) * Math.PI * 2;
             const distance = Phaser.Math.Between(80, 120);
             const fireworkX = x + Math.cos(angle) * distance;
             const fireworkY = y + Math.sin(angle) * distance;
@@ -1926,5 +1920,61 @@ export default class GameScene extends Phaser.Scene {
                 this.bullets.splice(index, 1);
             }
         }
+    }
+    
+    shutdown() {
+        // 清理所有 tweens
+        this.tweens.killAll();
+        
+        // 清理所有定时器
+        this.time.removeAllEvents();
+        
+        // 清理所有粒子池
+        if (this.particlePool) {
+            this.particlePool.forEach(particle => {
+                if (particle && particle.active) {
+                    particle.destroy();
+                }
+            });
+            this.particlePool = [];
+        }
+        
+        // 清理所有文本池
+        if (this.textPool) {
+            this.textPool.forEach(text => {
+                if (text && text.active) {
+                    text.destroy();
+                }
+            });
+            this.textPool = [];
+        }
+        
+        // 清理所有子弹池
+        if (this.bulletPool) {
+            this.bulletPool.forEach(bullet => {
+                if (bullet && bullet.active) {
+                    bullet.destroy();
+                }
+            });
+            this.bulletPool = [];
+        }
+        
+        // 清理所有生命值条元素
+        if (this.healthBarElements) {
+            this.healthBarElements.forEach(element => {
+                if (element && element.active) {
+                    element.destroy();
+                }
+            });
+            this.healthBarElements = [];
+        }
+        
+        // 清理音频上下文
+        if (this.audioContext) {
+            this.audioContext.close();
+            this.audioContext = null;
+        }
+        
+        console.log('GameScene 已清理所有资源');
     }
 }
