@@ -865,6 +865,12 @@ export default class GameScene extends Phaser.Scene {
         bullet.owner = tank;
         bullet.isEnemy = isEnemy;
         
+        console.log('创建子弹:', {
+            isEnemy: isEnemy,
+            damage: bullet.damage,
+            owner: tank?.constructor?.name
+        });
+        
         // 添加到子弹数组
         this.bullets.push(bullet);
         
@@ -921,7 +927,16 @@ export default class GameScene extends Phaser.Scene {
     }
     
     bulletHitPlayer1(bullet, player) {
+        console.log('子弹击中玩家1', {
+            bulletActive: bullet?.active,
+            playerAlive: player?.alive,
+            bulletIsEnemy: bullet?.isEnemy,
+            playerHealth: player?.health,
+            bulletDamage: bullet?.damage
+        });
+        
         if (bullet && bullet.active && player && player.alive && bullet.isEnemy) {
+            console.log('执行玩家1伤害:', '当前生命值:', player.health, '伤害:', bullet.damage);
             player.health -= bullet.damage;
             
             // 显示伤害效果
@@ -946,6 +961,8 @@ export default class GameScene extends Phaser.Scene {
             if (player.health <= 0) {
                 this.playerDefeated(player);
             }
+        } else {
+            console.log('子弹击中玩家1条件不满足');
         }
     }
     
