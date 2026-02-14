@@ -21,15 +21,27 @@ export default class GameScene extends Phaser.Scene {
         this.textPool = [];
         this.healthBarElements = [];
         this.lastHealthBarUpdate = 0;
+        
+        // 性能优化缓存
+        this.screenWidth = 0;
+        this.screenHeight = 0;
+        this.uiScale = 1;
+        this.isMobile = false;
     }
     
     create() {
+        // 性能优化：缓存屏幕尺寸和设备类型
+        this.screenWidth = this.cameras.main.width;
+        this.screenHeight = this.cameras.main.height;
+        this.isMobile = this.screenWidth < 600;
+        this.uiScale = this.isMobile ? 0.7 : 1;
+        
         // 设置背景
         this.cameras.main.setBackgroundColor('#1a1a1a');
         
         // 添加背景纹理
-        this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, 'background')
-            .setDisplaySize(this.cameras.main.width, this.cameras.main.height);
+        this.add.image(this.screenWidth / 2, this.screenHeight / 2, 'background')
+            .setDisplaySize(this.screenWidth, this.screenHeight);
         
         // 初始化音效系统
         this.initAudioSystem();
@@ -90,25 +102,23 @@ export default class GameScene extends Phaser.Scene {
     }
     
     createMap() {
-        // 创建地图边界
-        this.physics.add.staticGroup()
-            .create(this.cameras.main.width / 2, 0, 'wall')
-            .setScale(this.cameras.main.width, 1)
+        // 创建地图边界 - 合并为一个staticGroup以提高性能
+        this.walls = this.physics.add.staticGroup();
+        
+        this.walls.create(this.screenWidth / 2, 0, 'wall')
+            .setScale(this.screenWidth, 1)
             .refreshBody();
         
-        this.physics.add.staticGroup()
-            .create(this.cameras.main.width / 2, this.cameras.main.height, 'wall')
-            .setScale(this.cameras.main.width, 1)
+        this.walls.create(this.screenWidth / 2, this.screenHeight, 'wall')
+            .setScale(this.screenWidth, 1)
             .refreshBody();
         
-        this.physics.add.staticGroup()
-            .create(0, this.cameras.main.height / 2, 'wall')
-            .setScale(1, this.cameras.main.height)
+        this.walls.create(0, this.screenHeight / 2, 'wall')
+            .setScale(1, this.screenHeight)
             .refreshBody();
         
-        this.physics.add.staticGroup()
-            .create(this.cameras.main.width, this.cameras.main.height / 2, 'wall')
-            .setScale(1, this.cameras.main.height)
+        this.walls.create(this.screenWidth, this.screenHeight / 2, 'wall')
+            .setScale(1, this.screenHeight)
             .refreshBody();
         
         // 创建障碍物
@@ -116,31 +126,40 @@ export default class GameScene extends Phaser.Scene {
         
         // 随机创建障碍物
         for (let i = 0; i < 10; i++) {
-            const x = Phaser.Math.Between(100, this.cameras.main.width - 100);
-            const y = Phaser.Math.Between(100, this.cameras.main.height - 100);
+            const x = Phaser.Math.Between(100, this.screenWidth - 100);
+            const y = Phaser.Math.Between(100, this.screenHeight - 100);
             
             this.obstacles.create(x, y, 'wall')
                 .setScale(0.5)
                 .refreshBody();
         }
         
-        // 创建网格背景
+        // 创建网格背景 - 缓存为纹理以提高性能
         const gridSize = 40;
         const graphics = this.add.graphics();
         
         graphics.lineStyle(1, 0x34495e, 0.3);
         
-        for (let x = 0; x <= this.cameras.main.width; x += gridSize) {
+        for (let x = 0; x <= this.screenWidth; x += gridSize) {
             graphics.moveTo(x, 0);
-            graphics.lineTo(x, this.cameras.main.height);
+            graphics.lineTo(x, this.screenHeight);
         }
         
-        for (let y = 0; y <= this.cameras.main.height; y += gridSize) {
+        for (let y = 0; y <= this.screenHeight; y += gridSize) {
             graphics.moveTo(0, y);
-            graphics.lineTo(this.cameras.main.width, y);
+            graphics.lineTo(this.screenWidth, y);
         }
         
         graphics.strokePath();
+        
+        // 生成纹理并缓存
+        graphics.generateTexture('gridBackground', this.screenWidth, this.screenHeight);
+        
+        // 添加网格背景
+        this.add.image(this.screenWidth / 2, this.screenHeight / 2, 'gridBackground');
+        
+        // 销毁临时graphics对象
+        graphics.destroy();
     }
     
     createPlayers() {
@@ -519,26 +538,56 @@ export default class GameScene extends Phaser.Scene {
         if (this.isMobile) {
             console.log('检测到移动设备，启用虚拟控制');
             this.createVirtualControls();
+            
+            // 添加触摸事件优化
+            this.setupTouchOptimizations();
         }
+    }
+    
+    setupTouchOptimizations() {
+        // 防止移动端双击缩放
+        const gameCanvas = this.sys.canvas;
+        gameCanvas.style.touchAction = 'none';
+        
+        // 优化触摸事件处理
+        this.input.topOnly = true;
+        this.input.maxPointers = 5; // 支持多点触控
+        
+        // 添加触摸反馈配置
+        this.touchFeedback = {
+            vibrationEnabled: true,
+            hapticIntensity: 'medium'
+        };
     }
     
     createVirtualControls() {
         // 根据屏幕尺寸计算控制元素大小和位置
-        const screenWidth = this.cameras.main.width;
-        const screenHeight = this.cameras.main.height;
+        const screenWidth = this.screenWidth;
+        const screenHeight = this.screenHeight;
         const controlScale = Math.min(screenWidth, screenHeight) / 768; // 基于768px屏幕尺寸缩放
         
-        // 摇杆配置
+        // 摇杆配置 - 增大触控区域
         const joystickSize = 60 * controlScale;
         const joystickHandleSize = 30 * controlScale;
         const joystickX = joystickSize + 20 * controlScale;
         const joystickY = screenHeight - joystickSize - 20 * controlScale;
         
-        // 攻击按钮配置
+        // 攻击按钮配置 - 增大触控区域
         const attackButtonSize = 50 * controlScale;
         const attackButtonHandleSize = 40 * controlScale;
         const attackButtonX = screenWidth - attackButtonSize - 20 * controlScale;
         const attackButtonY = screenHeight - attackButtonSize - 20 * controlScale;
+        
+        // 创建更大的虚拟摇杆背景触控区域（增大50%以便更容易触摸）
+        const joystickTouchZone = this.add.graphics();
+        joystickTouchZone.fillStyle(0x000000, 0); // 透明
+        joystickTouchZone.fillCircle(joystickX, joystickY, joystickSize * 1.5);
+        joystickTouchZone.setInteractive({ cursor: 'pointer' })
+            .on('pointerdown', (pointer) => {
+                // 点击摇杆区域时立即激活
+                this.joystickActive = true;
+                this.updateJoystickPosition(pointer.x, pointer.y, joystickX, joystickY, maxDistance, joystick);
+            });
         
         // 创建虚拟摇杆背景
         const joystickBackground = this.add.graphics();
@@ -563,6 +612,27 @@ export default class GameScene extends Phaser.Scene {
         this.joystick.shadowBlur = 10;
         this.joystick.shadowOffsetX = 2;
         this.joystick.shadowOffsetY = 2;
+        
+        // 摇杆输入处理 - 改进响应性
+        this.input.setDraggable(this.joystick);
+        
+        this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+            this.updateJoystickPosition(dragX, dragY, joystickX, joystickY, joystickSize, gameObject);
+        });
+        
+        this.input.on('dragend', (pointer, gameObject) => {
+            this.joystickActive = false;
+            gameObject.setPosition(joystickX, joystickY);
+        });
+        
+        // 创建更大的攻击按钮触控区域
+        const attackButtonTouchZone = this.add.graphics();
+        attackButtonTouchZone.fillStyle(0x000000, 0); // 透明
+        attackButtonTouchZone.fillCircle(attackButtonX, attackButtonY, attackButtonSize * 1.5);
+        attackButtonTouchZone.setInteractive({ cursor: 'pointer' })
+            .on('pointerdown', () => {
+                this.handleAttackButtonPress();
+            });
         
         // 创建攻击按钮背景
         const attackButtonBackground = this.add.graphics();
@@ -591,90 +661,19 @@ export default class GameScene extends Phaser.Scene {
             align: 'center'
         }).setOrigin(0.5).setScrollFactor(0);
         
-        // 摇杆输入处理
-        this.input.setDraggable(this.joystick);
-        
-        this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
-            // 限制摇杆移动范围
-            const distance = Phaser.Math.Distance.Between(joystickX, joystickY, dragX, dragY);
-            const maxDistance = joystickSize;
-            
-            if (distance <= maxDistance) {
-                gameObject.setPosition(dragX, dragY);
-            } else {
-                const angle = Phaser.Math.Angle.Between(joystickX, joystickY, dragX, dragY);
-                const newX = joystickX + Math.cos(angle) * maxDistance;
-                const newY = joystickY + Math.sin(angle) * maxDistance;
-                gameObject.setPosition(newX, newY);
-            }
-        });
-        
-        this.input.on('dragend', (pointer, gameObject) => {
-            gameObject.setPosition(joystickX, joystickY);
-        });
-        
         // 攻击按钮点击处理
         this.attackButton.on('pointerdown', () => {
-            if (this.player1 && this.player1.alive && !this.isPaused) {
-                const now = this.time.now;
-                
-                // 添加开火冷却时间 (300ms)
-                if (!this.player1.lastFireTime || now - this.player1.lastFireTime >= 300) {
-                    this.fireBullet(this.player1, this.player1.turret.rotation);
-                    this.player1.lastFireTime = now;
-                    
-                    // 按钮按下效果 - 缩小
-                    this.tweens.add({
-                        targets: [this.attackButton, this.attackIcon],
-                        scale: 0.85,
-                        duration: 80,
-                        ease: 'Cubic.easeOut'
-                    });
-                    
-                    // 添加闪光效果
-                    const flash = this.add.circle(attackButtonX, attackButtonY, attackButtonHandleSize * 1.5, 0xff6b6b, 0.8);
-                    flash.setScrollFactor(0);
-                    this.tweens.add({
-                        targets: flash,
-                        scale: 2,
-                        alpha: 0,
-                        duration: 300,
-                        onComplete: () => flash.destroy()
-                    });
-                    
-                    // 添加开火震动反馈
-                    this.vibrate([30, 20, 30]);
-                } else {
-                    // 冷却中的视觉反馈 - 轻微闪烁
-                    this.tweens.add({
-                        targets: this.attackButton,
-                        alpha: 0.5,
-                        duration: 100,
-                        yoyo: true,
-                        ease: 'Cubic.easeOut'
-                    });
-                }
-            }
+            this.handleAttackButtonPress();
         });
         
         // 攻击按钮释放效果
         this.attackButton.on('pointerup', () => {
-            this.tweens.add({
-                targets: [this.attackButton, this.attackIcon],
-                scale: 1,
-                duration: 100,
-                ease: 'Back.easeOut'
-            });
+            this.handleAttackButtonRelease();
         });
         
         // 攻击按钮移出效果
         this.attackButton.on('pointerout', () => {
-            this.tweens.add({
-                targets: [this.attackButton, this.attackIcon],
-                scale: 1,
-                duration: 100,
-                ease: 'Back.easeOut'
-            });
+            this.handleAttackButtonRelease();
         });
         
         // 保存控制配置以便在updateMobileControls中使用
@@ -683,6 +682,83 @@ export default class GameScene extends Phaser.Scene {
             joystickY,
             maxDistance: joystickSize
         };
+        
+        // 初始化摇杆状态
+        this.joystickActive = false;
+    }
+    
+    updateJoystickPosition(dragX, dragY, baseX, baseY, maxDistance, gameObject) {
+        // 计算距离
+        const deltaX = dragX - baseX;
+        const deltaY = dragY - baseY;
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        
+        if (distance <= maxDistance) {
+            gameObject.setPosition(dragX, dragY);
+        } else {
+            const angle = Math.atan2(deltaY, deltaX);
+            const newX = baseX + Math.cos(angle) * maxDistance;
+            const newY = baseY + Math.sin(angle) * maxDistance;
+            gameObject.setPosition(newX, newY);
+        }
+    }
+    
+    handleAttackButtonPress() {
+        if (this.player1 && this.player1.alive && !this.isPaused) {
+            const now = this.time.now;
+            
+            // 添加开火冷却时间 (300ms)
+            if (!this.player1.lastFireTime || now - this.player1.lastFireTime >= 300) {
+                this.fireBullet(this.player1, this.player1.turret.rotation);
+                this.player1.lastFireTime = now;
+                
+                // 按钮按下效果 - 缩小
+                this.tweens.add({
+                    targets: [this.attackButton, this.attackIcon],
+                    scale: 0.85,
+                    duration: 80,
+                    ease: 'Cubic.easeOut'
+                });
+                
+                // 添加闪光效果
+                const flash = this.add.circle(
+                    this.controlConfig.joystickX || this.screenWidth / 2,
+                    this.controlConfig.joystickY || this.screenHeight / 2,
+                    40 * 1.5,
+                    0xff6b6b,
+                    0.8
+                );
+                flash.setScrollFactor(0);
+                this.tweens.add({
+                    targets: flash,
+                    scale: 2,
+                    alpha: 0,
+                    duration: 300,
+                    onComplete: () => flash.destroy()
+                });
+                
+                // 添加开火震动反馈
+                this.vibrate([30, 20, 30]);
+            } else {
+                // 冷却中的视觉反馈 - 轻微闪烁
+                this.tweens.add({
+                    targets: this.attackButton,
+                    alpha: 0.5,
+                    duration: 100,
+                    yoyo: true,
+                    ease: 'Cubic.easeOut'
+                });
+            }
+        }
+    }
+    
+    handleAttackButtonRelease() {
+        this.tweens.add({
+            targets: [this.attackButton, this.attackIcon],
+            scale: 1,
+            duration: 100,
+            ease: 'Back.easeOut'
+        });
     }
     
     updateMobileControls() {
@@ -697,19 +773,17 @@ export default class GameScene extends Phaser.Scene {
         
         const deltaX = joystickX - baseX;
         const deltaY = joystickY - baseY;
-        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
         
-        // 归一化摇杆输入 (-1 到 1)
-        const normalizedX = deltaX / maxDistance;
-        const normalizedY = deltaY / maxDistance;
+        // 使用距离平方比较避免sqrt计算，提高性能
+        const distanceSquared = deltaX * deltaX + deltaY * deltaY;
+        const deadZoneSquared = (maxDistance * 0.12) * (maxDistance * 0.12);
+        const maxDistanceSquared = maxDistance * maxDistance;
         
-        // 设置死区阈值
-        const deadZone = 0.12;
-        
-        if (distance > maxDistance * deadZone) {
-            // 计算移动角度和速度
+        if (distanceSquared > deadZoneSquared) {
+            // 只在需要时才计算实际距离
+            const distance = Math.sqrt(distanceSquared);
             const moveAngle = Math.atan2(deltaY, deltaX);
-            const moveSpeed = Math.min(distance / maxDistance, 1) * 180; // 提高最大速度
+            const moveSpeed = Math.min(distance / maxDistance, 1) * 180;
             
             // 更新坦克旋转朝向摇杆方向
             this.player1.rotation = moveAngle;
@@ -955,15 +1029,19 @@ export default class GameScene extends Phaser.Scene {
     }
     
     updateBullets() {
-        // 优化子弹更新，使用过滤而不是遍历和删除
-        this.bullets = this.bullets.filter(bullet => {
+        // 优化子弹更新，使用filter但避免创建新数组
+        let i = 0;
+        while (i < this.bullets.length) {
+            const bullet = this.bullets[i];
             if (bullet && bullet.active) {
                 // 检查子弹是否超出边界
                 this.checkBulletBoundary(bullet);
-                return bullet.active;
+                i++;
+            } else {
+                // 移除不活跃的子弹，不需要调整索引
+                this.bullets.splice(i, 1);
             }
-            return false;
-        });
+        }
     }
     
     fireBullet(tank, angle, isEnemy = false) {
