@@ -1467,3 +1467,303 @@ body {
         font-size: 0.8rem;
     }
 }
+
+/* ==================== 新年主题样式 ==================== */
+
+/* 新年主题背景 */
+body.new-year-theme {
+    background: linear-gradient(135deg, #8B0000 0%, #DC143C 50%, #FFD700 100%);
+    background-attachment: fixed;
+}
+
+.new-year-theme .container {
+    background: rgba(255, 255, 255, 0.95);
+    min-height: 100vh;
+    box-shadow: 0 0 50px rgba(139, 0, 0, 0.3);
+}
+
+/* 新年主题头部 */
+.new-year-theme .header {
+    background: linear-gradient(135deg, #DC143C 0%, #8B0000 100%);
+    border-bottom: 3px solid #FFD700;
+}
+
+.new-year-theme .logo h1 {
+    color: #FFD700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.new-year-theme .logo .slogan {
+    color: #FFF8DC;
+}
+
+/* 新年主题导航 */
+.new-year-theme .nav a {
+    color: #FFF8DC;
+}
+
+.new-year-theme .nav a:hover,
+.new-year-theme .nav a.active {
+    color: #FFD700;
+    border-bottom: 2px solid #FFD700;
+}
+
+/* 新年主题Hero区域 */
+.new-year-theme .hero {
+    background: linear-gradient(135deg, #8B0000 0%, #DC143C 50%, #B22222 100%);
+    border: 3px solid #FFD700;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(139, 0, 0, 0.4);
+}
+
+.new-year-theme .hero h2 {
+    color: #FFD700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.new-year-theme .hero p {
+    color: #FFF8DC;
+}
+
+/* 新年主题按钮 */
+.new-year-theme .btn-primary {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #8B0000;
+    border: 2px solid #FFD700;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+}
+
+.new-year-theme .btn-primary:hover {
+    background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 215, 0, 0.6);
+}
+
+/* 新年主题游戏卡片 */
+.new-year-theme .game-card {
+    background: linear-gradient(135deg, #FFF8DC 0%, #FFFACD 100%);
+    border: 2px solid #DC143C;
+    box-shadow: 0 4px 12px rgba(139, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.new-year-theme .game-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(139, 0, 0, 0.4);
+    border-color: #FFD700;
+}
+
+.new-year-theme .game-card h4 {
+    color: #8B0000;
+}
+
+.new-year-theme .game-card p {
+    color: #B22222;
+}
+
+.new-year-theme .game-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+    filter: drop-shadow(2px 2px 4px rgba(139, 0, 0, 0.3));
+}
+
+/* 新年主题功能卡片 */
+.new-year-theme .feature-card {
+    background: linear-gradient(135deg, #FFF8DC 0%, #FFFACD 100%);
+    border: 2px solid #DC143C;
+    box-shadow: 0 4px 12px rgba(139, 0, 0, 0.2);
+}
+
+.new-year-theme .feature-card h3 {
+    color: #8B0000;
+}
+
+.new-year-theme .feature-card p {
+    color: #B22222;
+}
+
+/* 新年主题灯笼装饰 */
+.new-year-lantern {
+    position: fixed;
+    top: 0;
+    width: 60px;
+    height: 80px;
+    background: radial-gradient(ellipse at 30% 30%, #FF6347, #DC143C);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), inset 0 0 20px rgba(255, 255, 0, 0.2);
+    z-index: 1001;
+    animation: swing 3s ease-in-out infinite;
+    opacity: 0.9;
+}
+
+.new-year-lantern::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+}
+
+.new-year-lantern::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 40px;
+    background: linear-gradient(to bottom, #FFD700, transparent);
+}
+
+.new-year-lantern.left {
+    left: 20px;
+    animation-delay: 0s;
+}
+
+.new-year-lantern.right {
+    right: 20px;
+    animation-delay: 1.5s;
+}
+
+@keyframes swing {
+    0%, 100% {
+        transform: rotate(-5deg);
+    }
+    50% {
+        transform: rotate(5deg);
+    }
+}
+
+/* 新年主题飘带效果 */
+.new-year-ribbon {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: linear-gradient(90deg, #DC143C, #FFD700, #DC143C, #FFD700, #DC143C);
+    background-size: 200% 100%;
+    animation: ribbon-flow 3s linear infinite;
+    z-index: 1002;
+    box-shadow: 0 2px 8px rgba(139, 0, 0, 0.5);
+}
+
+@keyframes ribbon-flow {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 200% 50%;
+    }
+}
+
+/* 新年主题烟花效果 */
+.new-year-firework {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #FFD700;
+    box-shadow: 0 0 10px #FFD700, 0 0 20px #FF6347, 0 0 30px #DC143C;
+    animation: firework 2s ease-out infinite;
+    z-index: 999;
+}
+
+.new-year-firework:nth-child(1) {
+    top: 15%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.new-year-firework:nth-child(2) {
+    top: 25%;
+    right: 15%;
+    animation-delay: 0.5s;
+    background: #FF6347;
+    box-shadow: 0 0 10px #FF6347, 0 0 20px #FFD700, 0 0 30px #DC143C;
+}
+
+.new-year-firework:nth-child(3) {
+    bottom: 20%;
+    left: 20%;
+    animation-delay: 1s;
+}
+
+.new-year-firework:nth-child(4) {
+    bottom: 30%;
+    right: 10%;
+    animation-delay: 1.5s;
+    background: #FFA500;
+    box-shadow: 0 0 10px #FFA500, 0 0 20px #FFD700, 0 0 30px #DC143C;
+}
+
+@keyframes firework {
+    0%, 100% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* 新年主题切换按钮 */
+.new-year-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #DC143C, #8B0000);
+    border: 2px solid #FFD700;
+    color: #FFD700;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 1003;
+    box-shadow: 0 4px 12px rgba(139, 0, 0, 0.4);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.new-year-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(139, 0, 0, 0.6);
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+    .new-year-lantern {
+        width: 40px;
+        height: 55px;
+    }
+    
+    .new-year-lantern.left {
+        left: 5px;
+    }
+    
+    .new-year-lantern.right {
+        right: 5px;
+    }
+    
+    .new-year-toggle {
+        width: 45px;
+        height: 45px;
+        bottom: 15px;
+        right: 15px;
+        font-size: 1.3rem;
+    }
+    
+    .new-year-firework {
+        width: 4px;
+        height: 4px;
+    }
+}

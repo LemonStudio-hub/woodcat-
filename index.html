@@ -505,6 +505,75 @@
             console.log('App installed successfully!');
             addBtn.style.display = 'none';
         });
+
+        // 新年主题切换功能
+        const newYearToggle = document.createElement('button');
+        newYearToggle.className = 'new-year-toggle';
+        newYearToggle.innerHTML = '🎊';
+        newYearToggle.title = '切换新年主题';
+        newYearToggle.addEventListener('click', toggleNewYearTheme);
+        document.body.appendChild(newYearToggle);
+
+        // 检查是否已保存新年主题设置
+        if (localStorage.getItem('newYearTheme') === 'enabled') {
+            enableNewYearTheme();
+        }
+
+        function toggleNewYearTheme() {
+            if (document.body.classList.contains('new-year-theme')) {
+                disableNewYearTheme();
+            } else {
+                enableNewYearTheme();
+            }
+        }
+
+        function enableNewYearTheme() {
+            document.body.classList.add('new-year-theme');
+            localStorage.setItem('newYearTheme', 'enabled');
+            
+            // 添加新年装饰元素
+            addNewYearDecorations();
+        }
+
+        function disableNewYearTheme() {
+            document.body.classList.remove('new-year-theme');
+            localStorage.setItem('newYearTheme', 'disabled');
+            
+            // 移除新年装饰元素
+            removeNewYearDecorations();
+        }
+
+        function addNewYearDecorations() {
+            // 移除已存在的装饰
+            removeNewYearDecorations();
+            
+            // 添加灯笼
+            const leftLantern = document.createElement('div');
+            leftLantern.className = 'new-year-lantern left';
+            document.body.appendChild(leftLantern);
+
+            const rightLantern = document.createElement('div');
+            rightLantern.className = 'new-year-lantern right';
+            document.body.appendChild(rightLantern);
+
+            // 添加飘带
+            const ribbon = document.createElement('div');
+            ribbon.className = 'new-year-ribbon';
+            document.body.appendChild(ribbon);
+
+            // 添加烟花效果
+            for (let i = 0; i < 4; i++) {
+                const firework = document.createElement('div');
+                firework.className = 'new-year-firework';
+                firework.style.animationDelay = `${i * 0.5}s`;
+                document.body.appendChild(firework);
+            }
+        }
+
+        function removeNewYearDecorations() {
+            const decorations = document.querySelectorAll('.new-year-lantern, .new-year-ribbon, .new-year-firework');
+            decorations.forEach(decoration => decoration.remove());
+        }
     </script>
 </body>
 </html>
