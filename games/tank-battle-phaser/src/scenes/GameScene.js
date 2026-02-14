@@ -1722,6 +1722,10 @@ export default class GameScene extends Phaser.Scene {
         // 创建音效
         const { frequency, duration, type } = soundConfig;
         
+        // 添加随机变化，使音效更自然
+        const frequencyVariation = (Math.random() - 0.5) * 20; // ±10Hz变化
+        const durationVariation = (Math.random() - 0.5) * 0.02; // ±0.01秒变化
+        
         frequency.forEach((freq, index) => {
             setTimeout(() => {
                 const oscillator = this.audioContext.createOscillator();
@@ -1731,16 +1735,83 @@ export default class GameScene extends Phaser.Scene {
                 gainNode.connect(this.audioContext.destination);
                 
                 oscillator.type = type;
-                oscillator.frequency.setValueAtTime(freq, this.audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(freq + frequencyVariation, this.audioContext.currentTime);
                 
-                // 设置音量 envelope
-                gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+                // 改进音量 envelope
+                const actualDuration = duration + durationVariation;
+                gainNode.gain.setValueAtTime(0.15, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + actualDuration);
                 
                 oscillator.start(this.audioContext.currentTime);
-                oscillator.stop(this.audioContext.currentTime + duration);
+                oscillator.stop(this.audioContext.currentTime + actualDuration);
             }, index * 50);
         });
+        
+        // 根据音效类型添加特殊效果
+        if (soundType === 'explosion') {
+            this.addExplosionNoise();
+        } else if (soundType === 'fire') {
+            this.addFireNoise();
+        }
+    }
+    
+    addExplosionNoise() {
+        // 添加爆炸噪音效果
+        const bufferSize = this.audioContext.sampleRate * 0.3;
+        const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+        const data = buffer.getChannelData(0);
+        
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+        
+        const noise = this.audioContext.createBufferSource();
+        noise.buffer = buffer;
+        
+        const noiseGain = this.audioContext.createGain();
+        noiseGain.gain.setValueAtTime(0.2, this.audioContext.currentTime);
+        noiseGain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
+        
+        const noiseFilter = this.audioContext.createBiquadFilter();
+        noiseFilter.type = 'lowpass';
+        noiseFilter.frequency.setValueAtTime(1000, this.audioContext.currentTime);
+        noiseFilter.frequency.exponentialRampToValueAtTime(100, this.audioContext.currentTime + 0.3);
+        
+        noise.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(this.audioContext.destination);
+        
+        noise.start();
+        noise.stop(this.audioContext.currentTime + 0.3);
+    }
+    
+    addFireNoise() {
+        // 添加开火噪音效果
+        const bufferSize = this.audioContext.sampleRate * 0.1;
+        const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+        const data = buffer.getChannelData(0);
+        
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+        
+        const noise = this.audioContext.createBufferSource();
+        noise.buffer = buffer;
+        
+        const noiseGain = this.audioContext.createGain();
+        noiseGain.gain.setValueAtTime(0.08, this.audioContext.currentTime);
+        noiseGain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
+        
+        const noiseFilter = this.audioContext.createBiquadFilter();
+        noiseFilter.type = 'highpass';
+        noiseFilter.frequency.setValueAtTime(500, this.audioContext.currentTime);
+        
+        noise.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(this.audioContext.destination);
+        
+        noise.start();
+        noise.stop(this.audioContext.currentTime + 0.1);
     }
     
     initObjectPools() {
