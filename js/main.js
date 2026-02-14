@@ -672,6 +672,8 @@ window.initializeNonLeaderboardFeatures = function() {
     const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
 
     if (mobileMenuBtn) {
+            console.log('移动端菜单按钮已找到');
+            
             // 添加触摸事件支持（移动端优化）
             mobileMenuBtn.addEventListener('touchstart', function() {
                 // 记录触摸开始时间
@@ -680,6 +682,8 @@ window.initializeNonLeaderboardFeatures = function() {
 
             // 添加触摸结束事件
             mobileMenuBtn.addEventListener('touchend', function(e) {
+                console.log('移动端菜单按钮被点击');
+                
                 // 如果触摸时间小于300ms，则认为是点击
                 const touchDuration = Date.now() - this.touchStartTime;
 
@@ -691,15 +695,21 @@ window.initializeNonLeaderboardFeatures = function() {
                     const nav = document.querySelector('.nav');
                     const navList = nav.querySelector('ul');
 
+                    console.log('当前窗口宽度:', window.innerWidth);
+                    console.log('navList:', navList);
+                    console.log('navList.classList.contains("show"):', navList.classList.contains('show'));
+
                     // 检查当前窗口大小
                     if (window.innerWidth <= 768) { // 移动端
                         // 检查当前显示状态
                         if (navList.classList.contains('show')) {
                             // 菜单当前显示，需要隐藏
+                            console.log('隐藏菜单');
                             navList.classList.remove('show');
                             this.classList.remove('active');
                         } else {
                             // 菜单当前隐藏，需要显示
+                            console.log('显示菜单');
                             navList.classList.add('show');
                             this.classList.add('active'); // 添加active类来实现动画效果
 
