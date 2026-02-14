@@ -143,8 +143,8 @@ export default class GameScene extends Phaser.Scene {
         this.player1 = this.physics.add.sprite(100, 100, 'tank-player1')
             .setScale(0.5)
             .setRotation(-Math.PI / 2) // 初始朝向上方
-            .setDrag(1000)
-            .setAngularDrag(1000);
+            .setDrag(1200)
+            .setAngularDrag(1500);
         
         this.player1.turret = this.physics.add.sprite(this.player1.x, this.player1.y, 'tank-turret')
             .setScale(0.5)
@@ -153,6 +153,12 @@ export default class GameScene extends Phaser.Scene {
         this.player1.health = 100;
         this.player1.score = 0;
         this.player1.alive = true;
+        this.player1.maxHealth = 100;
+        
+        // 添加玩家发光效果容器
+        this.player1Glow = this.add.circle(0, 0, 40, 0x3498db, 0.3);
+        this.player1Glow.setScrollFactor(0);
+        this.player1Glow.setVisible(false);
         
         // 如果是双人模式，创建玩家2坦克
         if (this.game.gameState.gameMode === 'two-player') {
@@ -169,6 +175,12 @@ export default class GameScene extends Phaser.Scene {
             this.player2.health = 100;
             this.player2.score = 0;
             this.player2.alive = true;
+            this.player2.maxHealth = 100;
+            
+            // 添加玩家2发光效果容器
+            this.player2Glow = this.add.circle(0, 0, 40, 0xe74c3c, 0.3);
+            this.player2Glow.setScrollFactor(0);
+            this.player2Glow.setVisible(false);
         }
     }
     
@@ -447,10 +459,27 @@ export default class GameScene extends Phaser.Scene {
             }
         });
         
-        // 鼠标点击开火
+        // 鼠标点击开火 - 添加冷却时间
         this.input.on('pointerdown', (pointer) => {
             if (this.player1 && this.player1.alive && !this.isPaused) {
-                this.fireBullet(this.player1, this.player1.turret.rotation);
+                const now = this.time.now;
+                
+                // 检查是否点击了开火按钮，避免重复开火
+                if (this.attackButton && this.attackButton.input && 
+                    this.attackButton.input.enabled && 
+                    pointer.x >= this.attackButton.x - this.attackButton.displayWidth / 2 &&
+                    pointer.x <= this.attackButton.x + this.attackButton.displayWidth / 2 &&
+                    pointer.y >= this.attackButton.y - this.attackButton.displayHeight / 2 &&
+                    pointer.y <= this.attackButton.y + this.attackButton.displayHeight / 2) {
+                    // 点击了开火按钮，不处理
+                    return;
+                }
+                
+                // 添加开火冷却时间
+                if (!this.player1.lastFireTime || now - this.player1.lastFireTime >= 300) {
+                    this.fireBullet(this.player1, this.player1.turret.rotation);
+                    this.player1.lastFireTime = now;
+                }
             }
         });
         
@@ -575,24 +604,44 @@ export default class GameScene extends Phaser.Scene {
         // 攻击按钮点击处理
         this.attackButton.on('pointerdown', () => {
             if (this.player1 && this.player1.alive && !this.isPaused) {
-                this.fireBullet(this.player1, this.player1.turret.rotation);
-                // 按钮按下效果 - 缩小
-                this.tweens.add({
-                    targets: [this.attackButton, this.attackIcon],
-                    scale: 0.85,
-                    duration: 80,
-                    ease: 'Cubic.easeOut'
-                });
-                // 添加闪光效果
-                const flash = this.add.circle(attackButtonX, attackButtonY, attackButtonHandleSize * 1.5, 0xff6b6b, 0.8);
-                flash.setScrollFactor(0);
-                this.tweens.add({
-                    targets: flash,
-                    scale: 2,
-                    alpha: 0,
-                    duration: 300,
-                    onComplete: () => flash.destroy()
-                });
+                const now = this.time.now;
+                
+                // 添加开火冷却时间 (300ms)
+                if (!this.player1.lastFireTime || now - this.player1.lastFireTime >= 300) {
+                    this.fireBullet(this.player1, this.player1.turret.rotation);
+                    this.player1.lastFireTime = now;
+                    
+                    // 按钮按下效果 - 缩小
+                    this.tweens.add({
+                        targets: [this.attackButton, this.attackIcon],
+                        scale: 0.85,
+                        duration: 80,
+                        ease: 'Cubic.easeOut'
+                    });
+                    
+                    // 添加闪光效果
+                    const flash = this.add.circle(attackButtonX, attackButtonY, attackButtonHandleSize * 1.5, 0xff6b6b, 0.8);
+                    flash.setScrollFactor(0);
+                    this.tweens.add({
+                        targets: flash,
+                        scale: 2,
+                        alpha: 0,
+                        duration: 300,
+                        onComplete: () => flash.destroy()
+                    });
+                    
+                    // 添加开火震动反馈
+                    this.vibrate([30, 20, 30]);
+                } else {
+                    // 冷却中的视觉反馈 - 轻微闪烁
+                    this.tweens.add({
+                        targets: this.attackButton,
+                        alpha: 0.5,
+                        duration: 100,
+                        yoyo: true,
+                        ease: 'Cubic.easeOut'
+                    });
+                }
             }
         });
         
@@ -643,12 +692,12 @@ export default class GameScene extends Phaser.Scene {
         const normalizedY = deltaY / maxDistance;
         
         // 设置死区阈值
-        const deadZone = 0.15;
+        const deadZone = 0.12;
         
         if (distance > maxDistance * deadZone) {
             // 计算移动角度和速度
             const moveAngle = Math.atan2(deltaY, deltaX);
-            const moveSpeed = Math.min(distance / maxDistance, 1) * 150;
+            const moveSpeed = Math.min(distance / maxDistance, 1) * 180; // 提高最大速度
             
             // 更新坦克旋转朝向摇杆方向
             this.player1.rotation = moveAngle;
@@ -658,10 +707,21 @@ export default class GameScene extends Phaser.Scene {
             
             // 保存当前移动方向，用于开火
             this.player1.lastMoveAngle = moveAngle;
+            
+            // 移动时的视觉效果
+            this.player1.alpha = 0.9;
+            
+            // 摇杆缩放反馈
+            const scale = 1 + (distance / maxDistance) * 0.3;
+            this.joystick.setScale(scale);
         } else {
             // 停止移动
             this.player1.setVelocity(0);
             this.player1.setAngularVelocity(0);
+            this.player1.alpha = 1;
+            
+            // 恢复摇杆大小
+            this.joystick.setScale(1);
         }
         
         // 始终更新炮塔位置和旋转
@@ -707,27 +767,60 @@ export default class GameScene extends Phaser.Scene {
     updatePlayers() {
         // 更新玩家1
         if (this.player1 && this.player1.alive) {
-            // 移动
+            // 添加冷却时间检测，避免按键重复触发
+            const now = this.time.now;
+            
+            // 移动控制 - 改进响应性
+            let moving = false;
             if (this.keys.up.isDown) {
-                this.physics.velocityFromRotation(this.player1.rotation, 150, this.player1.body.velocity);
+                this.physics.velocityFromRotation(this.player1.rotation, 180, this.player1.body.velocity);
+                moving = true;
             } else if (this.keys.down.isDown) {
-                this.physics.velocityFromRotation(this.player1.rotation, -100, this.player1.body.velocity);
+                this.physics.velocityFromRotation(this.player1.rotation, -120, this.player1.body.velocity);
+                moving = true;
             } else {
                 this.player1.setVelocity(0);
             }
             
-            // 转向
+            // 转向控制 - 改进响应性
             if (this.keys.left.isDown) {
-                this.player1.setAngularVelocity(-200);
+                this.player1.setAngularVelocity(-250);
             } else if (this.keys.right.isDown) {
-                this.player1.setAngularVelocity(200);
+                this.player1.setAngularVelocity(250);
             } else {
                 this.player1.setAngularVelocity(0);
+            }
+            
+            // 开火控制 - 添加冷却时间
+            if (this.keys.space.isDown && !this.isPaused) {
+                if (!this.player1.lastFireTime || now - this.player1.lastFireTime >= 300) {
+                    this.fireBullet(this.player1, this.player1.turret.rotation);
+                    this.player1.lastFireTime = now;
+                }
             }
             
             // 更新炮塔位置
             this.player1.turret.x = this.player1.x;
             this.player1.turret.y = this.player1.y;
+            
+            // 更新发光效果位置
+            if (this.player1Glow) {
+                this.player1Glow.setPosition(this.player1.x, this.player1.y);
+            }
+            
+            // 移动时的视觉效果
+            if (moving) {
+                this.player1.alpha = 0.9;
+                if (this.player1Glow) {
+                    this.player1Glow.setVisible(true);
+                    this.player1Glow.setScale(1.1);
+                }
+            } else {
+                this.player1.alpha = 1;
+                if (this.player1Glow) {
+                    this.player1Glow.setVisible(false);
+                }
+            }
             
             // 边界检测
             this.checkBoundary(this.player1);
@@ -735,39 +828,64 @@ export default class GameScene extends Phaser.Scene {
         
         // 更新玩家2
         if (this.player2 && this.player2.alive) {
-            // 移动
+            // 移动控制
+            let moving2 = false;
             if (this.keys2.up2.isDown) {
-                this.physics.velocityFromRotation(this.player2.rotation, 150, this.player2.body.velocity);
+                this.physics.velocityFromRotation(this.player2.rotation, 180, this.player2.body.velocity);
+                moving2 = true;
             } else if (this.keys2.down2.isDown) {
-                this.physics.velocityFromRotation(this.player2.rotation, -100, this.player2.body.velocity);
+                this.physics.velocityFromRotation(this.player2.rotation, -120, this.player2.body.velocity);
+                moving2 = true;
             } else {
                 this.player2.setVelocity(0);
             }
             
             // 转向
             if (this.keys2.left2.isDown) {
-                this.player2.setAngularVelocity(-200);
+                this.player2.setAngularVelocity(-250);
             } else if (this.keys2.right2.isDown) {
-                this.player2.setAngularVelocity(200);
+                this.player2.setAngularVelocity(250);
             } else {
                 this.player2.setAngularVelocity(0);
             }
             
             // 炮塔转向
             if (this.keys2.turretLeft.isDown) {
-                this.player2.turret.rotation -= 0.05;
+                this.player2.turret.rotation -= 0.06;
             } else if (this.keys2.turretRight.isDown) {
-                this.player2.turret.rotation += 0.05;
+                this.player2.turret.rotation += 0.06;
             }
             
-            // 开火
+            // 开火 - 添加冷却时间
             if (this.keys2.fire2.isDown && !this.isPaused) {
-                this.fireBullet(this.player2, this.player2.turret.rotation);
+                if (!this.player2.lastFireTime || now - this.player2.lastFireTime >= 300) {
+                    this.fireBullet(this.player2, this.player2.turret.rotation);
+                    this.player2.lastFireTime = now;
+                }
             }
             
             // 更新炮塔位置
             this.player2.turret.x = this.player2.x;
             this.player2.turret.y = this.player2.y;
+            
+            // 更新发光效果位置
+            if (this.player2Glow) {
+                this.player2Glow.setPosition(this.player2.x, this.player2.y);
+            }
+            
+            // 移动时的视觉效果
+            if (moving2) {
+                this.player2.alpha = 0.9;
+                if (this.player2Glow) {
+                    this.player2Glow.setVisible(true);
+                    this.player2Glow.setScale(1.1);
+                }
+            } else {
+                this.player2.alpha = 1;
+                if (this.player2Glow) {
+                    this.player2Glow.setVisible(false);
+                }
+            }
             
             // 边界检测
             this.checkBoundary(this.player2);
@@ -975,6 +1093,33 @@ export default class GameScene extends Phaser.Scene {
                 this.bullets.splice(index, 1);
             }
             
+            // 添加被击中的视觉效果 - 屏幕闪红
+            const cameraFlash = this.cameras.main.add.rectangle(
+                0, 0,
+                this.cameras.main.width, 
+                this.cameras.main.height,
+                0xff0000, 
+                0.2
+            );
+            this.tweens.add({
+                targets: cameraFlash,
+                alpha: 0,
+                duration: 200,
+                onComplete: () => cameraFlash.destroy()
+            });
+            
+            // 坦克闪红效果
+            this.tweens.add({
+                targets: realPlayer,
+                tint: 0xff0000,
+                duration: 100,
+                yoyo: true,
+                ease: 'Cubic.easeOut',
+                onYoyo: () => {
+                    realPlayer.clearTint();
+                }
+            });
+            
             // 更新生命值条
             console.log('调用updateHealthBar，生命值:', realPlayer.health);
             this.updateHealthBar('player1', realPlayer.health);
@@ -1010,6 +1155,33 @@ export default class GameScene extends Phaser.Scene {
             if (index > -1) {
                 this.bullets.splice(index, 1);
             }
+            
+            // 添加被击中的视觉效果 - 屏幕闪红
+            const cameraFlash = this.cameras.main.add.rectangle(
+                0, 0,
+                this.cameras.main.width, 
+                this.cameras.main.height,
+                0xff0000, 
+                0.2
+            );
+            this.tweens.add({
+                targets: cameraFlash,
+                alpha: 0,
+                duration: 200,
+                onComplete: () => cameraFlash.destroy()
+            });
+            
+            // 坦克闪红效果
+            this.tweens.add({
+                targets: realPlayer,
+                tint: 0xff0000,
+                duration: 100,
+                yoyo: true,
+                ease: 'Cubic.easeOut',
+                onYoyo: () => {
+                    realPlayer.clearTint();
+                }
+            });
             
             // 更新生命值条
             this.updateHealthBar('player2', realPlayer.health);
@@ -1445,6 +1617,16 @@ export default class GameScene extends Phaser.Scene {
     }
     
     updateHealthBar(playerType, health) {
+        // 使用防抖处理，避免频繁更新导致重叠
+        const now = this.time.now;
+        const cooldown = 100; // 100ms冷却时间
+        
+        if (this.lastHealthBarUpdate && now - this.lastHealthBarUpdate < cooldown) {
+            return;
+        }
+        
+        this.lastHealthBarUpdate = now;
+        
         console.log('updateHealthBar 调用:', playerType, health);
         
         // 清除旧的生命值条和相关图形对象
