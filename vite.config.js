@@ -51,7 +51,9 @@ export default defineConfig({
           return 'assets/[name].[ext]';
         },
         entryFileNames: (entryInfo) => {
-          if (entryInfo.name.includes('games/')) {
+          // 检查是否是游戏入口
+          const gameEntries = ['tetris', 'snake', 'minesweeper', '2048', 'chess', 'checkers', 'tic-tac-toe', 'memory-card', 'arkanoid', 'spider-solitaire', 'tank-battle', 'tank-battle-phaser'];
+          if (gameEntries.includes(entryInfo.name)) {
             return 'games/[name].js';
           }
           return 'js/[name].js';

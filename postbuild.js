@@ -78,6 +78,17 @@ function fixSingleHtmlFile(filePath) {
     }
   }
   
+  // 特殊处理 tank-battle-phaser 的脚本引用路径
+  if (filePath.includes('tank-battle-phaser') && filePath.includes('games')) {
+    const oldScript = '<script type="module" crossorigin src="./games/tank-battle-phaser.js"></script>';
+    const newScript = '<script type="module" crossorigin src="../tank-battle-phaser.js"></script>';
+    
+    if (content.includes(oldScript)) {
+      content = content.replace(oldScript, newScript);
+      console.log(`已修复 tank-battle-phaser 脚本路径: ${filePath}`);
+    }
+  }
+  
   fs.writeFileSync(filePath, content);
   console.log(`已修复: ${filePath}`);
 }

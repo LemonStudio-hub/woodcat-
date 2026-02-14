@@ -81,5 +81,26 @@
     </div>
     
     <script type="module" src="./src/main.js"></script>
+    <script>
+        // 检测是否在开发环境或构建环境
+        window.addEventListener('DOMContentLoaded', function() {
+            const loadingScreen = document.querySelector('.loading-screen');
+            const loadingProgress = document.getElementById('loading-progress');
+            
+            // 如果加载完成后10秒内游戏未启动，显示错误提示
+            setTimeout(() => {
+                if (loadingScreen && loadingScreen.style.display !== 'none') {
+                    const container = document.getElementById('game-container');
+                    if (container && !container.querySelector('canvas')) {
+                        loadingScreen.innerHTML = `
+                            <div class="loading-text" style="color: #ff6b6b;">游戏加载失败</div>
+                            <div style="color: #888; margin-top: 10px;">请刷新页面重试</div>
+                            <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">刷新页面</button>
+                        `;
+                    }
+                }
+            }, 10000);
+        });
+    </script>
 </body>
 </html>
