@@ -27,6 +27,11 @@ export default class GameScene extends Phaser.Scene {
         this.screenHeight = 0;
         this.uiScale = 1;
         this.isMobile = false;
+        
+        // 坦克轨迹效果
+        this.player1Trail = [];
+        this.player2Trail = [];
+        this.maxTrailLength = 10;
     }
     
     create() {
@@ -901,12 +906,19 @@ export default class GameScene extends Phaser.Scene {
                     this.player1Glow.setVisible(true);
                     this.player1Glow.setScale(1.1);
                 }
+                // 添加移动轨迹效果
+                this.updatePlayerTrail(this.player1, this.player1Trail, 0x3498db);
+                // 添加尾焰效果
+                this.spawnExhaustParticle(this.player1);
             } else {
                 this.player1.alpha = 1;
                 if (this.player1Glow) {
                     this.player1Glow.setVisible(false);
                 }
             }
+            
+            // 更新轨迹显示
+            this.updateTrailDisplay(this.player1Trail);
             
             // 边界检测
             this.checkBoundary(this.player1);
@@ -966,6 +978,10 @@ export default class GameScene extends Phaser.Scene {
                     this.player2Glow.setVisible(true);
                     this.player2Glow.setScale(1.1);
                 }
+                // 添加移动轨迹效果
+                this.updatePlayerTrail(this.player2, this.player2Trail, 0xe74c3c);
+                // 添加尾焰效果
+                this.spawnExhaustParticle(this.player2);
             } else {
                 this.player2.alpha = 1;
                 if (this.player2Glow) {
@@ -973,8 +989,96 @@ export default class GameScene extends Phaser.Scene {
                 }
             }
             
+            // 更新轨迹显示
+            this.updateTrailDisplay(this.player2Trail);
+            
             // 边界检测
             this.checkBoundary(this.player2);
+        }
+    }
+    
+    updatePlayerTrail(player, trail, color) {
+        // 添加当前位置到轨迹
+        trail.push({
+            x: player.x,
+            y: player.y,
+            rotation: player.rotation,
+            alpha: 1
+        });
+        
+        // 限制轨迹长度
+        if (trail.length > this.maxTrailLength) {
+            trail.shift();
+        }
+    }
+    
+    updateTrailDisplay(trail) {
+        // 如果轨迹已经创建，先销毁
+        if (this.trailGraphics) {
+            this.trailGraphics.destroy();
+        }
+        
+        // 创建新的轨迹图形
+        this.trailGraphics = this.add.graphics();
+        
+        // 绘制轨迹
+        for (let i = 0; i < trail.length; i++) {
+            const point = trail[i];
+            const alpha = (i / trail.length) * 0.3; // 越新的点越不透明
+            
+            this.trailGraphics.fillStyle(point.color || 0x3498db, alpha);
+            this.trailGraphics.fillCircle(point.x, point.y, 3);
+        }
+    }
+    
+    spawnExhaustParticle(player) {
+        // 每5帧生成一个尾焰粒子
+        if (this.time.now % 100 < 17) {
+            let particle = this.particlePool.find(p => !p.active);
+            if (!particle && this.particlePool.length < 150) {
+                particle = this.add.image(0, 0, 'bullet')
+                    .setScale(0.08)
+                    .setActive(false)
+                    .setVisible(false);
+                this.particlePool.push(particle);
+            }
+            
+            if (!particle) return;
+            
+            // 计算尾焰位置（坦克后方）
+            const backX = player.x - Math.cos(player.rotation) * 15;
+            const backY = player.y - Math.sin(player.rotation) * 15;
+            
+            const flameColors = [0xff6600, 0xff8800, 0xffaa00, 0xff4400];
+            const flameColor = flameColors[Math.floor(Math.random() * flameColors.length)];
+            
+            particle.setPosition(backX, backY)
+                .setActive(true)
+                .setVisible(true)
+                .setAlpha(0.8)
+                .setScale(0.1)
+                .setTint(flameColor)
+                .setRotation(Math.random() * Math.PI);
+            
+            // 随机散开
+            const spreadX = (Math.random() - 0.5) * 10;
+            const spreadY = (Math.random() - 0.5) * 10;
+            
+            this.tweens.add({
+                targets: particle,
+                x: particle.x + spreadX - Math.cos(player.rotation) * 20,
+                y: particle.y + spreadY - Math.sin(player.rotation) * 20,
+                scale: 0,
+                alpha: 0,
+                duration: 300,
+                ease: 'Cubic.easeOut',
+                onComplete: () => {
+                    if (particle) {
+                        particle.setActive(false).setVisible(false);
+                        particle.clearTint();
+                    }
+                }
+            });
         }
     }
     
@@ -1089,6 +1193,18 @@ export default class GameScene extends Phaser.Scene {
         bullet.owner = tank;
         bullet.isEnemy = isEnemy;
         
+        // 添加子弹发光效果
+        const bulletColor = isEnemy ? 0xff4444 : 0x00ffff;
+        bullet.setTint(bulletColor);
+        
+        // 添加子弹光晕
+        const bulletGlow = this.add.graphics();
+        bulletGlow.fillStyle(bulletColor, 0.4);
+        bulletGlow.fillCircle(0, 0, 8);
+        bulletGlow.setScrollFactor(0);
+        bulletGlow.setVisible(false);
+        bullet.glow = bulletGlow;
+        
         // 播放开火音效
         this.playSound('fire');
         
@@ -1104,8 +1220,52 @@ export default class GameScene extends Phaser.Scene {
                 if (index > -1) {
                     this.bullets.splice(index, 1);
                 }
+                // 销毁光晕
+                if (bullet.glow) {
+                    bullet.glow.destroy();
+                    bullet.glow = null;
+                }
             }
         });
+        
+        // 添加子弹尾迹效果
+        this.createBulletTrail(bullet, angle, isEnemy);
+    }
+    
+    createBulletTrail(bullet, angle, isEnemy) {
+        // 创建子弹尾迹
+        const trailLength = 8;
+        for (let i = 0; i < trailLength; i++) {
+            const trailParticle = this.particlePool.find(p => !p.active);
+            if (!trailParticle && this.particlePool.length < 150) {
+                trailParticle = this.add.image(0, 0, 'bullet')
+                    .setScale(0.05)
+                    .setActive(false)
+                    .setVisible(false);
+                this.particlePool.push(trailParticle);
+            }
+            
+            if (!trailParticle) continue;
+            
+            const trailColor = isEnemy ? 0xff4444 : 0x00ffff;
+            const trailX = bullet.x - Math.cos(angle) * (i * 5);
+            const trailY = bullet.y - Math.sin(angle) * (i * 5);
+            
+            trailParticle.setPosition(trailX, trailY)
+                .setActive(true)
+                .setVisible(true)
+                .setAlpha(0.6 - (i * 0.07))
+                .setScale(0.1 - (i * 0.01))
+                .setTint(trailColor);
+            
+            // 延迟消失
+            this.time.delayedCall(100 + i * 20, () => {
+                if (trailParticle && trailParticle.active) {
+                    trailParticle.setActive(false).setVisible(false);
+                    trailParticle.clearTint();
+                }
+            });
+        }
     }
     
     bulletHitObstacle(bullet, obstacle) {
