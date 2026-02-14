@@ -575,7 +575,7 @@ export default class GameScene extends Phaser.Scene {
     }
     
     updateMobileControls() {
-        if (!this.isMobile || !this.joystick || !this.controlConfig) return;
+        if (!this.isMobile || !this.joystick || !this.controlConfig || !this.player1 || !this.player1.alive) return;
         
         // 计算摇杆输入
         const joystickX = this.joystick.x;
@@ -588,25 +588,26 @@ export default class GameScene extends Phaser.Scene {
         const deltaY = joystickY - baseY;
         const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
         
-        if (distance > maxDistance * 0.1) { // 使用相对阈值
-            // 移动控制
-            if (Math.abs(deltaY) > Math.abs(deltaX)) {
-                if (deltaY < 0) {
-                    // 向上移动
-                    this.physics.velocityFromRotation(this.player1.rotation, 150, this.player1.body.velocity);
-                } else {
-                    // 向下移动
-                    this.physics.velocityFromRotation(this.player1.rotation, -100, this.player1.body.velocity);
-                }
-            } else {
-                if (deltaX < 0) {
-                    // 向左转
-                    this.player1.setAngularVelocity(-200);
-                } else {
-                    // 向右转
-                    this.player1.setAngularVelocity(200);
-                }
-            }
+        // 归一化摇杆输入 (-1 到 1)
+        const normalizedX = deltaX / maxDistance;
+        const normalizedY = deltaY / maxDistance;
+        
+        // 设置死区阈值
+        const deadZone = 0.15;
+        
+        if (distance > maxDistance * deadZone) {
+            // 计算移动角度和速度
+            const moveAngle = Math.atan2(deltaY, deltaX);
+            const moveSpeed = Math.min(distance / maxDistance, 1) * 150;
+            
+            // 更新坦克旋转朝向摇杆方向
+            this.player1.rotation = moveAngle;
+            
+            // 设置速度
+            this.physics.velocityFromRotation(moveAngle, moveSpeed, this.player1.body.velocity);
+            
+            // 自动炮塔朝向
+            this.player1.turret.rotation = moveAngle;
         } else {
             // 停止移动
             this.player1.setVelocity(0);
