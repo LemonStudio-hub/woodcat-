@@ -675,6 +675,11 @@ export default class GameScene extends Phaser.Scene {
     }
     
     setupCollisions() {
+        // 先移除所有现有的碰撞检测
+        if (this.physics.world) {
+            this.physics.world.colliders.destroy();
+        }
+        
         // 坦克与障碍物碰撞
         this.physics.add.collider(this.player1, this.obstacles);
         if (this.player2) {
@@ -695,6 +700,8 @@ export default class GameScene extends Phaser.Scene {
         if (this.player2) {
             this.physics.add.collider(this.bulletGroup, this.player2, this.bulletHitPlayer2, null, this);
         }
+        
+        console.log('碰撞检测已重新设置');
     }
     
     updatePlayers() {
@@ -1438,10 +1445,30 @@ export default class GameScene extends Phaser.Scene {
     }
     
     updateHealthBar(playerType, health) {
-        // 清除旧的生命值条
+        console.log('updateHealthBar 调用:', playerType, health);
+        
+        // 清除旧的生命值条和相关图形对象
         const children = this.children.getChildren();
+        const toRemove = [];
+        
         children.forEach(child => {
-            if (child && child.text && child.text.includes(`${playerType === 'player1' ? '玩家1' : '玩家2'}:`)) {
+            if (child) {
+                // 检查是否是生命值条相关元素
+                const hasPlayerLabel = child.text && (child.text.includes('玩家1') || child.text.includes('玩家2'));
+                const isHealthBar = child.type === 'Graphics' && 
+                                   child.x >= 10 * 0.7 && child.x <= 400 && 
+                                   child.y >= this.cameras.main.height - 120;
+                
+                if (hasPlayerLabel || isHealthBar) {
+                    console.log('移除旧的生命值条元素:', child.text || 'Graphics');
+                    toRemove.push(child);
+                }
+            }
+        });
+        
+        // 销毁所有需要移除的元素
+        toRemove.forEach(child => {
+            if (child && child.active) {
                 child.destroy();
             }
         });
@@ -1465,6 +1492,8 @@ export default class GameScene extends Phaser.Scene {
     
     checkLevelComplete() {
         if (this.enemiesDefeated >= this.enemiesToDefeat) {
+            console.log('关卡完成，进入下一关');
+            
             // 所有敌人被击败，进入下一关
             this.level++;
             this.enemiesDefeated = 0;
@@ -1482,16 +1511,18 @@ export default class GameScene extends Phaser.Scene {
             // 清除现有子弹
             this.bullets.forEach(bullet => {
                 if (bullet) {
-                    bullet.destroy();
+                    bullet.setActive(false).setVisible(false);
                 }
             });
             this.bullets = [];
             
+            // 清除子弹组中的所有子弹
+            if (this.bulletGroup) {
+                this.bulletGroup.clear(true, true);
+            }
+            
             // 创建新的敌人
             this.createEnemies();
-            
-            // 重新设置碰撞检测
-            this.setupCollisions();
             
             // 更新UI
             this.levelText.setText(`关卡: ${this.level}`);
