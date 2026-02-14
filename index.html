@@ -514,8 +514,9 @@
         newYearToggle.addEventListener('click', toggleNewYearTheme);
         document.body.appendChild(newYearToggle);
 
-        // 检查是否已保存新年主题设置
-        if (localStorage.getItem('newYearTheme') === 'enabled') {
+        // 检查是否已保存新年主题设置，默认启用新年主题
+        const savedTheme = localStorage.getItem('newYearTheme');
+        if (savedTheme !== 'disabled') {
             enableNewYearTheme();
         }
 
