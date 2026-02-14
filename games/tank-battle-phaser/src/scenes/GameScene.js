@@ -1456,30 +1456,11 @@ export default class GameScene extends Phaser.Scene {
     }
     
     bulletHitPlayer1(bullet, player) {
-        console.log('子弹击中玩家1', {
-            bulletActive: bullet?.active,
-            playerAlive: player?.alive,
-            bulletIsEnemy: bullet?.isEnemy,
-            playerHealth: player?.health,
-            bulletDamage: bullet?.damage,
-            bullet: bullet,
-            player: player
-        });
-        
         // 参数可能反过来，确保正确的顺序
         const realBullet = (bullet && bullet.isEnemy !== undefined) ? bullet : player;
         const realPlayer = (player && player.health !== undefined) ? player : bullet;
         
-        console.log('实际识别:', {
-            realBulletActive: realBullet?.active,
-            realPlayerAlive: realPlayer?.alive,
-            realBulletIsEnemy: realBullet?.isEnemy,
-            realPlayerHealth: realPlayer?.health,
-            realBulletDamage: realBullet?.damage
-        });
-        
         if (realBullet && realBullet.active && realPlayer && realPlayer.alive && realBullet.isEnemy) {
-            console.log('执行玩家1伤害:', '当前生命值:', realPlayer.health, '伤害:', realBullet.damage);
             realPlayer.health -= realBullet.damage;
             
             // 显示伤害效果
@@ -1500,8 +1481,8 @@ export default class GameScene extends Phaser.Scene {
             // 添加被击中的视觉效果 - 屏幕闪红
             const cameraFlash = this.cameras.main.add.rectangle(
                 0, 0,
-                this.cameras.main.width, 
-                this.cameras.main.height,
+                this.screenWidth, 
+                this.screenHeight,
                 0xff0000, 
                 0.2
             );
@@ -1525,15 +1506,12 @@ export default class GameScene extends Phaser.Scene {
             });
             
             // 更新生命值条
-            console.log('调用updateHealthBar，生命值:', realPlayer.health);
             this.updateHealthBar('player1', realPlayer.health);
             
             // 检查玩家是否被击败
             if (realPlayer.health <= 0) {
                 this.playerDefeated(realPlayer);
             }
-        } else {
-            console.log('子弹击中玩家1条件不满足');
         }
     }
     
