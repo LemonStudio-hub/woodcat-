@@ -932,15 +932,29 @@ export default class GameScene extends Phaser.Scene {
             playerAlive: player?.alive,
             bulletIsEnemy: bullet?.isEnemy,
             playerHealth: player?.health,
-            bulletDamage: bullet?.damage
+            bulletDamage: bullet?.damage,
+            bullet: bullet,
+            player: player
         });
         
-        if (bullet && bullet.active && player && player.alive && bullet.isEnemy) {
-            console.log('执行玩家1伤害:', '当前生命值:', player.health, '伤害:', bullet.damage);
-            player.health -= bullet.damage;
+        // 参数可能反过来，确保正确的顺序
+        const realBullet = (bullet && bullet.isEnemy !== undefined) ? bullet : player;
+        const realPlayer = (player && player.health !== undefined) ? player : bullet;
+        
+        console.log('实际识别:', {
+            realBulletActive: realBullet?.active,
+            realPlayerAlive: realPlayer?.alive,
+            realBulletIsEnemy: realBullet?.isEnemy,
+            realPlayerHealth: realPlayer?.health,
+            realBulletDamage: realBullet?.damage
+        });
+        
+        if (realBullet && realBullet.active && realPlayer && realPlayer.alive && realBullet.isEnemy) {
+            console.log('执行玩家1伤害:', '当前生命值:', realPlayer.health, '伤害:', realBullet.damage);
+            realPlayer.health -= realBullet.damage;
             
             // 显示伤害效果
-            this.showDamageEffect(player.x, player.y);
+            this.showDamageEffect(realPlayer.x, realPlayer.y);
             
             // 播放击中音效
             this.playSound('hit');
@@ -948,18 +962,19 @@ export default class GameScene extends Phaser.Scene {
             // 被击中振动
             this.vibrate([80]);
             
-            bullet.setActive(false).setVisible(false);
-            const index = this.bullets.indexOf(bullet);
+            realBullet.setActive(false).setVisible(false);
+            const index = this.bullets.indexOf(realBullet);
             if (index > -1) {
                 this.bullets.splice(index, 1);
             }
             
             // 更新生命值条
-            this.updateHealthBar('player1', player.health);
+            console.log('调用updateHealthBar，生命值:', realPlayer.health);
+            this.updateHealthBar('player1', realPlayer.health);
             
             // 检查玩家是否被击败
-            if (player.health <= 0) {
-                this.playerDefeated(player);
+            if (realPlayer.health <= 0) {
+                this.playerDefeated(realPlayer);
             }
         } else {
             console.log('子弹击中玩家1条件不满足');
@@ -967,11 +982,15 @@ export default class GameScene extends Phaser.Scene {
     }
     
     bulletHitPlayer2(bullet, player) {
-        if (bullet && bullet.active && player && player.alive && bullet.isEnemy) {
-            player.health -= bullet.damage;
+        // 参数可能反过来，确保正确的顺序
+        const realBullet = (bullet && bullet.isEnemy !== undefined) ? bullet : player;
+        const realPlayer = (player && player.health !== undefined) ? player : bullet;
+        
+        if (realBullet && realBullet.active && realPlayer && realPlayer.alive && realBullet.isEnemy) {
+            realPlayer.health -= realBullet.damage;
             
             // 显示伤害效果
-            this.showDamageEffect(player.x, player.y);
+            this.showDamageEffect(realPlayer.x, realPlayer.y);
             
             // 播放击中音效
             this.playSound('hit');
@@ -979,18 +998,18 @@ export default class GameScene extends Phaser.Scene {
             // 被击中振动
             this.vibrate([80]);
             
-            bullet.setActive(false).setVisible(false);
-            const index = this.bullets.indexOf(bullet);
+            realBullet.setActive(false).setVisible(false);
+            const index = this.bullets.indexOf(realBullet);
             if (index > -1) {
                 this.bullets.splice(index, 1);
             }
             
             // 更新生命值条
-            this.updateHealthBar('player2', player.health);
+            this.updateHealthBar('player2', realPlayer.health);
             
             // 检查玩家是否被击败
-            if (player.health <= 0) {
-                this.playerDefeated(player);
+            if (realPlayer.health <= 0) {
+                this.playerDefeated(realPlayer);
             }
         }
     }
