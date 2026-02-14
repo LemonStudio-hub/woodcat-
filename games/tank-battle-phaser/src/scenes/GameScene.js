@@ -232,11 +232,23 @@ export default class GameScene extends Phaser.Scene {
                 break;
         }
         
+        // 随关卡增加敌人数量
+        enemyCount += Math.floor((this.level - 1) * 1.5);
+        
         this.enemiesToDefeat = enemyCount;
         
+        // 根据难度和关卡调整敌人属性
+        const baseSpeed = difficulty === 'easy' ? 50 : difficulty === 'medium' ? 80 : 120;
+        const baseHealth = difficulty === 'easy' ? 30 : difficulty === 'medium' ? 50 : 80;
+        const baseFireRate = difficulty === 'easy' ? 3000 : difficulty === 'medium' ? 2000 : 1500;
+        
+        // 随关卡增加敌人能力
+        const speedMultiplier = 1 + (this.level - 1) * 0.1;
+        const healthMultiplier = 1 + (this.level - 1) * 0.15;
+        
         for (let i = 0; i < enemyCount; i++) {
-            const x = Phaser.Math.Between(200, this.cameras.main.width - 200);
-            const y = Phaser.Math.Between(200, this.cameras.main.height - 200);
+            const x = Phaser.Math.Between(200, this.screenWidth - 200);
+            const y = Phaser.Math.Between(200, this.screenHeight - 200);
             
             const enemy = this.physics.add.sprite(x, y, 'tank-enemy')
                 .setScale(0.5)
@@ -247,14 +259,18 @@ export default class GameScene extends Phaser.Scene {
                 .setScale(0.5)
                 .setOrigin(0.3, 0.5);
             
-            enemy.health = 50;
+            enemy.health = Math.floor(baseHealth * healthMultiplier);
+            enemy.maxHealth = enemy.health;
             enemy.alive = true;
-            enemy.speed = Phaser.Math.Between(50, 100);
-            enemy.fireRate = Phaser.Math.Between(1000, 3000);
+            enemy.speed = Math.floor(baseSpeed * speedMultiplier);
+            enemy.fireRate = baseFireRate - (this.level - 1) * 100;
             enemy.lastFired = 0;
             enemy.moveTimer = 0;
             enemy.moveInterval = Phaser.Math.Between(1000, 3000);
             enemy.targetAngle = Phaser.Math.Between(0, 360);
+            enemy.aiMode = 'patrol'; // AI模式：patrol(巡逻)、chase(追逐)、evade(躲避)
+            enemy.aiTimer = 0;
+            enemy.lastKnownPlayerPos = null;
             
             this.enemies.add(enemy);
         }
@@ -1090,19 +1106,8 @@ export default class GameScene extends Phaser.Scene {
                 enemy.turret.x = enemy.x;
                 enemy.turret.y = enemy.y;
                 
-                // 敌人AI移动
-                enemy.moveTimer += this.game.loop.delta;
-                if (enemy.moveTimer >= enemy.moveInterval) {
-                    enemy.moveTimer = 0;
-                    enemy.moveInterval = Phaser.Math.Between(1000, 3000);
-                    enemy.targetAngle = Phaser.Math.Between(0, 360);
-                }
-                
-                // 转向目标角度
-                enemy.rotation = Phaser.Math.Angle.RotateTo(enemy.rotation, enemy.targetAngle * Phaser.Math.DEG_TO_RAD, 0.02);
-                
-                // 向前移动
-                this.physics.velocityFromRotation(enemy.rotation, enemy.speed, enemy.body.velocity);
+                // 智能AI行为
+                this.updateEnemyAI(enemy);
                 
                 // 边界检测
                 this.checkBoundary(enemy);
@@ -1111,13 +1116,9 @@ export default class GameScene extends Phaser.Scene {
                 enemy.lastFired += this.game.loop.delta;
                 if (enemy.lastFired >= enemy.fireRate) {
                     enemy.lastFired = 0;
-                    enemy.fireRate = Phaser.Math.Between(1000, 3000);
                     
-                    // 瞄准玩家
-                    let target = this.player1;
-                    if (this.player2 && this.player2.alive && Phaser.Math.Distance.Between(enemy.x, enemy.y, this.player2.x, this.player2.y) < Phaser.Math.Distance.Between(enemy.x, enemy.y, this.player1.x, this.player1.y)) {
-                        target = this.player2;
-                    }
+                    // 瞄准最近的玩家
+                    let target = this.findNearestPlayer(enemy);
                     
                     if (target && target.alive) {
                         const angle = Phaser.Math.Angle.Between(
@@ -1130,6 +1131,159 @@ export default class GameScene extends Phaser.Scene {
                 }
             }
         });
+    }
+    
+    updateEnemyAI(enemy) {
+        // 更新AI计时器
+        enemy.aiTimer += this.game.loop.delta;
+        
+        // 每隔一段时间重新评估AI模式
+        if (enemy.aiTimer >= 2000) {
+            enemy.aiTimer = 0;
+            this.evaluateEnemyMode(enemy);
+        }
+        
+        // 根据AI模式执行不同行为
+        switch (enemy.aiMode) {
+            case 'chase':
+                this.executeChaseMode(enemy);
+                break;
+            case 'evade':
+                this.executeEvadeMode(enemy);
+                break;
+            case 'patrol':
+            default:
+                this.executePatrolMode(enemy);
+                break;
+        }
+    }
+    
+    evaluateEnemyMode(enemy) {
+        // 找到最近的玩家
+        const target = this.findNearestPlayer(enemy);
+        if (!target || !target.alive) {
+            enemy.aiMode = 'patrol';
+            return;
+        }
+        
+        const distanceToPlayer = Phaser.Math.Distance.Between(enemy.x, enemy.y, target.x, target.y);
+        
+        // 检查是否有子弹接近
+        const hasIncomingBullet = this.checkIncomingBullets(enemy);
+        
+        // AI模式决策逻辑
+        if (hasIncomingBullet) {
+            // 有子弹接近，切换到躲避模式
+            enemy.aiMode = 'evade';
+        } else if (distanceToPlayer < 200) {
+            // 距离玩家较近，追逐玩家
+            enemy.aiMode = 'chase';
+        } else if (distanceToPlayer > 400) {
+            // 距离玩家较远，巡逻模式
+            enemy.aiMode = 'patrol';
+        } else {
+            // 中等距离，随机选择模式
+            const modes = ['chase', 'patrol'];
+            enemy.aiMode = modes[Math.floor(Math.random() * modes.length)];
+        }
+    }
+    
+    executeChaseMode(enemy) {
+        const target = this.findNearestPlayer(enemy);
+        if (!target || !target.alive) {
+            enemy.aiMode = 'patrol';
+            return;
+        }
+        
+        // 计算朝向玩家的角度
+        const angleToPlayer = Phaser.Math.Angle.Between(enemy.x, enemy.y, target.x, target.y);
+        
+        // 平滑转向玩家
+        enemy.rotation = Phaser.Math.Angle.RotateTo(enemy.rotation, angleToPlayer, 0.03);
+        
+        // 向前移动
+        this.physics.velocityFromRotation(enemy.rotation, enemy.speed, enemy.body.velocity);
+    }
+    
+    executeEvadeMode(enemy) {
+        // 检测最近的威胁（子弹）
+        const nearestBullet = this.findNearestBullet(enemy);
+        if (nearestBullet) {
+            // 计算躲避方向（垂直于子弹方向）
+            const bulletAngle = Math.atan2(nearestBullet.y - enemy.y, nearestBullet.x - enemy.x);
+            const evadeAngle = bulletAngle + Math.PI / 2;
+            
+            // 平滑转向躲避方向
+            enemy.rotation = Phaser.Math.Angle.RotateTo(enemy.rotation, evadeAngle, 0.05);
+            
+            // 快速移动
+            this.physics.velocityFromRotation(enemy.rotation, enemy.speed * 1.3, enemy.body.velocity);
+        } else {
+            // 没有威胁，切换回巡逻模式
+            enemy.aiMode = 'patrol';
+        }
+    }
+    
+    executePatrolMode(enemy) {
+        // 定期改变移动方向
+        enemy.moveTimer += this.game.loop.delta;
+        if (enemy.moveTimer >= enemy.moveInterval) {
+            enemy.moveTimer = 0;
+            enemy.moveInterval = Phaser.Math.Between(1000, 3000);
+            enemy.targetAngle = Phaser.Math.Between(0, 360);
+        }
+        
+        // 转向目标角度
+        enemy.rotation = Phaser.Math.Angle.RotateTo(enemy.rotation, enemy.targetAngle * Phaser.Math.DEG_TO_RAD, 0.02);
+        
+        // 向前移动
+        this.physics.velocityFromRotation(enemy.rotation, enemy.speed, enemy.body.velocity);
+    }
+    
+    findNearestPlayer(enemy) {
+        let nearest = null;
+        let minDistance = Infinity;
+        
+        if (this.player1 && this.player1.alive) {
+            const dist = Phaser.Math.Distance.Between(enemy.x, enemy.y, this.player1.x, this.player1.y);
+            if (dist < minDistance) {
+                minDistance = dist;
+                nearest = this.player1;
+            }
+        }
+        
+        if (this.player2 && this.player2.alive) {
+            const dist = Phaser.Math.Distance.Between(enemy.x, enemy.y, this.player2.x, this.player2.y);
+            if (dist < minDistance) {
+                minDistance = dist;
+                nearest = this.player2;
+            }
+        }
+        
+        return nearest;
+    }
+    
+    findNearestBullet(enemy) {
+        let nearest = null;
+        let minDistance = Infinity;
+        
+        this.bullets.forEach(bullet => {
+            if (bullet && bullet.active && bullet.isEnemy === false) {
+                const dist = Phaser.Math.Distance.Between(enemy.x, enemy.y, bullet.x, bullet.y);
+                if (dist < minDistance && dist < 150) { // 只检测150范围内的子弹
+                    minDistance = dist;
+                    nearest = bullet;
+                }
+            }
+        });
+        
+        return nearest;
+    }
+    
+    checkIncomingBullets(enemy) {
+        // 检查是否有玩家子弹接近
+        const nearestBullet = this.findNearestBullet(enemy);
+        return nearestBullet !== null;
     }
     
     updateBullets() {
