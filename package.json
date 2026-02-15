@@ -6,11 +6,20 @@
   "main": "js/main.js",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && npm run postbuild",
     "postbuild": "node postbuild.js",
     "preview": "vite preview",
     "start": "vite preview",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:e2e": "cypress run",
+    "test:e2e:open": "cypress open",
+    "analyze": "vite-bundle-visualizer",
+    "clean": "rimraf dist node_modules/.vite",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,vue,css,scss,md,json}\"",
+    "type-check": "vue-tsc --noEmit"
   },
   "keywords": [
     "games",
